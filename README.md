@@ -1,5 +1,6 @@
 # NETInterface
-.NET Interface and example GUI
+This repo demonstrates how to interface between SingleTact, Arduino and Windows
+through a .NET application.
 
 # Setting up the development environment
 The manual assumes that you are using a full version of MS Visual Studio 2010.
