@@ -1,11 +1,9 @@
 ﻿//-----------------------------------------------------------------------------
-//                                                                            
-//  Copyright (c) 2015 All Right Reserved                                      
-//  Pressure Profile Systems                                                   
-//  www.pressureprofile.com                                                    
-//  V1.0                                                         
+//  Copyright (c) 2015 Pressure Profile Systems
+//
+//  Licensed under the MIT license. This file may not be copied, modified, or
+//  distributed except according to those terms.
 //-----------------------------------------------------------------------------
-
 
 using System;
 using System.Collections.Generic;
@@ -125,7 +123,7 @@ namespace SingleTactLibrary
 
          bool acknowledged = false;
          int attempts = 20;
-         //Typically takes 4 - 6 attempts as the chip needs to 
+         //Typically takes 4 - 6 attempts as the chip needs to
          //write the settings to flash which takes about 50ms.
 
          Thread.Sleep(10); //Give comms time to happen
@@ -185,7 +183,7 @@ namespace SingleTactLibrary
 
          bool acknowledged = false;
          int attempts = 20;
-         //Typically takes 4 - 6 attempts as the chip needs to 
+         //Typically takes 4 - 6 attempts as the chip needs to
          //write the settings to flash which takes about 50ms.
 
          Thread.Sleep(10); //Give comms time to happen
@@ -369,7 +367,7 @@ namespace SingleTactLibrary
 
          ReadSerialBuffer();
 
-         if (incommingSerialBuffer_.Count > MINIMUM_FROMARDUINO_PACKET_LENGTH) 
+         if (incommingSerialBuffer_.Count > MINIMUM_FROMARDUINO_PACKET_LENGTH)
          {
             if (false == CheckUartHeader())
             {

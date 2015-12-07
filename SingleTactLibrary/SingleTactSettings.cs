@@ -1,9 +1,8 @@
 ﻿//-----------------------------------------------------------------------------
-//                                                                            
-//  Copyright (c) 2015 All Right Reserved                                      
-//  Pressure Profile Systems                                                   
-//  www.pressureprofile.com                                                    
-//  V1.0                                                         
+//  Copyright (c) 2015 Pressure Profile Systems
+//
+//  Licensed under the MIT license. This file may not be copied, modified, or
+//  distributed except according to those terms.
 //-----------------------------------------------------------------------------
 
 using System;
@@ -108,7 +107,7 @@ namespace SingleTactLibrary
       /// <summary>
       /// See CY8051F70x datasheet, chapter 15
       /// </summary>
-      public byte ConversionSize  
+      public byte ConversionSize
       {
          get { return settingsRaw_[INDEX_CONVERSION_SIZE]; }
          set { settingsRaw_[INDEX_CONVERSION_SIZE] = value; }
@@ -202,9 +201,9 @@ namespace SingleTactLibrary
             {
                settingsRaw_[INDEX_OF_BASELINES + i] = (byte)(value[i] >> 8);
                settingsRaw_[INDEX_OF_BASELINES + i + 1] = (byte)(value[i]);
-               
+
             }
-             
+
             for (int i = value.Length * 2; i < 50; i++)
                settingsRaw_[INDEX_OF_BASELINES + i] = 0;
          }

@@ -1,9 +1,8 @@
 ﻿//-----------------------------------------------------------------------------
-//                                                                            
-//  Copyright (c) 2015 All Right Reserved                                      
-//  Pressure Profile Systems                                                   
-//  www.pressureprofile.com                                                    
-//  V1.0                                                         
+//  Copyright (c) 2015 Pressure Profile Systems
+//
+//  Licensed under the MIT license. This file may not be copied, modified, or
+//  distributed except according to those terms.
 //-----------------------------------------------------------------------------
 
 using System;
@@ -158,7 +157,7 @@ namespace SingleTactLibrary
          return command;
 
 
-         
+
       }
 
 

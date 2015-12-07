@@ -1,3 +1,10 @@
+﻿//-----------------------------------------------------------------------------
+//  Copyright (c) 2015 Pressure Profile Systems
+//
+//  Licensed under the MIT license. This file may not be copied, modified, or
+//  distributed except according to those terms.
+//-----------------------------------------------------------------------------
+
 ﻿namespace SingleTactLibrary
 {
    partial class SingleTact
@@ -7,7 +14,7 @@
       /// </summary>
       private System.ComponentModel.IContainer components = null;
 
-      /// <summary> 
+      /// <summary>
       /// Clean up any resources being used.
       /// </summary>
       /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>

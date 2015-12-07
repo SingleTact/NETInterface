@@ -1,11 +1,9 @@
 ﻿//-----------------------------------------------------------------------------
-//                                                                            
-//  Copyright (c) 2015 All Right Reserved                                      
-//  Pressure Profile Systems                                                   
-//  www.pressureprofile.com                                                    
-//  V1.0                                                         
+//  Copyright (c) 2015 Pressure Profile Systems
+//
+//  Licensed under the MIT license. This file may not be copied, modified, or
+//  distributed except according to those terms.
 //-----------------------------------------------------------------------------
-
 
 using System;
 using System.Collections.Generic;
@@ -103,7 +101,7 @@ namespace SingleTactLibrary
                MessageBox.Show("Failed to write calibration", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                isCalibrated = false;
                System.Environment.Exit(0);
-               
+
             }
 
             Thread.Sleep(100); //Give the sensor time to write to flash
@@ -115,18 +113,18 @@ namespace SingleTactLibrary
       /// <summary>
       /// Push Toggle GPIO CMD to Arduino
       /// </summary>
-      // 
-      
+      //
+
       public void PushToggleToArduino(byte ToggleGPIO)
       {
-         
+
          if (!arduino_.WriteToggleCommand(ToggleGPIO))
          {
             MessageBox.Show("Failed to Toggle the GPIO", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
          }
 
-         Thread.Sleep(50); 
-         
+         Thread.Sleep(50);
+
       }
 
       /// <summary>
@@ -246,7 +244,7 @@ namespace SingleTactLibrary
       public bool isConnected;
       public bool isCalibrated;
 
-      
+
       /// <summary>
       /// Sensors settings
       /// </summary>
@@ -257,9 +255,7 @@ namespace SingleTactLibrary
       /// </summary>
       public SingleTactParameters Parameters = new SingleTactParameters();
 
-      
+
 
    }
 }
-
-

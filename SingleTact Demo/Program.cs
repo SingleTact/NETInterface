@@ -1,3 +1,10 @@
+//-----------------------------------------------------------------------------
+//  Copyright (c) 2015 Pressure Profile Systems
+//
+//  Licensed under the MIT license. This file may not be copied, modified, or
+//  distributed except according to those terms.
+//-----------------------------------------------------------------------------
+
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;

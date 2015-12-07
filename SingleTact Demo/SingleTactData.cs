@@ -1,9 +1,8 @@
 ﻿//-----------------------------------------------------------------------------
-//                                                                            
-//  Copyright (c) 2015 All Right Reserved                                      
-//  Pressure Profile Systems                                                   
-//  www.pressureprofile.com                                                    
-//  V1.0                                                         
+//  Copyright (c) 2015 Pressure Profile Systems
+//
+//  Licensed under the MIT license. This file may not be copied, modified, or
+//  distributed except according to those terms.
 //-----------------------------------------------------------------------------
 
 using System;
@@ -22,7 +21,7 @@ namespace SingleTact_Demo
       /// <summary>
       /// Most recent time
       /// </summary>
-      public double MostRecentTime 
+      public double MostRecentTime
       { get { return mostRecentTime_; } }
       private double mostRecentTime_ = 0;
 
@@ -52,7 +51,7 @@ namespace SingleTact_Demo
          //Add the data to the buffer
          for (int i = 0; i < measurements.Length; i++)
             data[i].Add(time, measurements[i]);  //Convert to seconds
-         
+
 
          mostRecentTime_ = time;
       }

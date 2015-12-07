@@ -1,9 +1,8 @@
 ﻿//-----------------------------------------------------------------------------
-//                                                                            
-//  Copyright (c) 2015 All Right Reserved                                      
-//  Pressure Profile Systems                                                   
-//  www.pressureprofile.com                                                    
-//  V1.0                                                         
+//  Copyright (c) 2015 Pressure Profile Systems
+//
+//  Licensed under the MIT license. This file may not be copied, modified, or
+//  distributed except according to those terms.
 //-----------------------------------------------------------------------------
 
 using System;
@@ -62,7 +61,7 @@ namespace SingleTact_Demo
          else
             MessageBox.Show("Error: No Serial Port.  Please ensure the Arduino is plugged in and restart the application.", "No Serial Port", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
-        
+
          RefreshFlashSettings_Click(this, null); //Get the settings from flash
 
          //
@@ -139,7 +138,7 @@ namespace SingleTact_Demo
          myPane.YAxis.MajorGrid.IsVisible = true;
          myPane.YAxis.MinorGrid.IsVisible = true;
 
-         // Refeshes the plot.   
+         // Refeshes the plot.
          graph_.AxisChange();
          graph_.Invalidate();
          graph_.Refresh();
@@ -309,7 +308,7 @@ namespace SingleTact_Demo
          }
          catch (Exception ex)
          {
-  
+
          }
 
 
@@ -386,7 +385,7 @@ namespace SingleTact_Demo
 
          LockButton.Text = (singleTact_.Settings.Reserved == 0) ? "Lock" : "Unlock";
 
-         
+
          if (backgroundWasRunning)
          {
             StartAcquisitionThread();
@@ -411,8 +410,8 @@ namespace SingleTact_Demo
             singleTact_.Settings.Scaling = (UInt16)(scaleInputTrackBar_.Value);
             singleTact_.Settings.I2CAddress = (byte)(i2cAddressInputComboBox_.SelectedIndex + 4);
             singleTact_.Settings.Accumulator = 5;
-            //singleTact_.Settings.Baselines = 
-            
+            //singleTact_.Settings.Baselines =
+
          }
 
          catch (Exception)
@@ -441,7 +440,7 @@ namespace SingleTact_Demo
 
          string sensorType = (String)(sensorTypeSelector.Items[sensorTypeSelector.SelectedIndex]);
 
-         DialogResult result = MessageBox.Show("Warning: this will reset your sensor to the default value for a " 
+         DialogResult result = MessageBox.Show("Warning: this will reset your sensor to the default value for a "
             + sensorType + " SingleTact.  Do you want to proceed?", "Reset Sensor", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
 
          if (result == DialogResult.Yes)
@@ -449,7 +448,7 @@ namespace SingleTact_Demo
             MessageBox.Show("ToDo...");
             //ToDo
          }
-              
+
       }
 
       /// <summary>
@@ -502,11 +501,11 @@ namespace SingleTact_Demo
          scaleInputTrackBar_.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
 
          LockButton.Text = (singleTact_.Settings.Reserved == 0) ? "Lock" : "Unlock";
-         
+
          if (backgroundWasRunning)
             StartAcquisitionThread();
 
-         
+
       }
 
       private void Send_Calibration_Click(object sender, EventArgs e)
@@ -517,12 +516,12 @@ namespace SingleTact_Demo
 
          if (backgroundWasRunning)
             StopAcquisitionThread();
-         
+
          singleTact_.PushCalibrationToHardware(calibrationTable);
 
          if (backgroundWasRunning)
             StartAcquisitionThread();
       }
 
-   }   
+   }
 }

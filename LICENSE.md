@@ -1,6 +1,6 @@
 The MIT License (MIT)
 
-Copyright (c) 2015 SingleTact
+Copyright (c) 2015 Pressure Profile Systems
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
