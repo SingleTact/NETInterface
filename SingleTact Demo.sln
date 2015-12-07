@@ -1,12 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SingleTact Demo", "SingleTact Demo.csproj", "{FBC82521-1493-4A04-8523-CDC2F3627D28}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SingleTact Demo", "SingleTact Demo\SingleTact Demo.csproj", "{FBC82521-1493-4A04-8523-CDC2F3627D28}"
 	ProjectSection(ProjectDependencies) = postProject
 		{2623C116-7211-42AB-BD34-8D14BEF6831B} = {2623C116-7211-42AB-BD34-8D14BEF6831B}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SingleTactLibrary", "..\SingleTactLibrary\SingleTactLibrary.csproj", "{2623C116-7211-42AB-BD34-8D14BEF6831B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SingleTactLibrary", "SingleTactLibrary\SingleTactLibrary.csproj", "{2623C116-7211-42AB-BD34-8D14BEF6831B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
