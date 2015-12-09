@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------------
 //  Copyright (c) 2015 Pressure Profile Systems
 //
 //  Licensed under the MIT license. This file may not be copied, modified, or
@@ -363,7 +363,7 @@
          //
          // singleTact_
          //
-         this.singleTact_.I2cAddressForCommunications = ((byte)(5));
+         this.singleTact_.I2cAddressForCommunications = ((byte)(4));
          //
          // GUI
          //
