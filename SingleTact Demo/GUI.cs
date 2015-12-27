@@ -388,7 +388,7 @@ namespace SingleTact_Demo
                 scaleInputTrackBar_.Value = singleTact_.Settings.Scaling;
                 ScaleInputValueLabel.Text = (scaleInputTrackBar_.Value/100.0).ToString("#0.00");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Invalid settings", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
