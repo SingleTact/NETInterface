@@ -34,6 +34,7 @@ namespace SingleTact_Demo
         private const int graphXRange_ = 30; // 30 seconds
         private Object workThreadLock = new Object(); //Thread synchronization
         List<SingleTactFrame> newFrames_ = new List<SingleTactFrame>();
+        private delegate void CloseMainFormDelegate(); //Used to close the program if hardware is not connected
 
         public GUI()
         {
@@ -42,29 +43,51 @@ namespace SingleTact_Demo
 
             //Get available serial prot
             string[] ports = SerialPort.GetPortNames();
-
             if (0 != ports.Length)
             {
                 try
                 {
+                    string serialPortName = ports[0];
+                    if (ports.Length > 1)
+                    {
+                        SerialPortSelector selector = new SerialPortSelector(ports);
+                        selector.ShowDialog();
+
+                        serialPortName = selector.SelectedPort;
+                    }
+
                     //Assume arduino is on the first COM port
-                    arduinoSingleTactDriver.Initialise(ports[0]); //Start Arduino driver
+                    arduinoSingleTactDriver.Initialise(serialPortName); //Start Arduino driver
                     singleTact_.Initialise(arduinoSingleTactDriver); //Attach to sensor
-                    singleTact_.PullSettingsFromHardware();
                 }
                 catch (Exception)
                 {
                     MessageBox.Show("Failed to start sensor", "Hardware Initialisation Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    this.Shown += new EventHandler(this.CloseOnStart);
                 }
+
+                RefreshFlashSettings_Click(this, null); //Get the settings from flash
+                CreateStripChart();
+
+                AcquisitionWorker.RunWorkerAsync(); //Start the acquisition thread
+
+                guiTimer_.Start();
+
             }
             else
-            MessageBox.Show("Error: No Serial Port.  Please ensure the Arduino is plugged in and restart the application.", "No Serial Port", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            {
+                MessageBox.Show("Error: No Serial Port.  Please ensure the Arduino is plugged in and restart the application.", "No Serial Port", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                this.Shown += new EventHandler(this.CloseOnStart);
+            }
 
-            RefreshFlashSettings_Click(this, null); //Get the settings from flash
-            CreateStripChart();
-            AcquisitionWorker.RunWorkerAsync(); //Start the acquisition thread
-            guiTimer_.Start();
         }
+
+
+        private void CloseOnStart(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
 
         /// <summary>
         /// Fill appropriate Values into GUI Comboboxes
@@ -326,7 +349,8 @@ namespace SingleTact_Demo
 
         private void GUI_FormClosing(object sender, FormClosingEventArgs e)
         {
-            StopAcquisitionThread();
+            if(AcquisitionWorker.IsBusy)
+                StopAcquisitionThread();
         }
 
         private void scaleInputTrackBar__Scroll(object sender, EventArgs e)
