@@ -169,7 +169,7 @@ namespace SingleTactLibrary
                     //ToDo find a more elegent solution!
                     for (int i = 0; i < sensorData.Length; i++)
                     {
-                        sensorData[i] = (UInt16)((newByteData[2 * i + 4 + ArduinoSingleTactDriver.TIMESTAMP_SIZE] << 8) + newByteData[2 * i + 5 + ArduinoSingleTactDriver.TIMESTAMP_SIZE] + 255);
+                        sensorData[i] = (UInt16)((newByteData[2 * i + 4 + ArduinoSingleTactDriver.TIMESTAMP_SIZE] << 8) + newByteData[2 * i + 5 + ArduinoSingleTactDriver.TIMESTAMP_SIZE]);
                     }
 
                     SingleTactFrame toReturn = new SingleTactFrame(sensorData, timeStamp);
