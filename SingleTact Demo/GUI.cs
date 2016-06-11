@@ -393,12 +393,10 @@ namespace SingleTact_Demo
                 MessageBox.Show("Invalid settings", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
-            SetSettingsButton.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
-            i2cAddressInputComboBox_.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
             refGainInputComboBox_.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
             ResetSensorButton.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
             scaleInputTrackBar_.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
-
+            
             LockButton.Text = (singleTact_.Settings.Reserved == 0) ? "Lock" : "Unlock";
 
             if (backgroundWasRunning)
@@ -504,8 +502,6 @@ namespace SingleTact_Demo
             singleTact_.PushSettingsToHardware();
             RefreshFlashSettings_Click(this, null);
 
-            SetSettingsButton.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
-            i2cAddressInputComboBox_.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
             refGainInputComboBox_.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
             ResetSensorButton.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
             scaleInputTrackBar_.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
