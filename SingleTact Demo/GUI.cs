@@ -32,6 +32,7 @@ namespace SingleTact_Demo
         private int timerItr_ = 0;  // Some things are slower that the timer frequency
         private bool isFirstFrame_ = true; // Is first frame after boot
         private const int graphXRange_ = 30; // 30 seconds
+        private const int reservedAddresses = 4; // Don't use I2C addresses 0 to 3
         private Object workThreadLock = new Object(); //Thread synchronization
         List<SingleTactFrame> newFrames_ = new List<SingleTactFrame>();
         private delegate void CloseMainFormDelegate(); //Used to close the program if hardware is not connected
@@ -97,10 +98,10 @@ namespace SingleTact_Demo
             i2cAddressInputComboBox_.Items.Clear();
             refGainInputComboBox_.Items.Clear();
 
-            for (int i = 0; i < 12; i++)
+            for (int i = reservedAddresses; i < 128; i++)
             {
                 i2cAddressInputComboBox_.Items
-                                        .Add("0x" + (i + 4).ToString("00"));
+                                        .Add("0x" + i.ToString("X2"));
             }
 
             for (int i = 1; i <= 8; i++)
@@ -381,7 +382,7 @@ namespace SingleTact_Demo
                 if (singleTact_.Settings.Baselines.ElementAt(0) > 65000)
                 MessageBox.Show("Warning: Sensor raw baseline is really high, please reduce the reference gain.", "Warning: Baseline too high", MessageBoxButtons.OK);
 
-                i2cAddressInputComboBox_.SelectedIndex = singleTact_.Settings.I2CAddress - 4;
+                i2cAddressInputComboBox_.SelectedIndex = singleTact_.Settings.I2CAddress - reservedAddresses;
 
                 refGainInputComboBox_.SelectedIndex = singleTact_.Settings.ReferenceGain;
 
@@ -421,7 +422,7 @@ namespace SingleTact_Demo
             {
                 singleTact_.Settings.ReferenceGain = (byte)(refGainInputComboBox_.SelectedIndex);
                 singleTact_.Settings.Scaling = (UInt16)(scaleInputTrackBar_.Value);
-                singleTact_.Settings.I2CAddress = (byte)(i2cAddressInputComboBox_.SelectedIndex + 4);
+                singleTact_.Settings.I2CAddress = (byte)(i2cAddressInputComboBox_.SelectedIndex + reservedAddresses);
                 singleTact_.Settings.Accumulator = 5;
                 //singleTact_.Settings.Baselines =
 
