@@ -144,7 +144,7 @@ namespace SingleTact_Demo
 
             //Lables
             myPane.XAxis.Title.Text = "Time (s)";
-            myPane.YAxis.Title.Text = "Output (512 = Full Scale Range)";
+            myPane.YAxis.Title.Text = "Output (511 = Full Scale Range)";
             myPane.Title.IsVisible = false;
             myPane.Legend.IsVisible = false;
 
@@ -239,7 +239,7 @@ namespace SingleTact_Demo
                 StreamWriter dataWriter = new StreamWriter(saveFileName, false, Encoding.Default);
 
                 //Write a header
-                dataWriter.WriteLine("Time (s)" + "," + "Value (0 = 0 PSI  512 = Full Scale Range)");
+                dataWriter.WriteLine("Time (s)" + "," + "Value (0 = 0 PSI  511 = Full Scale Range)");
 
                 //Just export first trace (we only support 1 sensor)
                 for (int i = 0; i < dataBuffer_.data[0].Count; i++)
