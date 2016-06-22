@@ -96,17 +96,11 @@ namespace SingleTact_Demo
         private void PopulateSetComboBoxes()
         {
             i2cAddressInputComboBox_.Items.Clear();
-            refGainInputComboBox_.Items.Clear();
 
             for (int i = reservedAddresses; i < 128; i++)
             {
                 i2cAddressInputComboBox_.Items
                                         .Add("0x" + i.ToString("X2"));
-            }
-
-            for (int i = 1; i <= 8; i++)
-            {
-                refGainInputComboBox_.Items.Add(i.ToString("0") + "x");
             }
 
             ScaleInputValueLabel.Text = (scaleInputTrackBar_.Value/100.0)
@@ -379,12 +373,7 @@ namespace SingleTact_Demo
                 textScale.Text = singleTact_.Settings.Scaling.ToString("00") + " (" + ((singleTact_.Settings.Scaling) / 100.0).ToString("#0.00") + ")";
                 textTare.Text = singleTact_.Settings.Baselines.ElementAt(0).ToString("0000");
 
-                if (singleTact_.Settings.Baselines.ElementAt(0) > 65000)
-                MessageBox.Show("Warning: Sensor raw baseline is really high, please reduce the reference gain.", "Warning: Baseline too high", MessageBoxButtons.OK);
-
                 i2cAddressInputComboBox_.SelectedIndex = singleTact_.Settings.I2CAddress - reservedAddresses;
-
-                refGainInputComboBox_.SelectedIndex = singleTact_.Settings.ReferenceGain;
 
                 scaleInputTrackBar_.Value = singleTact_.Settings.Scaling;
                 ScaleInputValueLabel.Text = (scaleInputTrackBar_.Value/100.0).ToString("#0.00");
@@ -394,7 +383,6 @@ namespace SingleTact_Demo
                 MessageBox.Show("Invalid settings", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
-            refGainInputComboBox_.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
             ResetSensorButton.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
             scaleInputTrackBar_.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
             
@@ -420,7 +408,8 @@ namespace SingleTact_Demo
 
             try
             {
-                singleTact_.Settings.ReferenceGain = (byte)(refGainInputComboBox_.SelectedIndex);
+                // ReferenceGain still has value from PullSettingsFromHardware
+                // which is OK because the firmware fully controls this anyway.
                 singleTact_.Settings.Scaling = (UInt16)(scaleInputTrackBar_.Value);
                 singleTact_.Settings.I2CAddress = (byte)(i2cAddressInputComboBox_.SelectedIndex + reservedAddresses);
                 singleTact_.Settings.Accumulator = 5;
@@ -503,7 +492,6 @@ namespace SingleTact_Demo
             singleTact_.PushSettingsToHardware();
             RefreshFlashSettings_Click(this, null);
 
-            refGainInputComboBox_.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
             ResetSensorButton.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
             scaleInputTrackBar_.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
 

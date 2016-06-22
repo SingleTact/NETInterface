@@ -51,11 +51,9 @@
          this.textGain = new System.Windows.Forms.TextBox();
          this.label5 = new System.Windows.Forms.Label();
          this.label4 = new System.Windows.Forms.Label();
-         this.label2 = new System.Windows.Forms.Label();
          this.buttonSave = new System.Windows.Forms.Button();
          this.AcquisitionWorker = new System.ComponentModel.BackgroundWorker();
          this.i2cAddressInputComboBox_ = new System.Windows.Forms.ComboBox();
-         this.refGainInputComboBox_ = new System.Windows.Forms.ComboBox();
          this.scaleInputTrackBar_ = new System.Windows.Forms.TrackBar();
          this.ScaleInputValueLabel = new System.Windows.Forms.Label();
          this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -214,16 +212,6 @@
          this.label4.TabIndex = 39;
          this.label4.Text = "Scale Factor:";
          // 
-         // label2
-         // 
-         this.label2.AutoSize = true;
-         this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-         this.label2.Location = new System.Drawing.Point(15, 55);
-         this.label2.Name = "label2";
-         this.label2.Size = new System.Drawing.Size(100, 13);
-         this.label2.TabIndex = 37;
-         this.label2.Text = "Reference Gain:";
-         // 
          // buttonSave
          // 
          this.buttonSave.Location = new System.Drawing.Point(23, 496);
@@ -248,14 +236,6 @@
          this.i2cAddressInputComboBox_.Name = "i2cAddressInputComboBox_";
          this.i2cAddressInputComboBox_.Size = new System.Drawing.Size(102, 21);
          this.i2cAddressInputComboBox_.TabIndex = 47;
-         // 
-         // refGainInputComboBox_
-         // 
-         this.refGainInputComboBox_.FormattingEnabled = true;
-         this.refGainInputComboBox_.Location = new System.Drawing.Point(116, 52);
-         this.refGainInputComboBox_.Name = "refGainInputComboBox_";
-         this.refGainInputComboBox_.Size = new System.Drawing.Size(102, 21);
-         this.refGainInputComboBox_.TabIndex = 48;
          // 
          // scaleInputTrackBar_
          // 
@@ -284,8 +264,6 @@
          this.groupBox1.Controls.Add(this.ScaleInputValueLabel);
          this.groupBox1.Controls.Add(this.SetBaselineButton);
          this.groupBox1.Controls.Add(this.scaleInputTrackBar_);
-         this.groupBox1.Controls.Add(this.label2);
-         this.groupBox1.Controls.Add(this.refGainInputComboBox_);
          this.groupBox1.Controls.Add(this.label4);
          this.groupBox1.Controls.Add(this.i2cAddressInputComboBox_);
          this.groupBox1.Controls.Add(this.SetSettingsButton);
@@ -409,13 +387,11 @@
         private System.Windows.Forms.TextBox textGain;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button buttonSave;
         private System.ComponentModel.BackgroundWorker AcquisitionWorker;
         private SingleTactLibrary.SingleTact singleTact_;
         private SingleTactLibrary.ArduinoSingleTactDriver arduinoSingleTactDriver;
         private System.Windows.Forms.ComboBox i2cAddressInputComboBox_;
-        private System.Windows.Forms.ComboBox refGainInputComboBox_;
         private System.Windows.Forms.TrackBar scaleInputTrackBar_;
         private System.Windows.Forms.Label ScaleInputValueLabel;
         private System.Windows.Forms.GroupBox groupBox1;
