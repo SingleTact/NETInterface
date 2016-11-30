@@ -30,8 +30,36 @@ namespace SingleTactLibrary
         const int INDEX_SCALING_LSB = 11;
         const int INDEX_NUMBER_ELEMENTS = 12;
         const int INDEX_RESERVED = 13;
+        const int INDEX_SETTINGSPARAMCOUNT = 14;
         const int INDEX_INDEX_OF_SCANLIST = 15;
         const int INDEX_OF_BASELINES = 41;
+
+        public const int DEFAULT_I2C_ADDR = 4;
+        public const int DEFAULT_ACCUMULATOR = 5;
+        public const int DEFAULT_SERIAL_NUMBER = 0x3333;
+        public const int DEFAULT_NUMBER_OF_ELEMENTS = 1;
+        public const int DEFAULT_DISCHARGE_TIME = 3;
+        public const int DEFAULT_PARAMCOUNT = 0xFF;
+        public const int DEFAULT_PWMPINMODE = 0;
+        public const int DEFAULT_PWM_ANALOG = 0;
+        public const int DEFAULT_CONVERSION_SIZE = 0;
+        public const int DEFAULT_OUTPUT_CURRENT = 0;
+        public const int DEFAULT_CALIBRATED_RESERVERD = 1;
+        public const int DEFAULT_UNCALIBRATED_RESERVERD = 0;
+        
+       
+        // 1N, 10N, 100N; 4.5N, 45N, 450N
+        public const int DEFAULT_8MM_GAIN = 5;
+        public const int DEFAULT_15MM_GAIN = 1;
+
+        public const int DEFAULT_1N_SCALE    = 200;
+        public const int DEFAULT_10N_SCALE   = 250;
+        public const int DEFAULT_100N_SCALE  = 180;
+        public const int DEFAULT_4P5N_SCALE  = 200;
+        public const int DEFAULT_45N_SCALE   = 280;
+        public const int DEFAULT_450N_SCALE  = 270;
+        public const int DEFAULT_SCALE       = 300;
+
 
         public enum PWMPinModes { PWM, SYNC};
 
@@ -39,6 +67,12 @@ namespace SingleTactLibrary
         {
             get { return settingsRaw_[INDEX_NUMBER_ELEMENTS]; }
             set { settingsRaw_[INDEX_NUMBER_ELEMENTS] = value; }
+        }
+
+        public byte ParamCount
+        {
+           get { return settingsRaw_[INDEX_SETTINGSPARAMCOUNT]; }
+           set { settingsRaw_[INDEX_SETTINGSPARAMCOUNT] = value; }
         }
 
         /// <summary>
