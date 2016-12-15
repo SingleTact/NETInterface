@@ -60,7 +60,14 @@ namespace SingleTact_Demo
 
                     //Assume arduino is on the first COM port
                     arduinoSingleTactDriver.Initialise(serialPortName); //Start Arduino driver
-                    singleTact_.Initialise(arduinoSingleTactDriver); //Attach to sensor
+                    if (!singleTact_.Initialise(arduinoSingleTactDriver))
+                    {
+                        MessageBox.Show(
+                            "Failed to start sensor on " + serialPortName,
+                            "Hardware Initialisation Error",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Exclamation);
+                    }
                 }
                 catch (Exception)
                 {
@@ -371,22 +378,32 @@ namespace SingleTact_Demo
             if (backgroundWasRunning)
             StopAcquisitionThread();
 
-            singleTact_.PullSettingsFromHardware();
-            try
+            if (!singleTact_.PullSettingsFromHardware())
             {
-                textAddress.Text = "0x" + singleTact_.Settings.I2CAddress.ToString("X2");
-                textGain.Text = singleTact_.Settings.ReferenceGain.ToString("00") + " (" + (singleTact_.Settings.ReferenceGain + 1).ToString("0") + "x)";
-                textScale.Text = singleTact_.Settings.Scaling.ToString("00") + " (" + ((singleTact_.Settings.Scaling) / 100.0).ToString("#0.00") + ")";
-                textTare.Text = singleTact_.Settings.Baselines.ElementAt(0).ToString("0000");
-
-                i2cAddressInputComboBox_.SelectedIndex = singleTact_.Settings.I2CAddress - reservedAddresses;
-
-                scaleInputTrackBar_.Value = singleTact_.Settings.Scaling;
-                ScaleInputValueLabel.Text = (scaleInputTrackBar_.Value/100.0).ToString("#0.00");
+                MessageBox.Show(
+                    "Failed to retrieve current settings.",
+                    "Error!",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
-            catch (Exception)
+            else
             {
-                MessageBox.Show("Invalid settings", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                try
+                {
+                    textAddress.Text = "0x" + singleTact_.Settings.I2CAddress.ToString("X2");
+                    textGain.Text = singleTact_.Settings.ReferenceGain.ToString("00") + " (" + (singleTact_.Settings.ReferenceGain + 1).ToString("0") + "x)";
+                    textScale.Text = singleTact_.Settings.Scaling.ToString("00") + " (" + ((singleTact_.Settings.Scaling) / 100.0).ToString("#0.00") + ")";
+                    textTare.Text = singleTact_.Settings.Baselines.ElementAt(0).ToString("0000");
+
+                    i2cAddressInputComboBox_.SelectedIndex = singleTact_.Settings.I2CAddress - reservedAddresses;
+
+                    scaleInputTrackBar_.Value = singleTact_.Settings.Scaling;
+                    ScaleInputValueLabel.Text = (scaleInputTrackBar_.Value / 100.0).ToString("#0.00");
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Invalid settings", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
 
             //ResetSensorButton.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;

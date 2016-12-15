@@ -36,14 +36,17 @@ namespace SingleTactLibrary
         /// Start the SingleTact, using an Arduino Interface Object
         /// </summary>
         /// <param name="arduino">Arduino Interface</param>
-        public void Initialise(ArduinoSingleTactDriver arduino)
+        /// <returns>true if successful; false otherwise.</returns>
+        public bool Initialise(ArduinoSingleTactDriver arduino)
         {
             arduino_ = arduino;
 
-            PullSettingsFromHardware();
+            if (!PullSettingsFromHardware())
+                return false;
 
             isConnected  = false;
             isCalibrated = false;
+            return true;
         }
 
         /// <summary>
@@ -119,7 +122,8 @@ namespace SingleTactLibrary
         /// <summary>
         /// Pull settings from sensor flash (updating local copy)
         /// </summary>
-        public void PullSettingsFromHardware()
+        /// <returns>true if completely successful; otherwise false.</returns>
+        public bool PullSettingsFromHardware()
         {
             byte[] settings = new byte[SingleTactParameters.ParamLocation];
             byte[] parameters = new byte[128 - SingleTactParameters.ParamLocation];
@@ -128,20 +132,22 @@ namespace SingleTactLibrary
             {
                 byte[] newByteData = arduino_.ReadFromMainRegister((byte)(i * 32), 32, i2cAddress_);  //Read 32 bytes from main register
 
-                if (null != newByteData)
+                if (null == newByteData)
+                    return false;
+
+                for (int j = 0; j < 32; j++)
                 {
-                    for (int j = 0; j < 32; j++)
-                    {
-                        if (i * 32 + j < SingleTactParameters.ParamLocation)
+                    if (i * 32 + j < SingleTactParameters.ParamLocation)
                         settings[i * 32 + j] = newByteData[j + ArduinoSingleTactDriver.TIMESTAMP_SIZE];
-                        else
+                    else
                         parameters[j - 16] = newByteData[j + ArduinoSingleTactDriver.TIMESTAMP_SIZE]; //Last half packet is parameters
-                    }
                 }
             }
 
             Settings.SettingsRaw = settings;
             Parameters.ParametersRaw = parameters;
+
+            return true;
         }
 
         /// <summary>
