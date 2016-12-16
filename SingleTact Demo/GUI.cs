@@ -39,57 +39,76 @@ namespace SingleTact_Demo
 
         public GUI()
         {
+            bool sensorStarted = false;
+            string serialPortName = null;
+            string exceptionMessage = null;
+
             InitializeComponent();
             PopulateSetComboBoxes();
 
-
-            //Get available serial prot
+            // Get available serial ports.
             string[] ports = SerialPort.GetPortNames();
             if (0 != ports.Length)
             {
                 try
                 {
-                    string serialPortName = ports[0];
                     if (ports.Length > 1)
                     {
+                        // Ask user to select from multiple serial ports.
                         SerialPortSelector selector = new SerialPortSelector(ports);
                         selector.ShowDialog();
 
                         serialPortName = selector.SelectedPort;
                     }
-
-                    //Assume arduino is on the first COM port
-                    arduinoSingleTactDriver.Initialise(serialPortName); //Start Arduino driver
-                    if (!singleTact_.Initialise(arduinoSingleTactDriver))
+                    else
                     {
-                        MessageBox.Show(
-                            "Failed to start sensor on " + serialPortName,
-                            "Hardware Initialisation Error",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Exclamation);
+                        // Assume Arduino is on the first (and only) port.
+                        serialPortName = ports[0];
                     }
+
+                    arduinoSingleTactDriver.Initialise(serialPortName); //Start Arduino driver
+                    sensorStarted = singleTact_.Initialise(arduinoSingleTactDriver);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    MessageBox.Show("Failed to start sensor", "Hardware Initialisation Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    this.Shown += new EventHandler(this.CloseOnStart);
+                    exceptionMessage = ex.Message;
                 }
+            }
 
-
+            if (sensorStarted)
+            {
                 RefreshFlashSettings_Click(this, null); //Get the settings from flash
                 CreateStripChart();
-                
+
                 AcquisitionWorker.RunWorkerAsync(); //Start the acquisition thread
 
                 guiTimer_.Start();
-
             }
             else
             {
-                MessageBox.Show("Error: No Serial Port.  Please ensure the Arduino is plugged in and restart the application.", "No Serial Port", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                string summary = "Failed to start sensor";
+
+                if (serialPortName == null)
+                    summary += ": no serial ports detected.";
+                else
+                    summary += " on " + serialPortName + ".";
+
+                summary += "\n\n";
+
+                if (exceptionMessage != null)
+                    summary += exceptionMessage;
+                else
+                    summary += "Please connect the Arduino then restart this application.";
+
+                MessageBox.Show(
+                    summary,
+                    "Hardware initialisation failed",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Exclamation);
+
+                // There's no point showing the GUI.  Force the app to auto-close.
                 this.Shown += new EventHandler(this.CloseOnStart);
             }
-
         }
 
 
