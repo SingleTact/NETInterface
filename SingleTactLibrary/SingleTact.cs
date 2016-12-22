@@ -211,7 +211,6 @@ namespace SingleTactLibrary
             Settings.Scaling = scaling;
             PushSettingsToHardware();
         }
- 
 
         /// <summary>
         /// I2C address used for communication - all sensors respond to 0x04 and their own specific address.

@@ -62,9 +62,9 @@
          this.ResetSensorButton = new System.Windows.Forms.Button();
          this.guiTimer_ = new System.Windows.Forms.Timer(this.components);
          this.LockButton = new System.Windows.Forms.Button();
-         this.picPpsLogo = new System.Windows.Forms.PictureBox();
          this.singleTact_ = new SingleTactLibrary.SingleTact(this.components);
          this.arduinoSingleTactDriver = new SingleTactLibrary.ArduinoSingleTactDriver(this.components);
+         this.picPpsLogo = new System.Windows.Forms.PictureBox();
          ((System.ComponentModel.ISupportInitialize)(this.scaleInputTrackBar_)).BeginInit();
          this.groupBox1.SuspendLayout();
          this.groupBox2.SuspendLayout();
@@ -87,7 +87,7 @@
          this.graph_.ScrollMinX = 0D;
          this.graph_.ScrollMinY = 0D;
          this.graph_.ScrollMinY2 = 0D;
-         this.graph_.Size = new System.Drawing.Size(564, 506);
+         this.graph_.Size = new System.Drawing.Size(561, 500);
          this.graph_.TabIndex = 1;
          // 
          // RefreshFlashSettings
@@ -299,6 +299,7 @@
          this.sensorTypeSelector.Name = "sensorTypeSelector";
          this.sensorTypeSelector.Size = new System.Drawing.Size(121, 21);
          this.sensorTypeSelector.TabIndex = 53;
+         this.sensorTypeSelector.Visible = false;
          // 
          // ResetSensorButton
          // 
@@ -308,6 +309,7 @@
          this.ResetSensorButton.TabIndex = 54;
          this.ResetSensorButton.Text = "Reset Sensor As:";
          this.ResetSensorButton.UseVisualStyleBackColor = true;
+         this.ResetSensorButton.Visible = false;
          this.ResetSensorButton.Click += new System.EventHandler(this.ResetSensorButton_Click);
          // 
          // guiTimer_
@@ -325,6 +327,10 @@
          this.LockButton.UseVisualStyleBackColor = true;
          this.LockButton.Click += new System.EventHandler(this.LockButton_Click);
          // 
+         // singleTact_
+         // 
+         this.singleTact_.I2cAddressForCommunications = ((byte)(4));
+         // 
          // picPpsLogo
          // 
          this.picPpsLogo.Image = ((System.Drawing.Image)(resources.GetObject("picPpsLogo.Image")));
@@ -337,15 +343,11 @@
          this.picPpsLogo.TabIndex = 46;
          this.picPpsLogo.TabStop = false;
          // 
-         // singleTact_
-         // 
-         this.singleTact_.I2cAddressForCommunications = ((byte)(4));
-         // 
          // GUI
          // 
          this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
          this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-         this.ClientSize = new System.Drawing.Size(837, 564);
+         this.ClientSize = new System.Drawing.Size(834, 562);
          this.Controls.Add(this.LockButton);
          this.Controls.Add(this.ResetSensorButton);
          this.Controls.Add(this.sensorTypeSelector);

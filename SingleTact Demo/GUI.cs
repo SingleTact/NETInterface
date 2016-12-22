@@ -42,7 +42,6 @@ namespace SingleTact_Demo
             InitializeComponent();
             PopulateSetComboBoxes();
 
-
             //Get available serial prot
             string[] ports = SerialPort.GetPortNames();
             if (0 != ports.Length)
@@ -68,10 +67,9 @@ namespace SingleTact_Demo
                     this.Shown += new EventHandler(this.CloseOnStart);
                 }
 
-
                 RefreshFlashSettings_Click(this, null); //Get the settings from flash
                 CreateStripChart();
-                
+
                 AcquisitionWorker.RunWorkerAsync(); //Start the acquisition thread
 
                 guiTimer_.Start();
@@ -108,16 +106,12 @@ namespace SingleTact_Demo
             ScaleInputValueLabel.Text = (scaleInputTrackBar_.Value/100.0)
                                         .ToString("#0.00");
 
-            
-            sensorTypeSelector.Items.Add("Calibrated 8mm 1N");
-            sensorTypeSelector.Items.Add("Calibrated 8mm 10N");
-            sensorTypeSelector.Items.Add("Calibrated 8mm 100N");
-            sensorTypeSelector.Items.Add("Calibrated 15mm 4.5N");
-            sensorTypeSelector.Items.Add("Calibrated 15mm 45N");
-            sensorTypeSelector.Items.Add("Calibrated 15mm 450N");
-            
-            
-            
+            sensorTypeSelector.Items.Add("8mm XX PSI");
+            sensorTypeSelector.Items.Add("8mm XX PSI");
+            sensorTypeSelector.Items.Add("8mm XX PSI");
+            sensorTypeSelector.Items.Add("15mm XX PSI");
+            sensorTypeSelector.Items.Add("15mm XX PSI");
+            sensorTypeSelector.Items.Add("15mm XX PSI");
             sensorTypeSelector.SelectedIndex = 0;
         }
 
@@ -389,7 +383,7 @@ namespace SingleTact_Demo
                 MessageBox.Show("Invalid settings", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
-            //ResetSensorButton.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
+            ResetSensorButton.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
             scaleInputTrackBar_.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
             
             LockButton.Text = (singleTact_.Settings.Reserved == 0) ? "Lock" : "Unlock";
@@ -444,8 +438,7 @@ namespace SingleTact_Demo
         /// <param name="e"></param>
         private void ResetSensorButton_Click(object sender, EventArgs e)
         {
-           int index_ = sensorTypeSelector.SelectedIndex;
-           string sensorType = (String)(sensorTypeSelector.Items[sensorTypeSelector.SelectedIndex]);
+            string sensorType = (String)(sensorTypeSelector.Items[sensorTypeSelector.SelectedIndex]);
 
             DialogResult result = MessageBox.Show("Warning: this will reset your sensor to the default value for a "
                                 + sensorType
@@ -456,90 +449,8 @@ namespace SingleTact_Demo
 
             if (result == DialogResult.Yes)
             {
-                
+                MessageBox.Show("ToDo...");
                 //ToDo
-                bool backgroundWasRunning = AcquisitionWorker.IsBusy;
-
-                if (backgroundWasRunning)
-                   StopAcquisitionThread();
-
-               
-                try
-                {
-
-                   singleTact_.Settings.I2CAddress       = (byte)(SingleTactSettings.DEFAULT_I2C_ADDR);
-                   singleTact_.Settings.Accumulator      = SingleTactSettings.DEFAULT_ACCUMULATOR;
-                   singleTact_.Settings.SerialNumberMsb  = SingleTactSettings.DEFAULT_SERIAL_NUMBER;
-                   singleTact_.Settings.NumberElements   = SingleTactSettings.DEFAULT_NUMBER_OF_ELEMENTS;
-                   singleTact_.Settings.DischargeTimer   = SingleTactSettings.DEFAULT_DISCHARGE_TIME;
-                   singleTact_.Settings.ParamCount       = SingleTactSettings.DEFAULT_PARAMCOUNT;
-                   singleTact_.Settings.PWMPinMode       = SingleTactSettings.DEFAULT_PWMPINMODE;
-                   singleTact_.Settings.SensorMappingPWM_Analogue = SingleTactSettings.DEFAULT_PWM_ANALOG;
-                   singleTact_.Settings.ConversionSize   = SingleTactSettings.DEFAULT_CONVERSION_SIZE;
-                   singleTact_.Settings.OutputCurrent    = SingleTactSettings.DEFAULT_OUTPUT_CURRENT;
-                   singleTact_.Settings.Reserved         = SingleTactSettings.DEFAULT_CALIBRATED_RESERVERD;
-
-                   byte[] scanList_ = new byte[SingleTactSettings.DEFAULT_NUMBER_OF_ELEMENTS];
-                   scanList_[0] = 0;
-                   singleTact_.Settings.ScanList = scanList_;
-
-                   switch (index_)
-                   {
-                        case 0:
-                           singleTact_.Settings.Scaling = (UInt16)(SingleTactSettings.DEFAULT_1N_SCALE);
-                           singleTact_.Settings.ReferenceGain = SingleTactSettings.DEFAULT_8MM_GAIN;
-                           break;
-                        case 1:
-                           singleTact_.Settings.Scaling = (UInt16)(SingleTactSettings.DEFAULT_10N_SCALE);
-                           singleTact_.Settings.ReferenceGain = SingleTactSettings.DEFAULT_8MM_GAIN;
-                           break;
-                        case 2:
-                           singleTact_.Settings.Scaling = (UInt16)(SingleTactSettings.DEFAULT_100N_SCALE);
-                           singleTact_.Settings.ReferenceGain = SingleTactSettings.DEFAULT_8MM_GAIN;
-                           break;
-                        case 3:
-                           singleTact_.Settings.Scaling = (UInt16)(SingleTactSettings.DEFAULT_4P5N_SCALE);
-                           singleTact_.Settings.ReferenceGain = SingleTactSettings.DEFAULT_15MM_GAIN;
-                           break;
-                        case 4:
-                           singleTact_.Settings.Scaling = (UInt16)(SingleTactSettings.DEFAULT_45N_SCALE);
-                           singleTact_.Settings.ReferenceGain = SingleTactSettings.DEFAULT_15MM_GAIN;
-                           break;
-                        case 5:
-                           singleTact_.Settings.Scaling = (UInt16)(SingleTactSettings.DEFAULT_450N_SCALE);
-                           singleTact_.Settings.ReferenceGain = SingleTactSettings.DEFAULT_15MM_GAIN;
-                           break;
-
-                        case 6:
-                           singleTact_.Settings.Scaling = (UInt16)(SingleTactSettings.DEFAULT_SCALE);
-                           singleTact_.Settings.ReferenceGain = SingleTactSettings.DEFAULT_15MM_GAIN;
-                           singleTact_.Settings.Reserved = SingleTactSettings.DEFAULT_UNCALIBRATED_RESERVERD;
-                           break;
-                   }
-
-                  
-                   
-                   
-                   
-                   
-                }
-                catch (Exception)
-                {
-                   MessageBox.Show("Invalid settings", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-
-                singleTact_.PushSettingsToHardware();
-                singleTact_.Tare();
-                RefreshFlashSettings_Click(this, null);
-
-                MessageBox.Show("Reset Successfully!");
-
-                if (backgroundWasRunning)
-                {
-                   StartAcquisitionThread();
-                }
-                  
-
             }
         }
 
@@ -581,7 +492,7 @@ namespace SingleTact_Demo
             singleTact_.PushSettingsToHardware();
             RefreshFlashSettings_Click(this, null);
 
-            //ResetSensorButton.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
+            ResetSensorButton.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
             scaleInputTrackBar_.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
 
             LockButton.Text = (singleTact_.Settings.Reserved == 0) ? "Lock" : "Unlock";
