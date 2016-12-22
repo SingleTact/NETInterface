@@ -39,50 +39,76 @@ namespace SingleTact_Demo
 
         public GUI()
         {
+            bool sensorStarted = false;
+            string serialPortName = null;
+            string exceptionMessage = null;
+
             InitializeComponent();
             PopulateSetComboBoxes();
 
-
-            //Get available serial prot
+            // Get available serial ports.
             string[] ports = SerialPort.GetPortNames();
             if (0 != ports.Length)
             {
                 try
                 {
-                    string serialPortName = ports[0];
                     if (ports.Length > 1)
                     {
+                        // Ask user to select from multiple serial ports.
                         SerialPortSelector selector = new SerialPortSelector(ports);
                         selector.ShowDialog();
 
                         serialPortName = selector.SelectedPort;
                     }
+                    else
+                    {
+                        // Assume Arduino is on the first (and only) port.
+                        serialPortName = ports[0];
+                    }
 
-                    //Assume arduino is on the first COM port
                     arduinoSingleTactDriver.Initialise(serialPortName); //Start Arduino driver
-                    singleTact_.Initialise(arduinoSingleTactDriver); //Attach to sensor
+                    sensorStarted = singleTact_.Initialise(arduinoSingleTactDriver);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    MessageBox.Show("Failed to start sensor", "Hardware Initialisation Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    this.Shown += new EventHandler(this.CloseOnStart);
+                    exceptionMessage = ex.Message;
                 }
+            }
 
-
+            if (sensorStarted)
+            {
                 RefreshFlashSettings_Click(this, null); //Get the settings from flash
                 CreateStripChart();
-                
+
                 AcquisitionWorker.RunWorkerAsync(); //Start the acquisition thread
 
                 guiTimer_.Start();
-
             }
             else
             {
-                MessageBox.Show("Error: No Serial Port.  Please ensure the Arduino is plugged in and restart the application.", "No Serial Port", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                string summary = "Failed to start sensor";
+
+                if (serialPortName == null)
+                    summary += ": no serial ports detected.";
+                else
+                    summary += " on " + serialPortName + ".";
+
+                summary += "\n\n";
+
+                if (exceptionMessage != null)
+                    summary += exceptionMessage;
+                else
+                    summary += "Please connect the Arduino then restart this application.";
+
+                MessageBox.Show(
+                    summary,
+                    "Hardware initialisation failed",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Exclamation);
+
+                // There's no point showing the GUI.  Force the app to auto-close.
                 this.Shown += new EventHandler(this.CloseOnStart);
             }
-
         }
 
 
@@ -371,22 +397,32 @@ namespace SingleTact_Demo
             if (backgroundWasRunning)
             StopAcquisitionThread();
 
-            singleTact_.PullSettingsFromHardware();
-            try
+            if (!singleTact_.PullSettingsFromHardware())
             {
-                textAddress.Text = "0x" + singleTact_.Settings.I2CAddress.ToString("X2");
-                textGain.Text = singleTact_.Settings.ReferenceGain.ToString("00") + " (" + (singleTact_.Settings.ReferenceGain + 1).ToString("0") + "x)";
-                textScale.Text = singleTact_.Settings.Scaling.ToString("00") + " (" + ((singleTact_.Settings.Scaling) / 100.0).ToString("#0.00") + ")";
-                textTare.Text = singleTact_.Settings.Baselines.ElementAt(0).ToString("0000");
-
-                i2cAddressInputComboBox_.SelectedIndex = singleTact_.Settings.I2CAddress - reservedAddresses;
-
-                scaleInputTrackBar_.Value = singleTact_.Settings.Scaling;
-                ScaleInputValueLabel.Text = (scaleInputTrackBar_.Value/100.0).ToString("#0.00");
+                MessageBox.Show(
+                    "Failed to retrieve current settings.",
+                    "Error!",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
-            catch (Exception)
+            else
             {
-                MessageBox.Show("Invalid settings", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                try
+                {
+                    textAddress.Text = "0x" + singleTact_.Settings.I2CAddress.ToString("X2");
+                    textGain.Text = singleTact_.Settings.ReferenceGain.ToString("00") + " (" + (singleTact_.Settings.ReferenceGain + 1).ToString("0") + "x)";
+                    textScale.Text = singleTact_.Settings.Scaling.ToString("00") + " (" + ((singleTact_.Settings.Scaling) / 100.0).ToString("#0.00") + ")";
+                    textTare.Text = singleTact_.Settings.Baselines.ElementAt(0).ToString("0000");
+
+                    i2cAddressInputComboBox_.SelectedIndex = singleTact_.Settings.I2CAddress - reservedAddresses;
+
+                    scaleInputTrackBar_.Value = singleTact_.Settings.Scaling;
+                    ScaleInputValueLabel.Text = (scaleInputTrackBar_.Value / 100.0).ToString("#0.00");
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Invalid settings", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
 
             //ResetSensorButton.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
