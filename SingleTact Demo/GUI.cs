@@ -211,6 +211,22 @@ namespace SingleTact_Demo
             graph_.AxisChange();
         }
 
+        /// <summary>
+        /// Finds a character to separate exported values.
+        /// </summary>
+        /// <returns>A semi-colon for locales where comma is the decimal 
+        /// separator; otherwise a comma.</returns>
+        private string safeSeparator()
+        {
+            double testValue = 3.14;
+            string testText = testValue.ToString();
+
+            if (testText.IndexOf(',') < 0)
+                return ",";
+
+            return ";";
+        }
+
         //Save data to CSV
         private void buttonSave_Click(object sender, EventArgs e)
         {
@@ -229,16 +245,19 @@ namespace SingleTact_Demo
 
             if (saveDataDialog.ShowDialog() == DialogResult.OK)
             {
+                // To fix Issue 3, separate exported values by semi-colon instead
+                // of comma if current locale's decimal separator is comma.
+                string separator = safeSeparator();
                 string saveFileName = saveDataDialog.FileName;
                 StreamWriter dataWriter = new StreamWriter(saveFileName, false, Encoding.Default);
 
                 //Write a header
-                dataWriter.WriteLine("Time (s)" + "," + "Value (0 = 0 PSI  511 = Full Scale Range)");
+                dataWriter.WriteLine("Time (s)" + separator + "Value (0 = 0 PSI  511 = Full Scale Range)");
 
                 //Just export first trace (we only support 1 sensor)
                 for (int i = 0; i < dataBuffer_.data[0].Count; i++)
                 {
-                    dataWriter.WriteLine(dataBuffer_.data[0][i].X + "," + dataBuffer_.data[0][i].Y);
+                    dataWriter.WriteLine(dataBuffer_.data[0][i].X + separator + dataBuffer_.data[0][i].Y);
                 }
 
                 dataWriter.Close();
