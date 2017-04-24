@@ -56,6 +56,8 @@ namespace SingleTactLibrary
             serialPort_.BaudRate = 115200;
             serialPort_.ReadBufferSize = 48;
             serialPort_.WriteBufferSize = 16;
+            serialPort_.DtrEnable = true;
+            serialPort_.RtsEnable = true;
             serialPort_.ErrorReceived += new System.IO.Ports.SerialErrorReceivedEventHandler(this.SerialErrorReceived);
             serialPort_.Open();
 
