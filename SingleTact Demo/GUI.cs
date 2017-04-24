@@ -422,8 +422,10 @@ namespace SingleTact_Demo
             }
 
             singleTact_.PushSettingsToHardware();
-            singleTact_.Tare();
-            RefreshFlashSettings_Click(this, null);
+            if (singleTact_.Tare())
+            {
+                RefreshFlashSettings_Click(this, null);
+            }
 
             if (backgroundWasRunning)
             {
@@ -462,8 +464,10 @@ namespace SingleTact_Demo
         private void SetBaselineButton_Click(object sender, EventArgs e)
         {
             StopAcquisitionThread();
-            singleTact_.Tare();
-            RefreshFlashSettings_Click(null, null);
+            if (singleTact_.Tare())
+            {
+                RefreshFlashSettings_Click(null, null);
+            }
             StartAcquisitionThread();
         }
 

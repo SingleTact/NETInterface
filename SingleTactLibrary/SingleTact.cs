@@ -188,9 +188,13 @@ namespace SingleTactLibrary
         /// <summary>
         /// Reset baseline of all elements
         /// </summary>
-        public void Tare()
+        /// <returns>true if successful; false otherwise.</returns>
+        public bool Tare()
         {
             ushort scaling = Settings.Scaling;
+
+            if (lastFrame_ == null)
+                return false;
 
             Settings.Baselines = new UInt16[lastFrame_.nSensors]; //Zeros
             Settings.Scaling = 100;
@@ -210,6 +214,8 @@ namespace SingleTactLibrary
             Settings.Baselines = newBaselines;
             Settings.Scaling = scaling;
             PushSettingsToHardware();
+
+            return true;
         }
 
         /// <summary>
