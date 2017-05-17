@@ -63,7 +63,7 @@ namespace SingleTactLibrary
             serialPort_.DtrEnable = true;
             Thread.Sleep(10);
             serialPort_.DtrEnable = false;
-            Thread.Sleep(1000); //Give Arduino time to boot after reset
+            Thread.Sleep(2000); //Give Arduino time to boot after reset
         }
 
         public void ResetArduino()
@@ -76,7 +76,7 @@ namespace SingleTactLibrary
             serialPort_.DtrEnable = true;
             Thread.Sleep(10);
             serialPort_.DtrEnable = false;
-            Thread.Sleep(1000); //Give Arduino time to boot after reset
+            Thread.Sleep(2000); //Give Arduino time to boot after reset
         }
 
         private void SerialErrorReceived(object sender, SerialErrorReceivedEventArgs e)
