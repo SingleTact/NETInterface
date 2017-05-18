@@ -22,7 +22,32 @@ namespace SingleTact_Demo
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new GUI());
+            try
+            {
+                Application.Run(new GUI());
+            }
+            catch (System.IO.FileNotFoundException ex)
+            {
+                // Avoids silently failing when a sub-assembly is missing.
+
+                // Convert assembly details to a readable DLL name.
+                string details = ex.FileName.ToLower();
+                string missingName = null;
+
+                if (details.Contains("zedgraph"))
+                    missingName = "ZedGraph.dll";
+                else if (details.Contains("singletactlibrary"))
+                    missingName = "SingleTactLibrary.dll";
+
+                if (missingName != null)
+                {
+                    MessageBox.Show(
+                        "Please ensure that " +
+                        missingName +
+                        " is in the same location as this program.",
+                        Application.ProductName);
+                }
+            }
         }
     }
 }
