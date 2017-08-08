@@ -55,9 +55,7 @@ namespace SingleTactLibrary
             //serialPort_.BaudRate = 115200*4;
             serialPort_.BaudRate = 115200;
             serialPort_.ReadBufferSize = 48;
-            serialPort_.WriteBufferSize = 16;
-            serialPort_.DtrEnable = true;
-            serialPort_.RtsEnable = true;
+            serialPort_.WriteBufferSize = 16;          
             serialPort_.ErrorReceived += new System.IO.Ports.SerialErrorReceivedEventHandler(this.SerialErrorReceived);
             serialPort_.Open();
 
@@ -65,7 +63,8 @@ namespace SingleTactLibrary
             serialPort_.DtrEnable = true;
             Thread.Sleep(10);
             serialPort_.DtrEnable = false;
-            Thread.Sleep(1000); //Give Arduino time to boot after reset
+            Thread.Sleep(2000); //Give Arduino time to boot after reset
+            serialPort_.RtsEnable = true;
         }
 
         public void ResetArduino()
