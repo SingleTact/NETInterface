@@ -294,6 +294,7 @@ namespace SingleTact_Demo
 
                     //Calculate rate
                     double delta = newFrame.TimeStamp - lastTimestamp_;
+                    if (delta!=0)
                     measuredFrequency_ = measuredFrequency_ * 0.95 + 0.05 * (1.0 / (delta));  //Averaging
                     lastTimestamp_ = newFrame.TimeStamp;
                 }
