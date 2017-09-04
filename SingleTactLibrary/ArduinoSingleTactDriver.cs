@@ -64,6 +64,11 @@ namespace SingleTactLibrary
             Thread.Sleep(10);
             serialPort_.DtrEnable = false;
             Thread.Sleep(2000); //Give Arduino time to boot after reset
+<<<<<<< HEAD
+
+            serialPort_.RtsEnable = true;
+=======
+>>>>>>> refs/remotes/origin/master
         }
 
         public void ResetArduino()

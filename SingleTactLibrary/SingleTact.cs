@@ -20,6 +20,8 @@ namespace SingleTactLibrary
     {
         private ArduinoSingleTactDriver arduino_;
         private SingleTactFrame lastFrame_;
+        private bool isFirst = true;
+        private UInt32 startTime = 0;
 
         public SingleTact()
         {
@@ -167,6 +169,12 @@ namespace SingleTactLibrary
                     itr_ = itr;
 
                     UInt32 timeStampRaw = (UInt32)((newByteData[0] << 24) + (newByteData[1] << 16) + (newByteData[2] << 8) + newByteData[3]);
+                    if (isFirst == true)
+                    {
+                        isFirst = false;
+                        startTime = timeStampRaw;
+                    }
+                    timeStampRaw -= startTime;
                     double timeStamp = (double)timeStampRaw / 10000.0; //10kHz clock
 
                     UInt16[] sensorData = new UInt16[(int)(newByteData.Length - ArduinoSingleTactDriver.TIMESTAMP_SIZE - 4) / 2];
