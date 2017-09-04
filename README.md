@@ -2,6 +2,10 @@
 This repo demonstrates how to interface between SingleTact, Arduino and Windows
 through a .NET application.
 
+# Windows 10 User?
+This app is available in Windows Store.
+https://www.microsoft.com/store/apps/9p0p8944fnr2
+
 # Setting up the development environment
 The manual assumes that you are using a full version of MS Visual Studio 2010.
 
