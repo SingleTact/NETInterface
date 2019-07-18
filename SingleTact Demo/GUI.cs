@@ -36,7 +36,6 @@ namespace SingleTact_Demo
         private const int reservedAddresses = 4; // Don't use I2C addresses 0 to 3
         private Object workThreadLock = new Object(); //Thread synchronization
         private List<List<SingleTactFrame>> frameList_ = new List<List<SingleTactFrame>>();
-        private List<SingleTactFrame> newFrames_ = new List<SingleTactFrame>();
         List<string> serialPortNames = new List<string>();
         private Container drivers = new Container();
         private Container singleTacts = new Container();
@@ -84,6 +83,8 @@ namespace SingleTact_Demo
                         sensorStarted = singleTact.Initialise(arduinoSingleTactDriver);
                         singleTact.I2cAddressForCommunications = ((byte)(4));
                         SingleTactData data_pt = new SingleTactData();
+                        List<SingleTactFrame> newFrames_ = new List<SingleTactFrame>();
+                        frameList_.Add(newFrames_);
                         dataBuffer_.Add(data_pt);
                     }
                     singleTact_ = (SingleTact) singleTacts.Components[0];
@@ -358,20 +359,25 @@ namespace SingleTact_Demo
 
             while (!worker.CancellationPending) //Do the work
             {
-                SingleTactFrame newFrame = singleTact_.ReadSensorData(); //Get sensor data
-
-                if (null != newFrame) //If we have data
+                foreach (List<SingleTactFrame> frames in frameList_)
                 {
-                    lock (workThreadLock)
-                    {
-                        newFrames_.Add(newFrame.DeepClone());
-                    }
+                    int index = frameList_.IndexOf(frames);
+                    SingleTact singleTact = (SingleTact)singleTacts.Components[index];
+                    SingleTactFrame newFrame = singleTact.ReadSensorData(); //Get sensor data
 
-                    //Calculate rate
-                    double delta = newFrame.TimeStamp - lastTimestamp_;
-                    if (delta!=0)                   
-                    measuredFrequency_ = measuredFrequency_ * 0.95 + 0.05 * (1.0 / (delta));  //Averaging
-                    lastTimestamp_ = newFrame.TimeStamp;
+                    if (null != newFrame) //If we have data
+                    {
+                        lock (workThreadLock)
+                        {
+                            frames.Add(newFrame.DeepClone());
+                        }
+
+                        //Calculate rate
+                        double delta = newFrame.TimeStamp - lastTimestamp_;
+                        if (delta != 0)
+                            measuredFrequency_ = measuredFrequency_ * 0.95 + 0.05 * (1.0 / (delta));  //Averaging
+                        lastTimestamp_ = newFrame.TimeStamp;
+                    }
                 }
             }
         }
@@ -389,6 +395,8 @@ namespace SingleTact_Demo
                 {
                     foreach (SingleTactData data in dataBuffer_)
                     {
+                        int index = dataBuffer_.IndexOf(data);
+                        List<SingleTactFrame> newFrames_ = frameList_[index];
                         SingleTactFrame localCopy = null;
 
                         while (newFrames_.Count != 0)
