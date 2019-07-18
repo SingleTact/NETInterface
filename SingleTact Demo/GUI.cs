@@ -20,12 +20,13 @@ using ZedGraph;
 using System.Threading;
 using System.Globalization;
 using SingleTactLibrary;
+using System.Diagnostics;
 
 namespace SingleTact_Demo
 {
     public partial class GUI : Form
     {
-        private SingleTactData dataBuffer_ = new SingleTactData();  // Stripchart data
+        private List<SingleTactData> dataBuffer_ = new List<SingleTactData>();  // Stripchart data
         private bool backgroundIsFinished_ = false;  // Flag to check background thread is finished
         private double measuredFrequency_ = 50;  // Sensor update rate
         private double lastTimestamp_ = 0; // Used to calculate update rate
@@ -34,7 +35,12 @@ namespace SingleTact_Demo
         private const int graphXRange_ = 30; // 30 seconds
         private const int reservedAddresses = 4; // Don't use I2C addresses 0 to 3
         private Object workThreadLock = new Object(); //Thread synchronization
-        List<SingleTactFrame> newFrames_ = new List<SingleTactFrame>();
+        private List<List<SingleTactFrame>> frameList_ = new List<List<SingleTactFrame>>();
+        private List<SingleTactFrame> newFrames_ = new List<SingleTactFrame>();
+        List<string> serialPortNames = new List<string>();
+        private Container drivers = new Container();
+        private Container singleTacts = new Container();
+        SingleTact singleTact_;
         private delegate void CloseMainFormDelegate(); //Used to close the program if hardware is not connected
 
         public GUI()
@@ -44,12 +50,13 @@ namespace SingleTact_Demo
             string exceptionMessage = null;
 
             InitializeComponent();
-            PopulateSetComboBoxes();
 
             // Get available serial ports.
             string[] ports = SerialPort.GetPortNames();
             if (0 != ports.Length)
             {
+                // Assume Arduino is on the first port during startup.
+                serialPortName = ports[0];
                 try
                 {
                     if (ports.Length > 1)
@@ -58,21 +65,39 @@ namespace SingleTact_Demo
                         SerialPortSelector selector = new SerialPortSelector(ports);
                         selector.ShowDialog();
 
-                        serialPortName = selector.SelectedPort;
+                        serialPortNames = selector.SelectedPorts;
+                        foreach (string portName in serialPortNames)
+                        {
+                            arduinoSingleTactDriver = new ArduinoSingleTactDriver(drivers);
+                            arduinoSingleTactDriver.Initialise(portName); //Start Arduino driver
+                        }
                     }
                     else
                     {
-                        // Assume Arduino is on the first (and only) port.
-                        serialPortName = ports[0];
+                        arduinoSingleTactDriver = new ArduinoSingleTactDriver(drivers);
+                        arduinoSingleTactDriver.Initialise(serialPortName); //Start Arduino driver
                     }
 
-                    arduinoSingleTactDriver.Initialise(serialPortName); //Start Arduino driver
-                    sensorStarted = singleTact_.Initialise(arduinoSingleTactDriver);
+                    foreach (ArduinoSingleTactDriver driver in drivers.Components)
+                    {
+                        SingleTact singleTact = new SingleTact(singleTacts);
+                        sensorStarted = singleTact.Initialise(arduinoSingleTactDriver);
+                        singleTact.I2cAddressForCommunications = ((byte)(4));
+                        SingleTactData data_pt = new SingleTactData();
+                        dataBuffer_.Add(data_pt);
+                    }
+                    singleTact_ = (SingleTact) singleTacts.Components[0];
+
+
+
                 }
                 catch (Exception ex)
                 {
                     exceptionMessage = ex.Message;
                 }
+
+                PopulateSetComboBoxes();
+
             }
 
             if (sensorStarted)
@@ -123,6 +148,13 @@ namespace SingleTact_Demo
         /// </summary>
         private void PopulateSetComboBoxes()
         {
+            //Populate active sensor combobox
+            foreach (string port in serialPortNames)
+                ActiveSensor.Items.Add(port);
+
+            ActiveSensor.SelectedIndex = 0;
+
+            // Populate i2c addresses
             i2cAddressInputComboBox_.Items.Clear();
 
             for (int i = reservedAddresses; i < 128; i++)
@@ -193,50 +225,46 @@ namespace SingleTact_Demo
         /// </summary>
         /// <param name="time"></param>
         /// <param name="measurements"></param>
-        public void AddData(double time, double[] measurements)
+        public void AddData(SingleTactData data_pt, double time, double[] measurements)
         {
-            dataBuffer_.AddData(measurements, time);
-            GraphPane graphPane = graph_.GraphPane;
+                int index = dataBuffer_.IndexOf(data_pt);
+                data_pt.AddData(measurements, time);
+                GraphPane graphPane = graph_.GraphPane;
+                Color[] colours = {Color.Blue, Color.Orange};
+                while (graphPane.CurveList.Count < dataBuffer_.Count)
+                {
+                    string name = "Sensor " + (graphPane.CurveList.Count + 1).ToString();
+                    LineItem myCurve = new LineItem(
+                        name,
+                        data_pt.data[0],
+                        colours[index],
+                        SymbolType.None,
+                        3.0f);
+                    graphPane.CurveList.Add(myCurve);
+                }
 
-            while (graphPane.CurveList.Count < measurements.Length)
-            {
-                string name = "Sensor " + (graphPane.CurveList.Count + 1).ToString();
-                LineItem myCurve = new LineItem(
-                    name,
-                    dataBuffer_.data[graphPane.CurveList.Count],
-                    Color.Blue,
-                    SymbolType.None,
-                    3.0f);
-                graphPane.CurveList.Add(myCurve);
-            }
+                // This is to update the max and min value
+                if (isFirstFrame_)
+                {
+                    graphPane.XAxis.Scale.Min = data_pt.MostRecentTime;
+                    graphPane.XAxis.Scale.Max = graphPane.XAxis.Scale.Min + graphXRange_;
+                    isFirstFrame_ = false;
+                }
 
-            for (int i = 0; i < measurements.Length; i++)
-            {
-                graphPane.CurveList[i].Points = dataBuffer_.data[i];
-            }
+                if (data_pt.MostRecentTime >= graphPane.XAxis.Scale.Max)
+                {
+                    graphPane.XAxis.Scale.Max = data_pt.MostRecentTime;
+                    graphPane.XAxis.Scale.Min = graphPane.XAxis.Scale.Max - graphXRange_;
+                }
 
-            // This is to update the max and min value
-            if (isFirstFrame_)
-            {
-                graphPane.XAxis.Scale.Min = dataBuffer_.MostRecentTime;
-                graphPane.XAxis.Scale.Max = graphPane.XAxis.Scale.Min + graphXRange_;
-                isFirstFrame_ = false;
-            }
+                //Update green valid region box
+                BoxObj b = (BoxObj)graphPane.GraphObjList[0];
+                b.Location.X = graphPane.XAxis.Scale.Max - graphXRange_;
+                b.Location.Y = Math.Min(graphPane.YAxis.Scale.Max, 512);
+                b.Location.Height = Math.Min(graphPane.YAxis.Scale.Max - graphPane.YAxis.Scale.Min, 512);
 
-            if (dataBuffer_.MostRecentTime >= graphPane.XAxis.Scale.Max)
-            {
-                graphPane.XAxis.Scale.Max = dataBuffer_.MostRecentTime;
-                graphPane.XAxis.Scale.Min = graphPane.XAxis.Scale.Max - graphXRange_;
-            }
-
-            //Update green valid region box
-            BoxObj b = (BoxObj)graphPane.GraphObjList[0];
-            b.Location.X = graphPane.XAxis.Scale.Max - graphXRange_;
-            b.Location.Y = Math.Min(graphPane.YAxis.Scale.Max, 512);
-            b.Location.Height = Math.Min(graphPane.YAxis.Scale.Max - graphPane.YAxis.Scale.Min, 512);
-
-            graph_.Refresh();
-            graph_.AxisChange();
+                graph_.Refresh();
+                graph_.AxisChange();
         }
 
         /// <summary>
@@ -283,9 +311,9 @@ namespace SingleTact_Demo
                 dataWriter.WriteLine("Time (s)" + separator + "Value (0 = 0 PSI  511 = Full Scale Range)");
 
                 //Just export first trace (we only support 1 sensor)
-                for (int i = 0; i < dataBuffer_.data[0].Count; i++)
+                for (int i = 0; i < dataBuffer_[0].data[0].Count; i++)
                 {
-                    dataWriter.WriteLine(dataBuffer_.data[0][i].X + separator + dataBuffer_.data[0][i].Y);
+                    dataWriter.WriteLine(dataBuffer_[0].data[0][i].X + separator + dataBuffer_[0].data[0][i].Y);
                 }
 
                 dataWriter.Close();
@@ -359,16 +387,19 @@ namespace SingleTact_Demo
             {
                 lock (workThreadLock)
                 {
-                    SingleTactFrame localCopy = null;
-
-                    while (newFrames_.Count != 0)
+                    foreach (SingleTactData data in dataBuffer_)
                     {
-                        localCopy = newFrames_[0];
-                        newFrames_.RemoveAt(0);
-                        newFrames_.TrimExcess();
+                        SingleTactFrame localCopy = null;
 
-                        if (localCopy != null)
-                        AddData(localCopy.TimeStamp, localCopy.SensorData); //Add to stripchart
+                        while (newFrames_.Count != 0)
+                        {
+                            localCopy = newFrames_[0];
+                            newFrames_.RemoveAt(0);
+                            newFrames_.TrimExcess();
+
+                            if (localCopy != null)
+                                AddData(data, localCopy.TimeStamp, localCopy.SensorData); //Add to stripchart
+                        }
                     }
                 }
             }
@@ -576,6 +607,16 @@ namespace SingleTact_Demo
 
             if (backgroundWasRunning)
             StartAcquisitionThread();
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            singleTact_ = (SingleTact)singleTacts.Components[ActiveSensor.SelectedIndex];
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

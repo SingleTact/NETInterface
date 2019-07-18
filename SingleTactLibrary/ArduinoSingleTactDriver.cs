@@ -86,6 +86,11 @@ namespace SingleTactLibrary
             MessageBox.Show("Serial General Error", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
+        public void Initialise(object portName)
+        {
+            throw new NotImplementedException();
+        }
+
         private void ReadSerialBuffer()
         {
             while (serialPort_.BytesToRead > 0)

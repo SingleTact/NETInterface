@@ -16,21 +16,35 @@ namespace SingleTact_Demo
          InitializeComponent();
 
          foreach (string port in serialPorts)
-            SerialPortComboBox.Items.Add(port);
+            SerialPortCheckBoxes.Items.Add(port);
 
-         SerialPortComboBox.SelectedIndex = 0;
+         SerialPortCheckBoxes.SelectedIndex = 0;
       }
 
       private void OkButton_Click(object sender, EventArgs e)
       {
-         selectedPort_ = (String) SerialPortComboBox.SelectedItem;
-         this.Close();
+            foreach (object itemChecked in SerialPortCheckBoxes.CheckedItems)
+            {
+                selectedPorts_.Add(itemChecked.ToString());
+            }
+            this.Close();
       }
 
-      private string selectedPort_ = "COM1";
-      public string SelectedPort
+      private List<string> selectedPorts_ = new List<string>();
+      public List<string> SelectedPorts
       {
-         get{ return selectedPort_;}
+         get{ return selectedPorts_;}
       }
-   }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void SerialPortSelector_Load(object sender, EventArgs e)
+        {
+
+        }
+
+    }
 }
