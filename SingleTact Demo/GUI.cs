@@ -67,7 +67,7 @@ namespace SingleTact_Demo
                         serialPortNames = selector.SelectedPorts;
                         foreach (string portName in serialPortNames)
                         {
-                            arduinoSingleTactDriver = new ArduinoSingleTactDriver(drivers);
+                            arduinoSingleTactDriver = new ArduinoSingleTactDriver(drivers); // Add new driver to collection
                             arduinoSingleTactDriver.Initialise(portName); //Start Arduino driver
                         }
                     }
@@ -76,21 +76,17 @@ namespace SingleTact_Demo
                         arduinoSingleTactDriver = new ArduinoSingleTactDriver(drivers);
                         arduinoSingleTactDriver.Initialise(serialPortName); //Start Arduino driver
                     }
-
+                    // Set up SingleTact object for each serial port selected
                     foreach (ArduinoSingleTactDriver driver in drivers.Components)
                     {
-                        SingleTact singleTact = new SingleTact(singleTacts);
-                        sensorStarted = singleTact.Initialise(arduinoSingleTactDriver);
+                        SingleTact singleTact = new SingleTact(singleTacts); // Add to collection of all SingleTacts
+                        sensorStarted = singleTact.Initialise(driver);
                         singleTact.I2cAddressForCommunications = ((byte)(4));
                         SingleTactData data_pt = new SingleTactData();
                         List<SingleTactFrame> newFrames_ = new List<SingleTactFrame>();
                         frameList_.Add(newFrames_);
                         dataBuffer_.Add(data_pt);
                     }
-                    singleTact_ = (SingleTact) singleTacts.Components[0];
-
-
-
                 }
                 catch (Exception ex)
                 {
@@ -103,9 +99,12 @@ namespace SingleTact_Demo
 
             if (sensorStarted)
             {
-                RefreshFlashSettings_Click(this, null); //Get the settings from flash
+                foreach (SingleTact singletact in singleTacts.Components)
+                {
+                    singleTact_ = singletact;
+                    RefreshFlashSettings_Click(this, null); //Get the settings from flash
+                }
                 CreateStripChart();
-
                 AcquisitionWorker.RunWorkerAsync(); //Start the acquisition thread
 
                 guiTimer_.Start();
@@ -232,7 +231,7 @@ namespace SingleTact_Demo
                 data_pt.AddData(measurements, time);
                 GraphPane graphPane = graph_.GraphPane;
                 Color[] colours = {Color.Blue, Color.Orange};
-                while (graphPane.CurveList.Count < dataBuffer_.Count)
+                while (graphPane.CurveList.Count <= index)
                 {
                     string name = "Sensor " + (graphPane.CurveList.Count + 1).ToString();
                     LineItem myCurve = new LineItem(
@@ -307,14 +306,37 @@ namespace SingleTact_Demo
                 string separator = safeSeparator();
                 string saveFileName = saveDataDialog.FileName;
                 StreamWriter dataWriter = new StreamWriter(saveFileName, false, Encoding.Default);
-
-                //Write a header
-                dataWriter.WriteLine("Time (s)" + separator + "Value (0 = 0 PSI  511 = Full Scale Range)");
-
-                //Just export first trace (we only support 1 sensor)
-                for (int i = 0; i < dataBuffer_[0].data[0].Count; i++)
+                //+ "Value (0 = 0 PSI  511 = Full Scale Range)"
+                string columnNames = "Time(s)" + separator;
+                // populate columns with serial port names
+                foreach(string portName in serialPortNames)
                 {
-                    dataWriter.WriteLine(dataBuffer_[0].data[0][i].X + separator + dataBuffer_[0].data[0][i].Y);
+                    columnNames += portName + " (PSI)" + separator;
+                }
+                columnNames += "NB (0 = 0 PSI;  511 = Full Scale Range)";
+                dataWriter.WriteLine(columnNames);
+                string row = "";
+                int data_length = dataBuffer_[0].data[0].Count;
+                for (int i = 0; i < data_length; i++)
+                {
+                    bool first = true;
+                    foreach (SingleTactData data in dataBuffer_)
+                    {
+                        PointPair dataPoint = data.data[0][i];
+                        if (first) // only save the time the first sensor's reading was taken
+                        {
+                            // round the time value to mitigate any uncertainty around sampling time
+                            row += Math.Round(dataPoint.X, 3) + separator + dataPoint.Y + separator;
+                        }
+                        else
+                        {
+                            row += dataPoint.Y + separator;
+                        }
+                        first = false;
+                    }
+                dataWriter.WriteLine(row);
+                row = "";
+
                 }
 
                 dataWriter.Close();
@@ -362,7 +384,7 @@ namespace SingleTact_Demo
                 foreach (List<SingleTactFrame> frames in frameList_)
                 {
                     int index = frameList_.IndexOf(frames);
-                    SingleTact singleTact = (SingleTact)singleTacts.Components[index];
+                    SingleTact singleTact = (SingleTact) singleTacts.Components[index];
                     SingleTactFrame newFrame = singleTact.ReadSensorData(); //Get sensor data
 
                     if (null != newFrame) //If we have data
