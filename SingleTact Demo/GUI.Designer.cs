@@ -209,7 +209,7 @@
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(54, 80);
+            this.label5.Location = new System.Drawing.Point(53, 147);
             this.label5.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(218, 38);
@@ -248,7 +248,7 @@
             // i2cAddressInputComboBox_
             // 
             this.i2cAddressInputComboBox_.FormattingEnabled = true;
-            this.i2cAddressInputComboBox_.Location = new System.Drawing.Point(367, 71);
+            this.i2cAddressInputComboBox_.Location = new System.Drawing.Point(361, 146);
             this.i2cAddressInputComboBox_.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
             this.i2cAddressInputComboBox_.Name = "i2cAddressInputComboBox_";
             this.i2cAddressInputComboBox_.Size = new System.Drawing.Size(314, 45);
@@ -279,6 +279,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.ActiveSensor);
+            this.groupBox1.Controls.Add(this.ActiveSensorLabel);
             this.groupBox1.Controls.Add(this.label5);
             this.groupBox1.Controls.Add(this.ScaleInputValueLabel);
             this.groupBox1.Controls.Add(this.SetBaselineButton);
@@ -368,17 +370,17 @@
             // ActiveSensor
             // 
             this.ActiveSensor.FormattingEnabled = true;
-            this.ActiveSensor.Location = new System.Drawing.Point(398, 238);
+            this.ActiveSensor.Location = new System.Drawing.Point(361, 71);
             this.ActiveSensor.Name = "ActiveSensor";
-            this.ActiveSensor.Size = new System.Drawing.Size(321, 45);
+            this.ActiveSensor.Size = new System.Drawing.Size(314, 45);
             this.ActiveSensor.TabIndex = 56;
             this.ActiveSensor.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
-            // label2
+            // ActiveSensorLabel
             // 
             this.ActiveSensorLabel.AutoSize = true;
-            this.ActiveSensorLabel.Location = new System.Drawing.Point(79, 241);
-            this.ActiveSensorLabel.Name = "label2";
+            this.ActiveSensorLabel.Location = new System.Drawing.Point(58, 79);
+            this.ActiveSensorLabel.Name = "ActiveSensorLabel";
             this.ActiveSensorLabel.Size = new System.Drawing.Size(213, 37);
             this.ActiveSensorLabel.TabIndex = 57;
             this.ActiveSensorLabel.Text = "Active Sensor";
@@ -389,8 +391,6 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(19F, 37F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(2641, 1600);
-            this.Controls.Add(this.ActiveSensorLabel);
-            this.Controls.Add(this.ActiveSensor);
             this.Controls.Add(this.LockButton);
             this.Controls.Add(this.ResetSensorButton);
             this.Controls.Add(this.sensorTypeSelector);
@@ -412,7 +412,6 @@
             this.groupBox2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPpsLogo)).EndInit();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 

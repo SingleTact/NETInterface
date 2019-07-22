@@ -152,8 +152,6 @@ namespace SingleTact_Demo
             foreach (string port in serialPortNames)
                 ActiveSensor.Items.Add(port);
 
-            ActiveSensor.SelectedIndex = 0;
-
             // Populate i2c addresses
             i2cAddressInputComboBox_.Items.Clear();
 
@@ -200,7 +198,7 @@ namespace SingleTact_Demo
             myPane.XAxis.Title.Text = "Time (s)";
             myPane.YAxis.Title.Text = "Output (511 = Full Scale Range)";
             myPane.Title.IsVisible = false;
-            myPane.Legend.IsVisible = false;
+            myPane.Legend.IsVisible = true;
 
             //Set scale
             myPane.XAxis.Scale.Max = 20; //Show 30s of data
@@ -233,7 +231,7 @@ namespace SingleTact_Demo
                 Color[] colours = {Color.Blue, Color.Orange};
                 while (graphPane.CurveList.Count <= index)
                 {
-                    string name = "Sensor " + (graphPane.CurveList.Count + 1).ToString();
+                    string name = "Sensor " + (graphPane.CurveList.Count + 1).ToString() + " - " + serialPortNames[index].ToString();
                     LineItem myCurve = new LineItem(
                         name,
                         data_pt.data[0],
@@ -396,7 +394,7 @@ namespace SingleTact_Demo
 
                         //Calculate rate
                         double delta = newFrame.TimeStamp - lastTimestamp_;
-                        if (delta != 0)
+                        if (delta > 0)
                             measuredFrequency_ = measuredFrequency_ * 0.95 + 0.05 * (1.0 / (delta));  //Averaging
                         lastTimestamp_ = newFrame.TimeStamp;
                     }
@@ -642,6 +640,7 @@ namespace SingleTact_Demo
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             singleTact_ = (SingleTact)singleTacts.Components[ActiveSensor.SelectedIndex];
+            RefreshFlashSettings_Click(this, null); //Update display
         }
 
         private void label2_Click(object sender, EventArgs e)

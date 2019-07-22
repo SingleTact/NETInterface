@@ -17,8 +17,6 @@ namespace SingleTact_Demo
 
          foreach (string port in serialPorts)
             SerialPortCheckBoxes.Items.Add(port);
-
-         SerialPortCheckBoxes.SelectedIndex = 0;
          // Changes the selection mode from double-click to single click.
          SerialPortCheckBoxes.CheckOnClick = true;
 
