@@ -228,7 +228,7 @@ namespace SingleTact_Demo
                 int index = dataBuffer_.IndexOf(data_pt);
                 data_pt.AddData(measurements, time);
                 GraphPane graphPane = graph_.GraphPane;
-                Color[] colours = {Color.Blue, Color.Orange};
+                Color[] colours = {Color.Blue, Color.Orange, Color.DeepPink, Color.Olive, Color.ForestGreen};
                 while (graphPane.CurveList.Count <= index)
                 {
                     string name = "Sensor " + (graphPane.CurveList.Count + 1).ToString() + " - " + serialPortNames[index].ToString();
