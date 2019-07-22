@@ -167,7 +167,7 @@ namespace SingleTactLibrary
                 if (itr_ != itr)
                 {
                     itr_ = itr;
-
+                    
                     UInt32 timeStampRaw = (UInt32)((newByteData[0] << 24) + (newByteData[1] << 16) + (newByteData[2] << 8) + newByteData[3]);
                     if (isFirst == true)
                     {

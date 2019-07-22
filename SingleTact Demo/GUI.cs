@@ -29,7 +29,7 @@ namespace SingleTact_Demo
         private List<SingleTactData> dataBuffer_ = new List<SingleTactData>();  // Stripchart data
         private bool backgroundIsFinished_ = false;  // Flag to check background thread is finished
         private double measuredFrequency_ = 50;  // Sensor update rate
-        private double lastTimestamp_ = 0; // Used to calculate update rate
+        private List<double> lastTimestamps_ = new List<double>(); // Used to calculate update rate
         private int timerItr_ = 0;  // Some things are slower that the timer frequency
         private bool isFirstFrame_ = true; // Is first frame after boot
         private const int graphXRange_ = 30; // 30 seconds
@@ -86,6 +86,7 @@ namespace SingleTact_Demo
                         List<SingleTactFrame> newFrames_ = new List<SingleTactFrame>();
                         frameList_.Add(newFrames_);
                         dataBuffer_.Add(data_pt);
+                        lastTimestamps_.Add(0.0);
                     }
                 }
                 catch (Exception ex)
@@ -393,10 +394,10 @@ namespace SingleTact_Demo
                         }
 
                         //Calculate rate
-                        double delta = newFrame.TimeStamp - lastTimestamp_;
+                        double delta = newFrame.TimeStamp - lastTimestamps_[index]; // calculate delta relative to previous timestamp from this sensor
                         if (delta > 0)
                             measuredFrequency_ = measuredFrequency_ * 0.95 + 0.05 * (1.0 / (delta));  //Averaging
-                        lastTimestamp_ = newFrame.TimeStamp;
+                        lastTimestamps_[index] = newFrame.TimeStamp;
                     }
                 }
             }
@@ -426,7 +427,8 @@ namespace SingleTact_Demo
                             newFrames_.TrimExcess();
 
                             if (localCopy != null)
-                                AddData(data, localCopy.TimeStamp, localCopy.SensorData); //Add to stripchart
+                                // use first timestamp only to quantise readings and match csv output
+                                AddData(data, lastTimestamps_[0], localCopy.SensorData); //Add to stripchart
                         }
                     }
                 }
