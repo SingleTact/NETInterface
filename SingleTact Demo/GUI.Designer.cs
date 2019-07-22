@@ -5,7 +5,9 @@
 //  distributed except according to those terms.
 //-----------------------------------------------------------------------------
 
-﻿namespace SingleTact_Demo
+using System;
+
+namespace SingleTact_Demo
 {
     partial class GUI
     {
@@ -57,6 +59,8 @@
             this.scaleInputTrackBar_ = new System.Windows.Forms.TrackBar();
             this.ScaleInputValueLabel = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.ActiveSensor = new System.Windows.Forms.ComboBox();
+            this.ActiveSensorLabel = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.sensorTypeSelector = new System.Windows.Forms.ComboBox();
             this.ResetSensorButton = new System.Windows.Forms.Button();
@@ -64,8 +68,7 @@
             this.LockButton = new System.Windows.Forms.Button();
             this.arduinoSingleTactDriver = new SingleTactLibrary.ArduinoSingleTactDriver(this.components);
             this.picPpsLogo = new System.Windows.Forms.PictureBox();
-            this.ActiveSensor = new System.Windows.Forms.ComboBox();
-            this.ActiveSensorLabel = new System.Windows.Forms.Label();
+            this.tareAll = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.scaleInputTrackBar_)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -121,7 +124,7 @@
             this.SetBaselineButton.Name = "SetBaselineButton";
             this.SetBaselineButton.Size = new System.Drawing.Size(323, 65);
             this.SetBaselineButton.TabIndex = 8;
-            this.SetBaselineButton.Text = "Update Baseline";
+            this.SetBaselineButton.Text = "Tare Active Sensor";
             this.SetBaselineButton.UseVisualStyleBackColor = true;
             this.SetBaselineButton.Click += new System.EventHandler(this.SetBaselineButton_Click);
             // 
@@ -279,6 +282,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.tareAll);
             this.groupBox1.Controls.Add(this.ActiveSensor);
             this.groupBox1.Controls.Add(this.ActiveSensorLabel);
             this.groupBox1.Controls.Add(this.label5);
@@ -288,14 +292,33 @@
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.i2cAddressInputComboBox_);
             this.groupBox1.Controls.Add(this.SetSettingsButton);
-            this.groupBox1.Location = new System.Drawing.Point(44, 817);
+            this.groupBox1.Location = new System.Drawing.Point(25, 728);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(10, 9, 10, 9);
-            this.groupBox1.Size = new System.Drawing.Size(725, 495);
+            this.groupBox1.Size = new System.Drawing.Size(725, 583);
             this.groupBox1.TabIndex = 51;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Update Flash";
+            // 
+            // ActiveSensor
+            // 
+            this.ActiveSensor.FormattingEnabled = true;
+            this.ActiveSensor.Location = new System.Drawing.Point(361, 71);
+            this.ActiveSensor.Name = "ActiveSensor";
+            this.ActiveSensor.Size = new System.Drawing.Size(314, 45);
+            this.ActiveSensor.TabIndex = 56;
+            this.ActiveSensor.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            // 
+            // ActiveSensorLabel
+            // 
+            this.ActiveSensorLabel.AutoSize = true;
+            this.ActiveSensorLabel.Location = new System.Drawing.Point(58, 79);
+            this.ActiveSensorLabel.Name = "ActiveSensorLabel";
+            this.ActiveSensorLabel.Size = new System.Drawing.Size(213, 37);
+            this.ActiveSensorLabel.TabIndex = 57;
+            this.ActiveSensorLabel.Text = "Active Sensor";
+            this.ActiveSensorLabel.Click += new System.EventHandler(this.label2_Click);
             // 
             // groupBox2
             // 
@@ -308,7 +331,7 @@
             this.groupBox2.Controls.Add(this.textScale);
             this.groupBox2.Controls.Add(this.label8);
             this.groupBox2.Controls.Add(this.label7);
-            this.groupBox2.Location = new System.Drawing.Point(38, 282);
+            this.groupBox2.Location = new System.Drawing.Point(25, 235);
             this.groupBox2.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(10, 9, 10, 9);
@@ -367,24 +390,17 @@
             this.picPpsLogo.TabIndex = 46;
             this.picPpsLogo.TabStop = false;
             // 
-            // ActiveSensor
+            // tareAll
             // 
-            this.ActiveSensor.FormattingEnabled = true;
-            this.ActiveSensor.Location = new System.Drawing.Point(361, 71);
-            this.ActiveSensor.Name = "ActiveSensor";
-            this.ActiveSensor.Size = new System.Drawing.Size(314, 45);
-            this.ActiveSensor.TabIndex = 56;
-            this.ActiveSensor.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
-            // 
-            // ActiveSensorLabel
-            // 
-            this.ActiveSensorLabel.AutoSize = true;
-            this.ActiveSensorLabel.Location = new System.Drawing.Point(58, 79);
-            this.ActiveSensorLabel.Name = "ActiveSensorLabel";
-            this.ActiveSensorLabel.Size = new System.Drawing.Size(213, 37);
-            this.ActiveSensorLabel.TabIndex = 57;
-            this.ActiveSensorLabel.Text = "Active Sensor";
-            this.ActiveSensorLabel.Click += new System.EventHandler(this.label2_Click);
+            this.tareAll.Location = new System.Drawing.Point(29, 471);
+            this.tareAll.Name = "tareAll";
+            this.tareAll.Size = new System.Drawing.Size(652, 65);
+            this.tareAll.TabIndex = 58;
+            this.tareAll.Text = "Tare All Sensors";
+            this.tareAll.UseVisualStyleBackColor = true;
+            this.tareAll.Click += new System.EventHandler(this.tareAllButton_Click);
+
+
             // 
             // GUI
             // 
@@ -414,6 +430,7 @@
             this.ResumeLayout(false);
 
         }
+
 
         #endregion
 
@@ -446,5 +463,6 @@
         private System.Windows.Forms.PictureBox picPpsLogo;
         private System.Windows.Forms.ComboBox ActiveSensor;
         private System.Windows.Forms.Label ActiveSensorLabel;
+        private System.Windows.Forms.Button tareAll;
     }
 }

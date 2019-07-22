@@ -347,6 +347,19 @@ namespace SingleTact_Demo
             }
         }
 
+        private void tareAllButton_Click(object sender, EventArgs e)
+        {
+            StopAcquisitionThread();
+            foreach (SingleTact singletact in singleTacts.Components)
+            {
+                if (singletact.Tare())
+                {
+                    RefreshFlashSettings_Click(null, null);
+                }
+            }
+            StartAcquisitionThread();
+        }
+
         /// <summary>
         /// Stop acquisition thread
         /// </summary>
