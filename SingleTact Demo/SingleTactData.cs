@@ -54,5 +54,14 @@ namespace SingleTact_Demo
 
             mostRecentTime_ = time;
         }
+
+        public SingleTactData Clone()
+        {
+            SingleTactData clone = new SingleTactData();
+            clone.mostRecentTime_ = this.mostRecentTime_;
+            clone.data = this.data;
+
+            return clone;
+        }
     }
 }

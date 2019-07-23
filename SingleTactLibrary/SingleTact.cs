@@ -22,6 +22,10 @@ namespace SingleTactLibrary
         private SingleTactFrame lastFrame_;
         private bool isFirst = true;
         private UInt32 startTime = 0;
+        private byte i2cAddress_ = 0x04;
+        private int itr_ = 0;
+        public bool isConnected;
+        public bool isCalibrated;
 
         public SingleTact()
         {
@@ -246,12 +250,7 @@ namespace SingleTactLibrary
                 i2cAddress_ = value;
             }
         }
-        private byte i2cAddress_ = 0x04;
 
-        private int itr_ = 0;
-
-        public bool isConnected;
-        public bool isCalibrated;
 
         /// <summary>
         /// Sensors settings
@@ -262,5 +261,23 @@ namespace SingleTactLibrary
         /// Sensor parameters
         /// </summary>
         public SingleTactParameters Parameters = new SingleTactParameters();
+
+
+        /// <summary>
+        /// Returns copy of SingleTact object
+        /// </summary>
+        public SingleTact Clone()
+        {
+            SingleTact clone = new SingleTact();
+            clone.arduino_ = this.arduino_;
+            clone.lastFrame_ = this.lastFrame_;
+            clone.isFirst = this.isFirst;
+            clone.startTime = this.startTime;
+            clone.i2cAddress_ = this.i2cAddress_;
+            clone.itr_ = this.itr_;
+            clone.isConnected = this.isConnected;
+            clone.isCalibrated = this.isCalibrated;
+            return clone;
+        }
     }
 }

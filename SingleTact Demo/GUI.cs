@@ -26,20 +26,17 @@ namespace SingleTact_Demo
 {
     public partial class GUI : Form
     {
-        private List<SingleTactData> dataBuffer_ = new List<SingleTactData>();  // Stripchart data
         private bool backgroundIsFinished_ = false;  // Flag to check background thread is finished
         private double measuredFrequency_ = 50;  // Sensor update rate
-        private List<double> lastTimestamps_ = new List<double>(); // Used to calculate update rate
         private int timerItr_ = 0;  // Some things are slower that the timer frequency
         private bool isFirstFrame_ = true; // Is first frame after boot
         private const int graphXRange_ = 30; // 30 seconds
         private const int reservedAddresses = 4; // Don't use I2C addresses 0 to 3
         private Object workThreadLock = new Object(); //Thread synchronization
-        private List<List<SingleTactFrame>> frameList_ = new List<List<SingleTactFrame>>();
         List<string> serialPortNames = new List<string>();
-        private Container drivers = new Container();
-        private Container singleTacts = new Container();
-        SingleTact singleTact_;
+        private List<USBdevice> USBdevices = new List<USBdevice>();
+        private SingleTact activeSingleTact;
+        private double lastReadingTime = 0.0;
         private delegate void CloseMainFormDelegate(); //Used to close the program if hardware is not connected
 
         public GUI()
@@ -58,36 +55,29 @@ namespace SingleTact_Demo
                 serialPortName = ports[0];
                 try
                 {
+                    // if there's more than one device connected
                     if (ports.Length > 1)
                     {
                         // Ask user to select from multiple serial ports.
                         SerialPortSelector selector = new SerialPortSelector(ports);
                         selector.ShowDialog();
-
                         serialPortNames = selector.SelectedPorts;
+
                         foreach (string portName in serialPortNames)
                         {
-                            arduinoSingleTactDriver = new ArduinoSingleTactDriver(drivers); // Add new driver to collection
-                            arduinoSingleTactDriver.Initialise(portName); //Start Arduino driver
+                            USBdevice USB = new USBdevice();
+                            USB.Initialise(portName);
+                            USBdevices.Add(USB);
                         }
                     }
-                    else
+                    else  // there is only one device connected
                     {
-                        arduinoSingleTactDriver = new ArduinoSingleTactDriver(drivers);
-                        arduinoSingleTactDriver.Initialise(serialPortName); //Start Arduino driver
+                        serialPortNames.Add(serialPortName);
+                        USBdevice USB = new USBdevice();
+                        USB.Initialise(serialPortName);
+                        USBdevices.Add(USB);
                     }
-                    // Set up SingleTact object for each serial port selected
-                    foreach (ArduinoSingleTactDriver driver in drivers.Components)
-                    {
-                        SingleTact singleTact = new SingleTact(singleTacts); // Add to collection of all SingleTacts
-                        sensorStarted = singleTact.Initialise(driver);
-                        singleTact.I2cAddressForCommunications = ((byte)(4));
-                        SingleTactData data_pt = new SingleTactData();
-                        List<SingleTactFrame> newFrames_ = new List<SingleTactFrame>();
-                        frameList_.Add(newFrames_);
-                        dataBuffer_.Add(data_pt);
-                        lastTimestamps_.Add(0.0);
-                    }
+
                 }
                 catch (Exception ex)
                 {
@@ -98,11 +88,11 @@ namespace SingleTact_Demo
 
             }
 
-            if (sensorStarted)
+            try
             {
-                foreach (SingleTact singletact in singleTacts.Components)
+                foreach (USBdevice USB in USBdevices)
                 {
-                    singleTact_ = singletact;
+                    activeSingleTact = USB.singleTact;
                     RefreshFlashSettings_Click(this, null); //Get the settings from flash
                 }
                 CreateStripChart();
@@ -110,7 +100,7 @@ namespace SingleTact_Demo
 
                 guiTimer_.Start();
             }
-            else
+            catch
             {
                 string summary = "Failed to start sensor";
 
@@ -224,46 +214,53 @@ namespace SingleTact_Demo
         /// </summary>
         /// <param name="time"></param>
         /// <param name="measurements"></param>
-        public void AddData(SingleTactData data_pt, double time, double[] measurements)
+        private void AddData(double time, double[] measurements, USBdevice USB)
         {
-                int index = dataBuffer_.IndexOf(data_pt);
-                data_pt.AddData(measurements, time);
-                GraphPane graphPane = graph_.GraphPane;
-                Color[] colours = {Color.Blue, Color.Orange, Color.DeepPink, Color.Olive, Color.ForestGreen};
-                while (graphPane.CurveList.Count <= index)
-                {
-                    string name = "Sensor " + (graphPane.CurveList.Count + 1).ToString() + " - " + serialPortNames[index].ToString();
-                    LineItem myCurve = new LineItem(
-                        name,
-                        data_pt.data[0],
-                        colours[index],
-                        SymbolType.None,
-                        3.0f);
-                    graphPane.CurveList.Add(myCurve);
-                }
+            USB.dataBuffer.AddData(measurements, time);  // update data
+        }
 
-                // This is to update the max and min value
-                if (isFirstFrame_)
-                {
-                    graphPane.XAxis.Scale.Min = data_pt.MostRecentTime;
-                    graphPane.XAxis.Scale.Max = graphPane.XAxis.Scale.Min + graphXRange_;
-                    isFirstFrame_ = false;
-                }
+        private void updateGraph(USBdevice USB)
+        {
+            int index = USBdevices.IndexOf(USB); // get current sensor number
+            SingleTactData data_pt = USB.dataBuffer;
 
-                if (data_pt.MostRecentTime >= graphPane.XAxis.Scale.Max)
-                {
-                    graphPane.XAxis.Scale.Max = data_pt.MostRecentTime;
-                    graphPane.XAxis.Scale.Min = graphPane.XAxis.Scale.Max - graphXRange_;
-                }
+            // start graphing
+            GraphPane graphPane = graph_.GraphPane;
+            Color[] colours = { Color.Blue, Color.Orange, Color.DeepPink, Color.Olive, Color.ForestGreen };
+            while (graphPane.CurveList.Count <= index)
+            {
+                string name = "Sensor " + (graphPane.CurveList.Count + 1).ToString() + " - " + serialPortNames[index].ToString();
+                LineItem myCurve = new LineItem(
+                    name,
+                    data_pt.data[0],
+                    colours[index],
+                    SymbolType.None,
+                    3.0f);
+                graphPane.CurveList.Add(myCurve);
+            }
 
-                //Update green valid region box
-                BoxObj b = (BoxObj)graphPane.GraphObjList[0];
-                b.Location.X = graphPane.XAxis.Scale.Max - graphXRange_;
-                b.Location.Y = Math.Min(graphPane.YAxis.Scale.Max, 512);
-                b.Location.Height = Math.Min(graphPane.YAxis.Scale.Max - graphPane.YAxis.Scale.Min, 512);
+            // This is to update the max and min value
+            if (isFirstFrame_)
+            {
+                graphPane.XAxis.Scale.Min = data_pt.MostRecentTime;
+                graphPane.XAxis.Scale.Max = graphPane.XAxis.Scale.Min + graphXRange_;
+                isFirstFrame_ = false;
+            }
 
-                graph_.Refresh();
-                graph_.AxisChange();
+            if (data_pt.MostRecentTime >= graphPane.XAxis.Scale.Max)
+            {
+                graphPane.XAxis.Scale.Max = data_pt.MostRecentTime;
+                graphPane.XAxis.Scale.Min = graphPane.XAxis.Scale.Max - graphXRange_;
+            }
+
+            //Update green valid region box
+            BoxObj b = (BoxObj)graphPane.GraphObjList[0];
+            b.Location.X = graphPane.XAxis.Scale.Max - graphXRange_;
+            b.Location.Y = Math.Min(graphPane.YAxis.Scale.Max, 512);
+            b.Location.Height = Math.Min(graphPane.YAxis.Scale.Max - graphPane.YAxis.Scale.Min, 512);
+
+            graph_.Refresh();
+            graph_.AxisChange();
         }
 
         /// <summary>
@@ -305,7 +302,8 @@ namespace SingleTact_Demo
                 string separator = safeSeparator();
                 string saveFileName = saveDataDialog.FileName;
                 StreamWriter dataWriter = new StreamWriter(saveFileName, false, Encoding.Default);
-                //+ "Value (0 = 0 PSI  511 = Full Scale Range)"
+
+                // write column headers
                 string columnNames = "Time(s)" + separator;
                 // populate columns with serial port names
                 foreach(string portName in serialPortNames)
@@ -314,28 +312,37 @@ namespace SingleTact_Demo
                 }
                 columnNames += "NB (0 = 0 PSI;  511 = Full Scale Range)";
                 dataWriter.WriteLine(columnNames);
+
+                // write data
                 string row = "";
-                int data_length = dataBuffer_[0].data[0].Count;
-                for (int i = 0; i < data_length; i++)
+                int data_length = USBdevices[0].dataBuffer.data[0].Count;
+                for (int i = 0; i < data_length; i++)  // for each sensor reading
                 {
                     bool first = true;
-                    foreach (SingleTactData data in dataBuffer_)
+                    foreach (USBdevice USB in USBdevices)
                     {
-                        PointPair dataPoint = data.data[0][i];
-                        if (first) // only save the time the first sensor's reading was taken
+                        try
                         {
-                            // round the time value to mitigate any uncertainty around sampling time
-                            row += Math.Round(dataPoint.X, 3) + separator + dataPoint.Y + separator;
+                            SingleTactData data = USB.dataBuffer;
+                            PointPair dataPoint = data.data[0][i];
+                            if (first) // only save the time the first sensor's reading was taken
+                            {
+                                // round the time value to mitigate any uncertainty around sampling time
+                                row += Math.Round(dataPoint.X, 3) + separator + dataPoint.Y + separator;
+                                first = false;
+                            }
+                            else
+                            {
+                                row += dataPoint.Y + separator;
+                            }
                         }
-                        else
+                        catch  // index out of range, unequal number of sensor readings
                         {
-                            row += dataPoint.Y + separator;
+                            row += "null" + separator;
                         }
-                        first = false;
                     }
-                dataWriter.WriteLine(row);
-                row = "";
-
+                    dataWriter.WriteLine(row);
+                    row = "";
                 }
 
                 dataWriter.Close();
@@ -350,8 +357,9 @@ namespace SingleTact_Demo
         private void tareAllButton_Click(object sender, EventArgs e)
         {
             StopAcquisitionThread();
-            foreach (SingleTact singletact in singleTacts.Components)
+            foreach (USBdevice USB in USBdevices)
             {
+                SingleTact singletact = USB.singleTact;
                 if (singletact.Tare())
                 {
                     RefreshFlashSettings_Click(null, null);
@@ -393,24 +401,24 @@ namespace SingleTact_Demo
 
             while (!worker.CancellationPending) //Do the work
             {
-                foreach (List<SingleTactFrame> frames in frameList_)
+                foreach (USBdevice USB in USBdevices)
                 {
-                    int index = frameList_.IndexOf(frames);
-                    SingleTact singleTact = (SingleTact) singleTacts.Components[index];
+                    SingleTact singleTact = USB.singleTact;
                     SingleTactFrame newFrame = singleTact.ReadSensorData(); //Get sensor data
 
                     if (null != newFrame) //If we have data
                     {
                         lock (workThreadLock)
                         {
-                            frames.Add(newFrame.DeepClone());
+                            USB.addFrame(newFrame.DeepClone());
                         }
 
                         //Calculate rate
-                        double delta = newFrame.TimeStamp - lastTimestamps_[index]; // calculate delta relative to previous timestamp from this sensor
+                        double delta = newFrame.TimeStamp - lastReadingTime; // calculate delta relative to previous sensor's last reading
                         if (delta > 0)
                             measuredFrequency_ = measuredFrequency_ * 0.95 + 0.05 * (1.0 / (delta));  //Averaging
-                        lastTimestamps_[index] = newFrame.TimeStamp;
+                        lastReadingTime = newFrame.TimeStamp;
+                        USB.setTimestamp(newFrame.TimeStamp);
                     }
                 }
             }
@@ -427,22 +435,20 @@ namespace SingleTact_Demo
             {
                 lock (workThreadLock)
                 {
-                    foreach (SingleTactData data in dataBuffer_)
+                    foreach (USBdevice USB in USBdevices)
                     {
-                        int index = dataBuffer_.IndexOf(data);
-                        List<SingleTactFrame> newFrames_ = frameList_[index];
+                        List<SingleTactFrame> newFrames_ = USB.frameList;
                         SingleTactFrame localCopy = null;
 
-                        while (newFrames_.Count != 0)
-                        {
-                            localCopy = newFrames_[0];
-                            newFrames_.RemoveAt(0);
-                            newFrames_.TrimExcess();
+                        localCopy = newFrames_[0];
+                        newFrames_.RemoveAt(0);
+                        newFrames_.TrimExcess();
 
-                            if (localCopy != null)
-                                // use first timestamp only to quantise readings and match csv output
-                                AddData(data, lastTimestamps_[0], localCopy.SensorData); //Add to stripchart
-                        }
+                        if (localCopy != null)
+                            // use first timestamp only to quantise readings and match csv output
+                            AddData(USBdevices[0].lastTimeStamp, localCopy.SensorData, USB); //Add to stripchart
+
+                        updateGraph(USB);
                     }
                 }
             }
@@ -487,7 +493,7 @@ namespace SingleTact_Demo
             if (backgroundWasRunning)
             StopAcquisitionThread();
 
-            if (!singleTact_.PullSettingsFromHardware())
+            if (!activeSingleTact.PullSettingsFromHardware())
             {
                 MessageBox.Show(
                     "Failed to retrieve current settings.",
@@ -499,14 +505,14 @@ namespace SingleTact_Demo
             {
                 try
                 {
-                    textAddress.Text = "0x" + singleTact_.Settings.I2CAddress.ToString("X2");
-                    textGain.Text = singleTact_.Settings.ReferenceGain.ToString("00") + " (" + (singleTact_.Settings.ReferenceGain + 1).ToString("0") + "x)";
-                    textScale.Text = singleTact_.Settings.Scaling.ToString("00") + " (" + ((singleTact_.Settings.Scaling) / 100.0).ToString("#0.00") + ")";
-                    textTare.Text = singleTact_.Settings.Baselines.ElementAt(0).ToString("0000");
+                    textAddress.Text = "0x" + activeSingleTact.Settings.I2CAddress.ToString("X2");
+                    textGain.Text = activeSingleTact.Settings.ReferenceGain.ToString("00") + " (" + (activeSingleTact.Settings.ReferenceGain + 1).ToString("0") + "x)";
+                    textScale.Text = activeSingleTact.Settings.Scaling.ToString("00") + " (" + ((activeSingleTact.Settings.Scaling) / 100.0).ToString("#0.00") + ")";
+                    textTare.Text = activeSingleTact.Settings.Baselines.ElementAt(0).ToString("0000");
 
-                    i2cAddressInputComboBox_.SelectedIndex = singleTact_.Settings.I2CAddress - reservedAddresses;
+                    i2cAddressInputComboBox_.SelectedIndex = activeSingleTact.Settings.I2CAddress - reservedAddresses;
 
-                    scaleInputTrackBar_.Value = singleTact_.Settings.Scaling;
+                    scaleInputTrackBar_.Value = activeSingleTact.Settings.Scaling;
                     ScaleInputValueLabel.Text = (scaleInputTrackBar_.Value / 100.0).ToString("#0.00");
                 }
                 catch (Exception)
@@ -515,10 +521,10 @@ namespace SingleTact_Demo
                 }
             }
 
-            ResetSensorButton.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
-            scaleInputTrackBar_.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
+            ResetSensorButton.Enabled = (activeSingleTact.Settings.Reserved == 0) ? true : false;
+            scaleInputTrackBar_.Enabled = (activeSingleTact.Settings.Reserved == 0) ? true : false;
             
-            LockButton.Text = (singleTact_.Settings.Reserved == 0) ? "Lock" : "Unlock";
+            LockButton.Text = (activeSingleTact.Settings.Reserved == 0) ? "Lock" : "Unlock";
 
             if (backgroundWasRunning)
             {
@@ -542,9 +548,9 @@ namespace SingleTact_Demo
             {
                 // ReferenceGain still has value from PullSettingsFromHardware
                 // which is OK because the firmware fully controls this anyway.
-                singleTact_.Settings.Scaling = (UInt16)(scaleInputTrackBar_.Value);
-                singleTact_.Settings.I2CAddress = (byte)(i2cAddressInputComboBox_.SelectedIndex + reservedAddresses);
-                singleTact_.Settings.Accumulator = 5;
+                activeSingleTact.Settings.Scaling = (UInt16)(scaleInputTrackBar_.Value);
+                activeSingleTact.Settings.I2CAddress = (byte)(i2cAddressInputComboBox_.SelectedIndex + reservedAddresses);
+                activeSingleTact.Settings.Accumulator = 5;
                 //singleTact_.Settings.Baselines =
 
             }
@@ -553,8 +559,8 @@ namespace SingleTact_Demo
                 MessageBox.Show("Invalid settings", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
-            singleTact_.PushSettingsToHardware();
-            if (singleTact_.Tare())
+            activeSingleTact.PushSettingsToHardware();
+            if (activeSingleTact.Tare())
             {
                 RefreshFlashSettings_Click(this, null);
             }
@@ -596,7 +602,7 @@ namespace SingleTact_Demo
         private void SetBaselineButton_Click(object sender, EventArgs e)
         {
             StopAcquisitionThread();
-            if (singleTact_.Tare())
+            if (activeSingleTact.Tare())
             {
                 RefreshFlashSettings_Click(null, null);
             }
@@ -618,20 +624,20 @@ namespace SingleTact_Demo
 
             try
             {
-                singleTact_.Settings.Reserved = (singleTact_.Settings.Reserved == 0) ? (byte)1 : (byte)0;
+                activeSingleTact.Settings.Reserved = (activeSingleTact.Settings.Reserved == 0) ? (byte)1 : (byte)0;
             }
             catch (Exception)
             {
                 MessageBox.Show("Invalid settings", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
-            singleTact_.PushSettingsToHardware();
+            activeSingleTact.PushSettingsToHardware();
             RefreshFlashSettings_Click(this, null);
 
-            ResetSensorButton.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
-            scaleInputTrackBar_.Enabled = (singleTact_.Settings.Reserved == 0) ? true : false;
+            ResetSensorButton.Enabled = (activeSingleTact.Settings.Reserved == 0) ? true : false;
+            scaleInputTrackBar_.Enabled = (activeSingleTact.Settings.Reserved == 0) ? true : false;
 
-            LockButton.Text = (singleTact_.Settings.Reserved == 0) ? "Lock" : "Unlock";
+            LockButton.Text = (activeSingleTact.Settings.Reserved == 0) ? "Lock" : "Unlock";
 
             if (backgroundWasRunning)
             StartAcquisitionThread();
@@ -646,7 +652,7 @@ namespace SingleTact_Demo
             if (backgroundWasRunning)
             StopAcquisitionThread();
 
-            singleTact_.PushCalibrationToHardware(calibrationTable);
+            activeSingleTact.PushCalibrationToHardware(calibrationTable);
 
             if (backgroundWasRunning)
             StartAcquisitionThread();
@@ -654,7 +660,7 @@ namespace SingleTact_Demo
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            singleTact_ = (SingleTact)singleTacts.Components[ActiveSensor.SelectedIndex];
+            activeSingleTact = USBdevices[ActiveSensor.SelectedIndex].singleTact;
             RefreshFlashSettings_Click(this, null); //Update display
         }
 

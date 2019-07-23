@@ -66,7 +66,6 @@ namespace SingleTact_Demo
             this.ResetSensorButton = new System.Windows.Forms.Button();
             this.guiTimer_ = new System.Windows.Forms.Timer(this.components);
             this.LockButton = new System.Windows.Forms.Button();
-            this.arduinoSingleTactDriver = new SingleTactLibrary.ArduinoSingleTactDriver(this.components);
             this.picPpsLogo = new System.Windows.Forms.PictureBox();
             this.tareAll = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.scaleInputTrackBar_)).BeginInit();
@@ -364,7 +363,7 @@ namespace SingleTact_Demo
             // 
             // guiTimer_
             // 
-            this.guiTimer_.Interval = 50;
+            this.guiTimer_.Interval = 1;
             this.guiTimer_.Tick += new System.EventHandler(this.guiTimer__Tick);
             // 
             // LockButton
@@ -450,7 +449,6 @@ namespace SingleTact_Demo
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button buttonSave;
         private System.ComponentModel.BackgroundWorker AcquisitionWorker;
-        private SingleTactLibrary.ArduinoSingleTactDriver arduinoSingleTactDriver;
         private System.Windows.Forms.ComboBox i2cAddressInputComboBox_;
         private System.Windows.Forms.TrackBar scaleInputTrackBar_;
         private System.Windows.Forms.Label ScaleInputValueLabel;
