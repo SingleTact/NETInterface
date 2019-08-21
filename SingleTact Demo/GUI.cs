@@ -408,15 +408,17 @@ namespace SingleTact_Demo
 
                     if (null != newFrame) //If we have data
                     {
+                        var frame_clone = newFrame.DeepClone();
                         lock (workThreadLock)
                         {
-                            USB.addFrame(newFrame.DeepClone());
+                            USB.addFrame(frame_clone);
                         }
 
                         //Calculate rate
                         double delta = newFrame.TimeStamp - lastReadingTime; // calculate delta relative to previous sensor's last reading
                         if (delta > 0)
-                            measuredFrequency_ = measuredFrequency_ * 0.95 + 0.05 * (1.0 / (delta));  //Averaging
+                            //measuredFrequency_ = measuredFrequency_ * 0.95 + 0.05 * (1.0 / (delta));  //Averaging
+                            measuredFrequency_ = 1/delta;
                         lastReadingTime = newFrame.TimeStamp;
                         USB.setTimestamp(newFrame.TimeStamp);
                     }
@@ -433,31 +435,34 @@ namespace SingleTact_Demo
         {
             try
             {
-                lock (workThreadLock)
+
+                foreach (USBdevice USB in USBdevices)
                 {
-                    foreach (USBdevice USB in USBdevices)
+                    List<SingleTactFrame> newFrames_ = USB.frameList;
+
+                    SingleTactFrame localCopy = null;
+
+                    localCopy = newFrames_[0];
+                    newFrames_.RemoveAt(0);
+                    newFrames_.TrimExcess();
+
+                    if (localCopy != null)
                     {
-                        List<SingleTactFrame> newFrames_ = USB.frameList;
-                        SingleTactFrame localCopy = null;
-
-                        localCopy = newFrames_[0];
-                        newFrames_.RemoveAt(0);
-                        newFrames_.TrimExcess();
-
-                        if (localCopy != null)
-                            // use first timestamp only to quantise readings and match csv output
-                            AddData(USBdevices[0].lastTimeStamp, localCopy.SensorData, USB); //Add to stripchart
-
+                        // use first timestamp only to quantise readings and match csv output
+                        AddData(USBdevices[0].lastTimeStamp, localCopy.SensorData, USB); //Add to stripchart
+                    }
+                    lock (workThreadLock)
+                    {
                         updateGraph(USB);
                     }
-                }
+                }                
             }
             catch (Exception) {}
 
             //Update update rate
             timerItr_++;
             if (0 == timerItr_ % 5)
-            this.Text = "PPS SingleTact Demo [ " + measuredFrequency_.ToString("##0") + " Hz ]";
+                this.Text = "PPS SingleTact Demo [ " + measuredFrequency_.ToString("##0") + " Hz ]";
         }
 
         /// <summary>
