@@ -7,9 +7,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -18,9 +16,7 @@ using System.IO.Ports;
 using System.IO;
 using ZedGraph;
 using System.Threading;
-using System.Globalization;
 using SingleTactLibrary;
-using System.Diagnostics;
 
 namespace SingleTact_Demo
 {
@@ -36,7 +32,6 @@ namespace SingleTact_Demo
         List<string> serialPortNames = new List<string>();
         private List<USBdevice> USBdevices = new List<USBdevice>();
         private SingleTact activeSingleTact;
-        private double lastReadingTime = 0.0;
         private delegate void CloseMainFormDelegate(); //Used to close the program if hardware is not connected
 
         public GUI()
@@ -217,10 +212,7 @@ namespace SingleTact_Demo
         private void AddData(double time, double[] measurements, USBdevice USB)
         {
             USB.dataBuffer.AddData(measurements, time);  // update data
-        }
 
-        private void updateGraph(USBdevice USB)
-        {
             int index = USBdevices.IndexOf(USB); // get current sensor number
             SingleTactData data_pt = USB.dataBuffer;
 
@@ -261,6 +253,7 @@ namespace SingleTact_Demo
 
             graph_.Refresh();
             graph_.AxisChange();
+
         }
 
         /// <summary>
@@ -408,18 +401,16 @@ namespace SingleTact_Demo
 
                     if (null != newFrame) //If we have data
                     {
-                        var frame_clone = newFrame.DeepClone();
                         lock (workThreadLock)
                         {
-                            USB.addFrame(frame_clone);
+                            USB.addFrame(newFrame);
                         }
 
                         //Calculate rate
-                        double delta = newFrame.TimeStamp - lastReadingTime; // calculate delta relative to previous sensor's last reading
-                        if (delta > 0)
-                            //measuredFrequency_ = measuredFrequency_ * 0.95 + 0.05 * (1.0 / (delta));  //Averaging
-                            measuredFrequency_ = 1/delta;
-                        lastReadingTime = newFrame.TimeStamp;
+                        double delta = newFrame.TimeStamp - USB.lastTimeStamp; // calculate delta relative to previous sensor's last reading
+                        if (delta != 0)
+                            measuredFrequency_ = measuredFrequency_ * 0.95 + 0.05 * (1.0 / (delta));  //Averaging
+                            //measuredFrequency_ = 1/delta;
                         USB.setTimestamp(newFrame.TimeStamp);
                     }
                 }
@@ -433,15 +424,16 @@ namespace SingleTact_Demo
         /// <param name="e"></param>
         private void guiTimer__Tick(object sender, EventArgs e)
         {
-            try
+            lock (workThreadLock)
             {
-                lock (workThreadLock)
-                {
-                    foreach (USBdevice USB in USBdevices)
+                foreach (USBdevice USB in USBdevices)
                 {
                     List<SingleTactFrame> newFrames_ = USB.frameList;
 
+                if (newFrames_.Count > 0)
+                {
                     SingleTactFrame localCopy = null;
+
 
                     localCopy = newFrames_[0];
                     newFrames_.RemoveAt(0);
@@ -452,11 +444,9 @@ namespace SingleTact_Demo
                         // use first timestamp only to quantise readings and match csv output
                         AddData(USBdevices[0].lastTimeStamp, localCopy.SensorData, USB); //Add to stripchart
                     }
-                        updateGraph(USB);
-                    }
-                }                
+                }
             }
-            catch (Exception) {}
+        }                
 
             //Update update rate
             timerItr_++;

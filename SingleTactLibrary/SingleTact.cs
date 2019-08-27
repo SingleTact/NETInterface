@@ -191,7 +191,6 @@ namespace SingleTactLibrary
                     }
 
                     SingleTactFrame toReturn = new SingleTactFrame(sensorData, timeStamp);
-                    lastFrame_ = toReturn.DeepClone();
                     return toReturn;
                 }
                 else
