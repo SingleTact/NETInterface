@@ -85,7 +85,6 @@ namespace SingleTact_Demo
                             USB.Initialise(serialPortName);
                             USBdevices.Add(USB);
                         }
-
                     }
                     catch (Exception ex)
                     {
@@ -102,6 +101,7 @@ namespace SingleTact_Demo
                 foreach (USBdevice USB in USBdevices)
                 {
                     activeSingleTact = USB.singleTact;
+                    activeSingleTact.PushSettingsToHardware();
                     RefreshFlashSettings_Click(this, null); //Get the settings from flash
                 }
                 CreateStripChart();
@@ -151,6 +151,7 @@ namespace SingleTact_Demo
             //Populate active sensor combobox
             foreach (string port in serialPortNames)
                 ActiveSensor.Items.Add(port);
+            ActiveSensor.SelectedIndex = 0;
 
             // Populate i2c addresses
             i2cAddressInputComboBox_.Items.Clear();
@@ -164,13 +165,7 @@ namespace SingleTact_Demo
             ScaleInputValueLabel.Text = (scaleInputTrackBar_.Value/100.0)
                                         .ToString("#0.00");
 
-            sensorTypeSelector.Items.Add("8mm XX PSI");
-            sensorTypeSelector.Items.Add("8mm XX PSI");
-            sensorTypeSelector.Items.Add("8mm XX PSI");
-            sensorTypeSelector.Items.Add("15mm XX PSI");
-            sensorTypeSelector.Items.Add("15mm XX PSI");
-            sensorTypeSelector.Items.Add("15mm XX PSI");
-            sensorTypeSelector.SelectedIndex = 0;
+
         }
 
         /// <summary>
@@ -197,6 +192,7 @@ namespace SingleTact_Demo
             //Lables
             myPane.XAxis.Title.Text = "Time (s)";
             myPane.YAxis.Title.Text = "Output (511 = Full Scale Range)";
+
             myPane.Title.IsVisible = false;
             myPane.Legend.IsVisible = true;
 
@@ -207,6 +203,13 @@ namespace SingleTact_Demo
             //Set scale
             myPane.YAxis.Scale.Max = 768; //Valid range
             myPane.YAxis.Scale.Min = -255;
+
+
+            // Set font sizes
+            myPane.XAxis.Title.FontSpec.Size = 10;
+            myPane.YAxis.Title.FontSpec.Size = 10;
+            myPane.XAxis.Scale.FontSpec.Size = 7;
+            myPane.YAxis.Scale.FontSpec.Size = 7;
 
             //Make grid visible
             myPane.YAxis.MajorGrid.IsVisible = true;
@@ -225,48 +228,51 @@ namespace SingleTact_Demo
         /// <param name="measurements"></param>
         private void AddData(double time, double[] measurements, USBdevice USB)
         {
-            USB.dataBuffer.AddData(measurements, time);  // update data
-
             int index = USBdevices.IndexOf(USB); // get current sensor number
             SingleTactData data_pt = USB.dataBuffer;
-
-            // start graphing
-            GraphPane graphPane = graph_.GraphPane;
-            Color[] colours = { Color.Blue, Color.Orange, Color.DeepPink, Color.Olive, Color.ForestGreen };
-            while (graphPane.CurveList.Count <= index)
+            if (data_pt.data.Count > 0)
             {
-                string name = "Sensor " + (graphPane.CurveList.Count + 1).ToString() + " - " + serialPortNames[index].ToString();
-                LineItem myCurve = new LineItem(
-                    name,
-                    data_pt.data[0],
-                    colours[index],
-                    SymbolType.None,
-                    3.0f);
-                graphPane.CurveList.Add(myCurve);
+                // start graphing
+                GraphPane graphPane = graph_.GraphPane;
+                Color[] colours = { Color.Blue, Color.Orange, Color.DeepPink, Color.Olive, Color.ForestGreen };
+                while (graphPane.CurveList.Count <= index)
+                {
+                    string name = "Sensor " + (graphPane.CurveList.Count + 1).ToString() + " - " + serialPortNames[index].ToString();
+                    LineItem myCurve = new LineItem(
+                        name,
+                        data_pt.data[0],
+                        colours[index],
+                        SymbolType.None,
+                        3.0f);
+                    graphPane.CurveList.Add(myCurve);
+                }
+
+                // This is to update the max and min value
+                if (isFirstFrame_)
+                {
+                    graphPane.XAxis.Scale.Min = data_pt.MostRecentTime;
+                    graphPane.XAxis.Scale.Max = graphPane.XAxis.Scale.Min + graphXRange_;
+                    isFirstFrame_ = false;
+                }
+
+                if (data_pt.MostRecentTime >= graphPane.XAxis.Scale.Max)
+                {
+                    graphPane.XAxis.Scale.Max = data_pt.MostRecentTime;
+                    graphPane.XAxis.Scale.Min = graphPane.XAxis.Scale.Max - graphXRange_;
+                }
+
+                //Update green valid region box
+                BoxObj b = (BoxObj)graphPane.GraphObjList[0];
+                b.Location.X = graphPane.XAxis.Scale.Max - graphXRange_;
+                b.Location.Y = Math.Min(graphPane.YAxis.Scale.Max, 512);
+                b.Location.Height = Math.Min(graphPane.YAxis.Scale.Max - graphPane.YAxis.Scale.Min, 512);
+
+                graph_.Refresh();
+                graph_.AxisChange();
             }
 
-            // This is to update the max and min value
-            if (isFirstFrame_)
-            {
-                graphPane.XAxis.Scale.Min = data_pt.MostRecentTime;
-                graphPane.XAxis.Scale.Max = graphPane.XAxis.Scale.Min + graphXRange_;
-                isFirstFrame_ = false;
-            }
+            USB.dataBuffer.AddData(measurements, time);  // update data
 
-            if (data_pt.MostRecentTime >= graphPane.XAxis.Scale.Max)
-            {
-                graphPane.XAxis.Scale.Max = data_pt.MostRecentTime;
-                graphPane.XAxis.Scale.Min = graphPane.XAxis.Scale.Max - graphXRange_;
-            }
-
-            //Update green valid region box
-            BoxObj b = (BoxObj)graphPane.GraphObjList[0];
-            b.Location.X = graphPane.XAxis.Scale.Max - graphXRange_;
-            b.Location.Y = Math.Min(graphPane.YAxis.Scale.Max, 512);
-            b.Location.Height = Math.Min(graphPane.YAxis.Scale.Max - graphPane.YAxis.Scale.Min, 512);
-
-            graph_.Refresh();
-            graph_.AxisChange();
 
         }
 
@@ -529,10 +535,8 @@ namespace SingleTact_Demo
                 }
             }
 
-            ResetSensorButton.Enabled = (activeSingleTact.Settings.Reserved == 0) ? true : false;
             scaleInputTrackBar_.Enabled = (activeSingleTact.Settings.Reserved == 0) ? true : false;
             
-            LockButton.Text = (activeSingleTact.Settings.Reserved == 0) ? "Lock" : "Unlock";
 
             if (backgroundWasRunning)
             {
@@ -568,10 +572,9 @@ namespace SingleTact_Demo
             }
 
             activeSingleTact.PushSettingsToHardware();
-            if (activeSingleTact.Tare())
-            {
-                RefreshFlashSettings_Click(this, null);
-            }
+
+            RefreshFlashSettings_Click(this, null);
+
 
             if (backgroundWasRunning)
             {
@@ -586,20 +589,7 @@ namespace SingleTact_Demo
         /// <param name="e"></param>
         private void ResetSensorButton_Click(object sender, EventArgs e)
         {
-            string sensorType = (String)(sensorTypeSelector.Items[sensorTypeSelector.SelectedIndex]);
 
-            DialogResult result = MessageBox.Show("Warning: this will reset your sensor to the default value for a "
-                                + sensorType
-                                + " SingleTact.  Do you want to proceed?",
-                                "Reset Sensor",
-                                MessageBoxButtons.YesNo,
-                                MessageBoxIcon.Exclamation);
-
-            if (result == DialogResult.Yes)
-            {
-                MessageBox.Show("ToDo...");
-                //ToDo
-            }
         }
 
         /// <summary>
@@ -642,10 +632,8 @@ namespace SingleTact_Demo
             activeSingleTact.PushSettingsToHardware();
             RefreshFlashSettings_Click(this, null);
 
-            ResetSensorButton.Enabled = (activeSingleTact.Settings.Reserved == 0) ? true : false;
             scaleInputTrackBar_.Enabled = (activeSingleTact.Settings.Reserved == 0) ? true : false;
 
-            LockButton.Text = (activeSingleTact.Settings.Reserved == 0) ? "Lock" : "Unlock";
 
             if (backgroundWasRunning)
             StartAcquisitionThread();
@@ -672,9 +660,18 @@ namespace SingleTact_Demo
             RefreshFlashSettings_Click(this, null); //Update display
         }
 
-        private void label2_Click(object sender, EventArgs e)
+        private void LinkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-
+            var text = linkLabel1.Text;
+            if (linkLabel1.Text.Contains((char)0x25BC))
+            {
+                linkLabel1.Text = text.Replace((char)0x25BC, (char)0x25B2);
+            }
+            else
+            {
+                linkLabel1.Text = text.Replace((char)0x25B2, (char)0x25BC);
+            }
+            Settings.Visible = !Settings.Visible;
         }
     }
 }
