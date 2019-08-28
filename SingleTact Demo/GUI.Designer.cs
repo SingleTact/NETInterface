@@ -320,6 +320,7 @@ namespace SingleTact_Demo
             this.ActiveSensor.Name = "ActiveSensor";
             this.ActiveSensor.Size = new System.Drawing.Size(280, 45);
             this.ActiveSensor.TabIndex = 69;
+            this.ActiveSensor.SelectedIndexChanged += new System.EventHandler(this.ActiveSensor_SelectedIndexChanged);
             // 
             // ActiveSensorLabel
             // 

@@ -100,8 +100,7 @@ namespace SingleTact_Demo
             {
                 foreach (USBdevice USB in USBdevices)
                 {
-                    activeSingleTact = USB.singleTact;
-                    activeSingleTact.PushSettingsToHardware();
+                    USB.singleTact.PushSettingsToHardware();
                     RefreshFlashSettings_Click(this, null); //Get the settings from flash
                 }
                 CreateStripChart();
@@ -152,6 +151,8 @@ namespace SingleTact_Demo
             foreach (string port in serialPortNames)
                 ActiveSensor.Items.Add(port);
             ActiveSensor.SelectedIndex = 0;
+            activeSingleTact = USBdevices[0].singleTact;
+
 
             // Populate i2c addresses
             i2cAddressInputComboBox_.Items.Clear();
@@ -228,6 +229,11 @@ namespace SingleTact_Demo
         /// <param name="measurements"></param>
         private void AddData(double time, double[] measurements, USBdevice USB)
         {
+            USB.dataBuffer.AddData(measurements, time);  // update 
+        }
+
+        private void updateGraph(USBdevice USB)
+        {
             int index = USBdevices.IndexOf(USB); // get current sensor number
             SingleTactData data_pt = USB.dataBuffer;
             if (data_pt.data.Count > 0)
@@ -235,7 +241,7 @@ namespace SingleTact_Demo
                 // start graphing
                 GraphPane graphPane = graph_.GraphPane;
                 Color[] colours = { Color.Blue, Color.Orange, Color.DeepPink, Color.Olive, Color.ForestGreen };
-                while (graphPane.CurveList.Count <= index)
+                if (graphPane.CurveList.Count <= index)
                 {
                     string name = "Sensor " + (graphPane.CurveList.Count + 1).ToString() + " - " + serialPortNames[index].ToString();
                     LineItem myCurve = new LineItem(
@@ -245,6 +251,10 @@ namespace SingleTact_Demo
                         SymbolType.None,
                         3.0f);
                     graphPane.CurveList.Add(myCurve);
+                }
+                else
+                {
+                    graphPane.CurveList[index].Points = data_pt.data[0];
                 }
 
                 // This is to update the max and min value
@@ -259,20 +269,16 @@ namespace SingleTact_Demo
                 {
                     graphPane.XAxis.Scale.Max = data_pt.MostRecentTime;
                     graphPane.XAxis.Scale.Min = graphPane.XAxis.Scale.Max - graphXRange_;
+                    //Update green valid region box
+                    BoxObj b = (BoxObj)graphPane.GraphObjList[0];
+                    b.Location.X = graphPane.XAxis.Scale.Max - graphXRange_;
+                    b.Location.Y = Math.Min(graphPane.YAxis.Scale.Max, 512);
+                    b.Location.Height = Math.Min(graphPane.YAxis.Scale.Max - graphPane.YAxis.Scale.Min, 512);
+                    graph_.AxisChange();
+
                 }
-
-                //Update green valid region box
-                BoxObj b = (BoxObj)graphPane.GraphObjList[0];
-                b.Location.X = graphPane.XAxis.Scale.Max - graphXRange_;
-                b.Location.Y = Math.Min(graphPane.YAxis.Scale.Max, 512);
-                b.Location.Height = Math.Min(graphPane.YAxis.Scale.Max - graphPane.YAxis.Scale.Min, 512);
-
-                graph_.Refresh();
-                graph_.AxisChange();
             }
-
-            USB.dataBuffer.AddData(measurements, time);  // update data
-
+            graph_.Refresh();
 
         }
 
@@ -375,7 +381,7 @@ namespace SingleTact_Demo
                 SingleTact singletact = USB.singleTact;
                 if (singletact.Tare())
                 {
-                    RefreshFlashSettings_Click(null, null);
+                    RefreshFlashSettings_Click(this, null);
                 }
             }
             StartAcquisitionThread();
@@ -444,11 +450,11 @@ namespace SingleTact_Demo
         /// <param name="e"></param>
         private void guiTimer__Tick(object sender, EventArgs e)
         {
-            lock (workThreadLock)
+
+            foreach (USBdevice USB in USBdevices)
             {
-                foreach (USBdevice USB in USBdevices)
-                {
-                    List<SingleTactFrame> newFrames_ = USB.frameList;
+
+                List<SingleTactFrame> newFrames_ = USB.frameList;
 
                 if (newFrames_.Count > 0)
                 {
@@ -461,12 +467,17 @@ namespace SingleTact_Demo
 
                     if (localCopy != null)
                     {
-                        // use first timestamp only to quantise readings and match csv output
-                        AddData(USBdevices[0].lastTimeStamp, localCopy.SensorData, USB); //Add to stripchart
+                        lock (workThreadLock)
+                        {
+                            // use first timestamp only to quantise readings and match csv output
+                            AddData(USBdevices[0].lastTimeStamp, localCopy.SensorData, USB); //Add to stripchart
+                            updateGraph(USB);
+
+                        }
+
                     }
                 }
-            }
-        }                
+            }                
 
             //Update update rate
             timerItr_++;
@@ -602,8 +613,9 @@ namespace SingleTact_Demo
             StopAcquisitionThread();
             if (activeSingleTact.Tare())
             {
-                RefreshFlashSettings_Click(null, null);
+                RefreshFlashSettings_Click(this, null);
             }
+
             StartAcquisitionThread();
         }
 
@@ -654,12 +666,6 @@ namespace SingleTact_Demo
             StartAcquisitionThread();
         }
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            activeSingleTact = USBdevices[ActiveSensor.SelectedIndex].singleTact;
-            RefreshFlashSettings_Click(this, null); //Update display
-        }
-
         private void LinkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             var text = linkLabel1.Text;
@@ -672,6 +678,12 @@ namespace SingleTact_Demo
                 linkLabel1.Text = text.Replace((char)0x25B2, (char)0x25BC);
             }
             Settings.Visible = !Settings.Visible;
+        }
+
+        private void ActiveSensor_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            activeSingleTact = USBdevices[ActiveSensor.SelectedIndex].singleTact;
+            RefreshFlashSettings_Click(this, null); //Update display
         }
     }
 }

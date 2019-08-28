@@ -191,6 +191,7 @@ namespace SingleTactLibrary
                     }
 
                     SingleTactFrame toReturn = new SingleTactFrame(sensorData, timeStamp);
+                    lastFrame_ = toReturn.DeepClone(); // keep a local copy of the last frame, used in taring
                     return toReturn;
                 }
                 else
