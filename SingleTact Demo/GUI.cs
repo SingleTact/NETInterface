@@ -48,35 +48,49 @@ namespace SingleTact_Demo
             {
                 // Assume Arduino is on the first port during startup.
                 serialPortName = ports[0];
-                try
+                bool portSelected = false;
+                while (!portSelected)
                 {
-                    // if there's more than one device connected
-                    if (ports.Length > 1)
+                    try
                     {
-                        // Ask user to select from multiple serial ports.
-                        SerialPortSelector selector = new SerialPortSelector(ports);
-                        selector.ShowDialog();
-                        serialPortNames = selector.SelectedPorts;
-
-                        foreach (string portName in serialPortNames)
+                        // if there's more than one device connected
+                        if (ports.Length > 1)
                         {
+                            // Ask user to select from multiple serial ports.
+                            SerialPortSelector selector = new SerialPortSelector(ports);
+                            selector.ShowDialog();
+                            serialPortNames = selector.SelectedPorts;
+
+                            if (serialPortNames.Count == 0) // no port selected, loop
+                            {
+                                MessageBox.Show("Please select at least one port");
+                            }
+
+                            else
+                            {
+                                portSelected = true;
+                                foreach (string portName in serialPortNames)
+                                {
+                                    USBdevice USB = new USBdevice();
+                                    USB.Initialise(portName);
+                                    USBdevices.Add(USB);
+                                }
+                            }
+                        }
+                        else if (ports.Length == 1)  // there is only one device connected
+                        {
+                            portSelected = true;
+                            serialPortNames.Add(serialPortName);
                             USBdevice USB = new USBdevice();
-                            USB.Initialise(portName);
+                            USB.Initialise(serialPortName);
                             USBdevices.Add(USB);
                         }
-                    }
-                    else  // there is only one device connected
-                    {
-                        serialPortNames.Add(serialPortName);
-                        USBdevice USB = new USBdevice();
-                        USB.Initialise(serialPortName);
-                        USBdevices.Add(USB);
-                    }
 
-                }
-                catch (Exception ex)
-                {
-                    exceptionMessage = ex.Message;
+                    }
+                    catch (Exception ex)
+                    {
+                        exceptionMessage = ex.Message;
+                    }
                 }
 
                 PopulateSetComboBoxes();
