@@ -327,9 +327,9 @@ namespace SingleTact_Demo
             this.ActiveSensorLabel.AutoSize = true;
             this.ActiveSensorLabel.Location = new System.Drawing.Point(16, 371);
             this.ActiveSensorLabel.Name = "ActiveSensorLabel";
-            this.ActiveSensorLabel.Size = new System.Drawing.Size(213, 37);
+            this.ActiveSensorLabel.Size = new System.Drawing.Size(249, 37);
             this.ActiveSensorLabel.TabIndex = 70;
-            this.ActiveSensorLabel.Text = "Active Sensor";
+            this.ActiveSensorLabel.Text = "Selected Sensor";
             // 
             // tareAll
             // 
@@ -348,7 +348,7 @@ namespace SingleTact_Demo
             this.SetBaselineButton.Name = "SetBaselineButton";
             this.SetBaselineButton.Size = new System.Drawing.Size(549, 65);
             this.SetBaselineButton.TabIndex = 67;
-            this.SetBaselineButton.Text = "Tare Active Sensor";
+            this.SetBaselineButton.Text = "Tare Selected Sensor";
             this.SetBaselineButton.UseVisualStyleBackColor = true;
             this.SetBaselineButton.Click += new System.EventHandler(this.SetBaselineButton_Click);
             // 

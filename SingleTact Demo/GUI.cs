@@ -86,6 +86,12 @@ namespace SingleTact_Demo
                             USBdevice USB = new USBdevice();
                             USB.Initialise(serialPortName);
                             USBdevices.Add(USB);
+
+                            //hide GUI elements intended for multiple USBs
+                            tareAll.Text = "Tare";
+                            SetBaselineButton.Visible = false;
+                            ActiveSensorLabel.Visible = false;
+                            ActiveSensor.Visible = false;
                         }
                     }
                     catch (Exception ex)

@@ -94,7 +94,7 @@ namespace SingleTactLibrary
         private void ReadSerialBuffer()
         {
 
-            while (serialPort_.IsOpen && serialPort_.BytesToRead > 0)
+            while (serialPort_.BytesToRead > 0)
             {
                     incommingSerialBuffer_.Add((byte)serialPort_.ReadByte());
             }
