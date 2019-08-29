@@ -241,8 +241,14 @@ namespace SingleTactLibrary
             }
 
             byte[] cmdToArduino = SerialCommand.GenerateReadCommand(i2CAddress, cmdItr_++, location, nBytes);
-
-            serialPort_.Write(cmdToArduino, 0, cmdToArduino.Length);
+            try
+            {
+                serialPort_.Write(cmdToArduino, 0, cmdToArduino.Length);
+            }
+            catch (Exception)  // USB has been unplugged
+            {
+                return null;
+            }
 
             bool acknowledged = false;
             long attempts = 50;

@@ -200,7 +200,11 @@ namespace SingleTactLibrary
                 }
             }
 
-            return null;
+            else  // USB has been unplugged
+            {
+                return null;
+            }
+
         }
 
         /// <summary>

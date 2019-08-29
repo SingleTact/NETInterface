@@ -255,6 +255,7 @@ namespace SingleTact_Demo
                 }
                 else
                 {
+                    // update curve data with new readings
                     graphPane.CurveList[index].Points = data_pt.data[0];
                 }
 
@@ -278,6 +279,7 @@ namespace SingleTact_Demo
                     graph_.AxisChange();
 
                 }
+                graph_.Refresh();
             }
         }
 
@@ -426,19 +428,23 @@ namespace SingleTact_Demo
 
                     if (null != newFrame) //If we have data
                     {
-                        lock (workThreadLock)
-                        {
                             USB.addFrame(newFrame);
-                        }
-                        
 
+                            // use first timestamp only to quantise readings and match csv output
+                            AddData(USBdevices[0].lastTimeStamp, newFrame.SensorData, USB); //Add to stripchart
+                    
+                    }
+                    else  // USB has been unplugged
+                    {
+
+                    }
+                        
                         //Calculate rate
                         double delta = newFrame.TimeStamp - USB.lastTimeStamp; // calculate delta relative to previous sensor's last reading
                         if (delta != 0)
                             measuredFrequency_ = measuredFrequency_ * 0.95 + 0.05 * (1.0 / (delta));  //Averaging
                             //measuredFrequency_ = 1/delta;
                         USB.setTimestamp(newFrame.TimeStamp);
-                    }
                 }
             }
         }
@@ -453,30 +459,8 @@ namespace SingleTact_Demo
 
             foreach (USBdevice USB in USBdevices)
             {
-
-                List<SingleTactFrame> newFrames_ = USB.frameList;
-
-                if (newFrames_.Count > 0)
-                {
-                    SingleTactFrame localCopy = null;
-
-
-                    localCopy = newFrames_[0];
-                    newFrames_.RemoveAt(0);
-                    newFrames_.TrimExcess();
-
-                    if (localCopy != null)
-                    {
-                        lock (workThreadLock)
-                        {
-                            // use first timestamp only to quantise readings and match csv output
-                            AddData(USBdevices[0].lastTimeStamp, localCopy.SensorData, USB); //Add to stripchart
-                            updateGraph(USB);
-                            graph_.Refresh();
-                        }
-
-                    }
-                }
+                if(!backgroundIsFinished_)
+                    updateGraph(USB);
             }                
 
             //Update update rate
