@@ -165,8 +165,6 @@ namespace SingleTact_Demo
                                         .Add("0x" + i.ToString("X2"));
             }
 
-            ScaleInputValueLabel.Text = (scaleInputTrackBar_.Value / 100.0)
-                                        .ToString("#0.00");
 
             //Populate active sensor combobox
             foreach (string port in serialPortNames)
@@ -513,11 +511,6 @@ namespace SingleTact_Demo
                 StopAcquisitionThread();
         }
 
-        private void scaleInputTrackBar__Scroll(object sender, EventArgs e)
-        {
-            ScaleInputValueLabel.Text = (scaleInputTrackBar_.Value/100.0).ToString("#0.00");
-        }
-
         /// <summary>
         /// Get settings from sensor flash
         /// </summary>
@@ -549,8 +542,6 @@ namespace SingleTact_Demo
 
                     i2cAddressInputComboBox_.SelectedIndex = activeSingleTact.Settings.I2CAddress - reservedAddresses;
 
-                    scaleInputTrackBar_.Value = activeSingleTact.Settings.Scaling;
-                    ScaleInputValueLabel.Text = (scaleInputTrackBar_.Value / 100.0).ToString("#0.00");
                 }
                 catch (Exception ex)
                 {
@@ -558,8 +549,6 @@ namespace SingleTact_Demo
                     MessageBox.Show("Invalid settings", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-
-            scaleInputTrackBar_.Enabled = (activeSingleTact.Settings.Reserved == 0) ? true : false;
             
 
             if (backgroundWasRunning)
@@ -584,7 +573,6 @@ namespace SingleTact_Demo
             {
                 // ReferenceGain still has value from PullSettingsFromHardware
                 // which is OK because the firmware fully controls this anyway.
-                activeSingleTact.Settings.Scaling = (UInt16)(scaleInputTrackBar_.Value);
                 activeSingleTact.Settings.I2CAddress = (byte)(i2cAddressInputComboBox_.SelectedIndex + reservedAddresses);
                 activeSingleTact.Settings.Accumulator = 5;
                 //singleTact_.Settings.Baselines =
@@ -656,8 +644,6 @@ namespace SingleTact_Demo
 
             activeSingleTact.PushSettingsToHardware();
             RefreshFlashSettings_Click(this, null);
-
-            scaleInputTrackBar_.Enabled = (activeSingleTact.Settings.Reserved == 0) ? true : false;
 
 
             if (backgroundWasRunning)

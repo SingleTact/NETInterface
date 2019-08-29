@@ -55,9 +55,6 @@ namespace SingleTact_Demo
             this.label7 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.label5 = new System.Windows.Forms.Label();
-            this.ScaleInputValueLabel = new System.Windows.Forms.Label();
-            this.scaleInputTrackBar_ = new System.Windows.Forms.TrackBar();
-            this.label4 = new System.Windows.Forms.Label();
             this.i2cAddressInputComboBox_ = new System.Windows.Forms.ComboBox();
             this.SetSettingsButton = new System.Windows.Forms.Button();
             this.ActiveSensor = new System.Windows.Forms.ComboBox();
@@ -66,11 +63,11 @@ namespace SingleTact_Demo
             this.SetBaselineButton = new System.Windows.Forms.Button();
             this.buttonSave = new System.Windows.Forms.Button();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
+            this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.picPpsLogo)).BeginInit();
             this.Settings.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.scaleInputTrackBar_)).BeginInit();
             this.SuspendLayout();
             // 
             // graph_
@@ -235,10 +232,8 @@ namespace SingleTact_Demo
             // tabPage2
             // 
             this.tabPage2.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.tabPage2.Controls.Add(this.label2);
             this.tabPage2.Controls.Add(this.label5);
-            this.tabPage2.Controls.Add(this.ScaleInputValueLabel);
-            this.tabPage2.Controls.Add(this.scaleInputTrackBar_);
-            this.tabPage2.Controls.Add(this.label4);
             this.tabPage2.Controls.Add(this.i2cAddressInputComboBox_);
             this.tabPage2.Controls.Add(this.SetSettingsButton);
             this.tabPage2.Location = new System.Drawing.Point(12, 58);
@@ -252,51 +247,17 @@ namespace SingleTact_Demo
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(18, 44);
+            this.label5.Location = new System.Drawing.Point(22, 212);
             this.label5.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(218, 38);
             this.label5.TabIndex = 53;
             this.label5.Text = "I2C Address:";
             // 
-            // ScaleInputValueLabel
-            // 
-            this.ScaleInputValueLabel.AutoSize = true;
-            this.ScaleInputValueLabel.Location = new System.Drawing.Point(89, 187);
-            this.ScaleInputValueLabel.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
-            this.ScaleInputValueLabel.Name = "ScaleInputValueLabel";
-            this.ScaleInputValueLabel.Size = new System.Drawing.Size(53, 37);
-            this.ScaleInputValueLabel.TabIndex = 56;
-            this.ScaleInputValueLabel.Text = "##";
-            // 
-            // scaleInputTrackBar_
-            // 
-            this.scaleInputTrackBar_.Location = new System.Drawing.Point(256, 136);
-            this.scaleInputTrackBar_.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
-            this.scaleInputTrackBar_.Maximum = 6400;
-            this.scaleInputTrackBar_.Minimum = 100;
-            this.scaleInputTrackBar_.Name = "scaleInputTrackBar_";
-            this.scaleInputTrackBar_.Size = new System.Drawing.Size(260, 136);
-            this.scaleInputTrackBar_.TabIndex = 55;
-            this.scaleInputTrackBar_.TickFrequency = 640;
-            this.scaleInputTrackBar_.Value = 100;
-            this.scaleInputTrackBar_.Scroll += new System.EventHandler(this.scaleInputTrackBar__Scroll);
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(13, 136);
-            this.label4.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(223, 38);
-            this.label4.TabIndex = 52;
-            this.label4.Text = "Scale Factor:";
-            // 
             // i2cAddressInputComboBox_
             // 
             this.i2cAddressInputComboBox_.FormattingEnabled = true;
-            this.i2cAddressInputComboBox_.Location = new System.Drawing.Point(269, 43);
+            this.i2cAddressInputComboBox_.Location = new System.Drawing.Point(273, 211);
             this.i2cAddressInputComboBox_.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
             this.i2cAddressInputComboBox_.Name = "i2cAddressInputComboBox_";
             this.i2cAddressInputComboBox_.Size = new System.Drawing.Size(235, 45);
@@ -309,7 +270,7 @@ namespace SingleTact_Demo
             this.SetSettingsButton.Name = "SetSettingsButton";
             this.SetSettingsButton.Size = new System.Drawing.Size(485, 65);
             this.SetSettingsButton.TabIndex = 51;
-            this.SetSettingsButton.Text = "Save Configuration";
+            this.SetSettingsButton.Text = "Update I2C Address";
             this.SetSettingsButton.UseVisualStyleBackColor = true;
             this.SetSettingsButton.Click += new System.EventHandler(this.SetSettingsButton_Click);
             // 
@@ -377,6 +338,15 @@ namespace SingleTact_Demo
             this.linkLabel1.VisitedLinkColor = System.Drawing.Color.Black;
             this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabel1_LinkClicked);
             // 
+            // label2
+            // 
+            this.label2.Location = new System.Drawing.Point(22, 38);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(498, 164);
+            this.label2.TabIndex = 55;
+            this.label2.Text = "Warning: changing the I2C Address can damage the hardware. Only update this if yo" +
+    "u are sure it is necessary.";
+            // 
             // GUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(19F, 37F);
@@ -403,7 +373,6 @@ namespace SingleTact_Demo
             this.tabPage1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.scaleInputTrackBar_)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -420,9 +389,6 @@ namespace SingleTact_Demo
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label ScaleInputValueLabel;
-        private System.Windows.Forms.TrackBar scaleInputTrackBar_;
-        private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ComboBox i2cAddressInputComboBox_;
         private System.Windows.Forms.Button SetSettingsButton;
         private System.Windows.Forms.TextBox textAddress;
@@ -439,5 +405,6 @@ namespace SingleTact_Demo
         private System.Windows.Forms.Button SetBaselineButton;
         private System.Windows.Forms.Button buttonSave;
         private System.Windows.Forms.LinkLabel linkLabel1;
+        private System.Windows.Forms.Label label2;
     }
 }
