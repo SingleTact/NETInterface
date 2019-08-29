@@ -243,11 +243,13 @@ namespace SingleTact_Demo
         {
             int index = USBdevices.IndexOf(USB); // get current sensor number
             SingleTactData data_pt = USB.dataBuffer;
-            if (data_pt.data.Count > 0)
+            Color[] colours = { Color.Blue, Color.Orange, Color.DarkViolet, Color.Red, Color.DeepPink, Color.DarkSlateGray  };
+
+            if (data_pt.data.Count > 0 && index < colours.Length)
             {
                 // start graphing
                 GraphPane graphPane = graph_.GraphPane;
-                Color[] colours = { Color.Blue, Color.Orange, Color.DeepPink, Color.Olive, Color.ForestGreen };
+
                 if (graphPane.CurveList.Count <= index)  // initialise curves
                 {
                     string name = "Sensor " + (graphPane.CurveList.Count + 1).ToString() + " - " + serialPortNames[index].ToString();
