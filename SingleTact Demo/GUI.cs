@@ -71,6 +71,16 @@ namespace SingleTact_Demo
                             {
 
                                 portSelected = true;
+
+                                if (serialPortNames.Count == 1) // User selected one port only
+                                {
+                                    //hide GUI elements intended for multiple USBs
+                                    tareAll.Text = "Tare";
+                                    SetBaselineButton.Visible = false;
+                                    ActiveSensorLabel.Visible = false;
+                                    ActiveSensor.Visible = false;
+                                }
+
                                 foreach (string portName in serialPortNames)
                                 {
                                     USBdevice USB = new USBdevice();
@@ -87,11 +97,6 @@ namespace SingleTact_Demo
                             USB.Initialise(serialPortName);
                             USBdevices.Add(USB);
 
-                            //hide GUI elements intended for multiple USBs
-                            tareAll.Text = "Tare";
-                            SetBaselineButton.Visible = false;
-                            ActiveSensorLabel.Visible = false;
-                            ActiveSensor.Visible = false;
                         }
                     }
                     catch (Exception ex)
