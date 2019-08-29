@@ -314,59 +314,60 @@ namespace SingleTact_Demo
             saveDataDialog.Filter = "*.csv|*.csv";
             saveDataDialog.RestoreDirectory = true;
             saveDataDialog.FileName = "SingleTactSampleData";
-
-            if (saveDataDialog.ShowDialog() == DialogResult.OK)
-            {
-                // To fix Issue 3, separate exported values by semi-colon instead
-                // of comma if current locale's decimal separator is comma.
-                string separator = safeSeparator();
-                string saveFileName = saveDataDialog.FileName;
-                StreamWriter dataWriter = new StreamWriter(saveFileName, false, Encoding.Default);
-
-                // write column headers
-                string columnNames = "Time(s)" + separator;
-                // populate columns with serial port names
-                foreach(string portName in serialPortNames)
+            Invoke((Action)(() => { 
+                if (saveDataDialog.ShowDialog() == DialogResult.OK)
                 {
-                    columnNames += portName + " (PSI)" + separator;
-                }
-                columnNames += "NB (0 = 0 PSI;  511 = Full Scale Range)";
-                dataWriter.WriteLine(columnNames);
+                    // To fix Issue 3, separate exported values by semi-colon instead
+                    // of comma if current locale's decimal separator is comma.
+                    string separator = safeSeparator();
+                    string saveFileName = saveDataDialog.FileName;
+                    StreamWriter dataWriter = new StreamWriter(saveFileName, false, Encoding.Default);
 
-                // write data
-                string row = "";
-                int data_length = USBdevices[0].dataBuffer.data[0].Count;
-                for (int i = 0; i < data_length; i++)  // for each sensor reading
-                {
-                    bool first = true;
-                    foreach (USBdevice USB in USBdevices)
+                    // write column headers
+                    string columnNames = "Time(s)" + separator;
+                    // populate columns with serial port names
+                    foreach(string portName in serialPortNames)
                     {
-                        try
-                        {
-                            SingleTactData data = USB.dataBuffer;
-                            PointPair dataPoint = data.data[0][i];
-                            if (first) // only save the time the first sensor's reading was taken
-                            {
-                                // round the time value to mitigate any uncertainty around sampling time
-                                row += Math.Round(dataPoint.X, 3) + separator + dataPoint.Y + separator;
-                                first = false;
-                            }
-                            else
-                            {
-                                row += dataPoint.Y + separator;
-                            }
-                        }
-                        catch  // index out of range, unequal number of sensor readings
-                        {
-                            row += "null" + separator;
-                        }
+                        columnNames += portName + " (PSI)" + separator;
                     }
-                    dataWriter.WriteLine(row);
-                    row = "";
-                }
+                    columnNames += "NB (0 = 0 PSI;  511 = Full Scale Range)";
+                    dataWriter.WriteLine(columnNames);
 
-                dataWriter.Close();
-            }
+                    // write data
+                    string row = "";
+                    int data_length = USBdevices[0].dataBuffer.data[0].Count;
+                    for (int i = 0; i < data_length; i++)  // for each sensor reading
+                    {
+                        bool first = true;
+                        foreach (USBdevice USB in USBdevices)
+                        {
+                            try
+                            {
+                                SingleTactData data = USB.dataBuffer;
+                                PointPair dataPoint = data.data[0][i];
+                                if (first) // only save the time the first sensor's reading was taken
+                                {
+                                    // round the time value to mitigate any uncertainty around sampling time
+                                    row += Math.Round(dataPoint.X, 3) + separator + dataPoint.Y + separator;
+                                    first = false;
+                                }
+                                else
+                                {
+                                    row += dataPoint.Y + separator;
+                                }
+                            }
+                            catch  // index out of range, unequal number of sensor readings
+                            {
+                                row += "null" + separator;
+                            }
+                        }
+                        dataWriter.WriteLine(row);
+                        row = "";
+                    }
+
+                    dataWriter.Close();
+                }
+            }));
 
             if (backgroundWasRunning)
             {
@@ -436,11 +437,30 @@ namespace SingleTact_Demo
                     }
                     else  // USB has been unplugged
                     {
-
+                        new Thread(() =>
+                        {
+                            guiTimer_.Stop();
+                            backgroundIsFinished_ = true;
+                            var index = USBdevices.IndexOf(USB);
+                            var comPort = serialPortNames[index];
+                            var result = MessageBox.Show(
+                                comPort.ToString() + " has been unplugged.\nWould you like to save your data before exiting?",
+                                "Error!",
+                                MessageBoxButtons.YesNo,
+                                MessageBoxIcon.Error);
+                            if (result == DialogResult.Yes)
+                            {
+                                buttonSave_Click(this, null);
+                            }
+                            Application.Exit();
+                        }).Start();
+                        backgroundIsFinished_ = false;
+                        StopAcquisitionThread();
+                        break;
                     }
-                        
-                        //Calculate rate
-                        double delta = newFrame.TimeStamp - USB.lastTimeStamp; // calculate delta relative to previous sensor's last reading
+
+                    //Calculate rate
+                    double delta = newFrame.TimeStamp - USB.lastTimeStamp; // calculate delta relative to previous sensor's last reading
                         if (delta != 0)
                             measuredFrequency_ = measuredFrequency_ * 0.95 + 0.05 * (1.0 / (delta));  //Averaging
                             //measuredFrequency_ = 1/delta;
