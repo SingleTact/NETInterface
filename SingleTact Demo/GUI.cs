@@ -44,6 +44,7 @@ namespace SingleTact_Demo
 
             // Get available serial ports.
             string[] ports = SerialPort.GetPortNames();
+
             if (0 != ports.Length)
             {
                 // Assume Arduino is on the first port during startup.
@@ -68,6 +69,7 @@ namespace SingleTact_Demo
 
                             else
                             {
+
                                 portSelected = true;
                                 foreach (string portName in serialPortNames)
                                 {
@@ -91,13 +93,12 @@ namespace SingleTact_Demo
                         exceptionMessage = ex.Message;
                     }
                 }
-
                 PopulateSetComboBoxes();
-
             }
 
             try
             {
+                var usb = USBdevices[0];  // Force exception to occur if there are no USB devices
                 foreach (USBdevice USB in USBdevices)
                 {
                     USB.singleTact.PushSettingsToHardware();
@@ -147,25 +148,25 @@ namespace SingleTact_Demo
         /// </summary>
         private void PopulateSetComboBoxes()
         {
-            //Populate active sensor combobox
-            foreach (string port in serialPortNames)
-                ActiveSensor.Items.Add(port);
-            ActiveSensor.SelectedIndex = 0;
-            activeSingleTact = USBdevices[0].singleTact;
-
 
             // Populate i2c addresses
             i2cAddressInputComboBox_.Items.Clear();
 
+            //TODO appears to be race condition to populate combo box
             for (int i = reservedAddresses; i < 128; i++)
             {
                 i2cAddressInputComboBox_.Items
                                         .Add("0x" + i.ToString("X2"));
             }
 
-            ScaleInputValueLabel.Text = (scaleInputTrackBar_.Value/100.0)
+            ScaleInputValueLabel.Text = (scaleInputTrackBar_.Value / 100.0)
                                         .ToString("#0.00");
 
+            //Populate active sensor combobox
+            foreach (string port in serialPortNames)
+                ActiveSensor.Items.Add(port);
+            ActiveSensor.SelectedIndex = 0;
+            activeSingleTact = USBdevices[0].singleTact;
 
         }
 
@@ -241,7 +242,7 @@ namespace SingleTact_Demo
                 // start graphing
                 GraphPane graphPane = graph_.GraphPane;
                 Color[] colours = { Color.Blue, Color.Orange, Color.DeepPink, Color.Olive, Color.ForestGreen };
-                if (graphPane.CurveList.Count <= index)
+                if (graphPane.CurveList.Count <= index)  // initialise curves
                 {
                     string name = "Sensor " + (graphPane.CurveList.Count + 1).ToString() + " - " + serialPortNames[index].ToString();
                     LineItem myCurve = new LineItem(
@@ -278,8 +279,6 @@ namespace SingleTact_Demo
 
                 }
             }
-            graph_.Refresh();
-
         }
 
         /// <summary>
@@ -381,7 +380,7 @@ namespace SingleTact_Demo
                 SingleTact singletact = USB.singleTact;
                 if (singletact.Tare())
                 {
-                    RefreshFlashSettings_Click(this, null);
+                    RefreshFlashSettings_Click(null, null);
                 }
             }
             StartAcquisitionThread();
@@ -431,6 +430,7 @@ namespace SingleTact_Demo
                         {
                             USB.addFrame(newFrame);
                         }
+                        
 
                         //Calculate rate
                         double delta = newFrame.TimeStamp - USB.lastTimeStamp; // calculate delta relative to previous sensor's last reading
@@ -472,7 +472,7 @@ namespace SingleTact_Demo
                             // use first timestamp only to quantise readings and match csv output
                             AddData(USBdevices[0].lastTimeStamp, localCopy.SensorData, USB); //Add to stripchart
                             updateGraph(USB);
-
+                            graph_.Refresh();
                         }
 
                     }
@@ -540,8 +540,9 @@ namespace SingleTact_Demo
                     scaleInputTrackBar_.Value = activeSingleTact.Settings.Scaling;
                     ScaleInputValueLabel.Text = (scaleInputTrackBar_.Value / 100.0).ToString("#0.00");
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Console.WriteLine(ex.ToString());
                     MessageBox.Show("Invalid settings", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
@@ -613,7 +614,7 @@ namespace SingleTact_Demo
             StopAcquisitionThread();
             if (activeSingleTact.Tare())
             {
-                RefreshFlashSettings_Click(this, null);
+                RefreshFlashSettings_Click(null, null);
             }
 
             StartAcquisitionThread();
