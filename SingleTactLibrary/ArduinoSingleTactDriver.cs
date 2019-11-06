@@ -24,6 +24,7 @@ namespace SingleTactLibrary
 
         byte cmdItr_ = 0;
         private UInt16 lastItr_ = 0;
+        public bool isUSB = false;
 
         public const int TIMESTAMP_SIZE = 4;
         const int I2C_ID_BYTE = 6;
@@ -33,6 +34,7 @@ namespace SingleTactLibrary
 
         //Minimum packet length is 15 (header + info + footer)
         const int MINIMUM_FROMARDUINO_PACKET_LENGTH = 15;
+
 
         public ArduinoSingleTactDriver()
         {
@@ -355,9 +357,11 @@ namespace SingleTactLibrary
         {
             for (int i = 0; i < 4; i++)
             {
-                if (incommingSerialBuffer_[i] != 0xFF)
+                if (incommingSerialBuffer_[i] != 0xFF && incommingSerialBuffer_[i] != 0xAA)
                 return false; //Header corrupt
             }
+            if (incommingSerialBuffer_[0] == 0xAA)
+                isUSB = true;
             return true; //Header all good
         }
 

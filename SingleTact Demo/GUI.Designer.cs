@@ -77,7 +77,7 @@ namespace SingleTact_Demo
             | System.Windows.Forms.AnchorStyles.Right)));
             this.graph_.IsEnableHPan = false;
             this.graph_.IsEnableHZoom = false;
-            this.graph_.Location = new System.Drawing.Point(191, 18);
+            this.graph_.Location = new System.Drawing.Point(191, 22);
             this.graph_.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
             this.graph_.Name = "graph_";
             this.graph_.ScrollGrace = 0D;
@@ -87,7 +87,7 @@ namespace SingleTact_Demo
             this.graph_.ScrollMinX = 0D;
             this.graph_.ScrollMinY = 0D;
             this.graph_.ScrollMinY2 = 0D;
-            this.graph_.Size = new System.Drawing.Size(675, 409);
+            this.graph_.Size = new System.Drawing.Size(740, 514);
             this.graph_.TabIndex = 1;
             // 
             // AcquisitionWorker
@@ -151,9 +151,9 @@ namespace SingleTact_Demo
             // 
             this.textAddress.BackColor = System.Drawing.SystemColors.Control;
             this.textAddress.Enabled = false;
-            this.textAddress.Location = new System.Drawing.Point(90, 15);
+            this.textAddress.Location = new System.Drawing.Point(103, 15);
             this.textAddress.Name = "textAddress";
-            this.textAddress.Size = new System.Drawing.Size(77, 20);
+            this.textAddress.Size = new System.Drawing.Size(64, 20);
             this.textAddress.TabIndex = 39;
             // 
             // label1
@@ -170,18 +170,18 @@ namespace SingleTact_Demo
             // 
             this.textGain.BackColor = System.Drawing.SystemColors.Control;
             this.textGain.Enabled = false;
-            this.textGain.Location = new System.Drawing.Point(90, 41);
+            this.textGain.Location = new System.Drawing.Point(103, 41);
             this.textGain.Name = "textGain";
-            this.textGain.Size = new System.Drawing.Size(77, 20);
+            this.textGain.Size = new System.Drawing.Size(64, 20);
             this.textGain.TabIndex = 40;
             // 
             // textTare
             // 
             this.textTare.BackColor = System.Drawing.SystemColors.Control;
             this.textTare.Enabled = false;
-            this.textTare.Location = new System.Drawing.Point(90, 68);
+            this.textTare.Location = new System.Drawing.Point(103, 68);
             this.textTare.Name = "textTare";
-            this.textTare.Size = new System.Drawing.Size(77, 20);
+            this.textTare.Size = new System.Drawing.Size(64, 20);
             this.textTare.TabIndex = 41;
             // 
             // label9
@@ -198,9 +198,9 @@ namespace SingleTact_Demo
             // 
             this.textScale.BackColor = System.Drawing.SystemColors.Control;
             this.textScale.Enabled = false;
-            this.textScale.Location = new System.Drawing.Point(90, 93);
+            this.textScale.Location = new System.Drawing.Point(103, 93);
             this.textScale.Name = "textScale";
-            this.textScale.Size = new System.Drawing.Size(77, 20);
+            this.textScale.Size = new System.Drawing.Size(64, 20);
             this.textScale.TabIndex = 42;
             // 
             // label8
@@ -346,7 +346,7 @@ namespace SingleTact_Demo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(876, 437);
+            this.ClientSize = new System.Drawing.Size(939, 545);
             this.Controls.Add(this.linkLabel1);
             this.Controls.Add(this.ActiveSensor);
             this.Controls.Add(this.ActiveSensorLabel);
@@ -357,7 +357,7 @@ namespace SingleTact_Demo
             this.Controls.Add(this.picPpsLogo);
             this.Controls.Add(this.graph_);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MinimumSize = new System.Drawing.Size(415, 264);
+            this.MinimumSize = new System.Drawing.Size(401, 222);
             this.Name = "GUI";
             this.Text = "PPS SingleTact Demo [XXHz]";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GUI_FormClosing);

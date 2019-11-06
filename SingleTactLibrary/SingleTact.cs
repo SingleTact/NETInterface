@@ -22,6 +22,7 @@ namespace SingleTactLibrary
         private SingleTactFrame lastFrame_;
         private bool isFirst = true;
         private UInt32 startTime = 0;
+        public bool isUSB = false;
         private byte i2cAddress_ = 0x04;
         private int itr_ = 0;
         public bool isConnected;
@@ -50,6 +51,7 @@ namespace SingleTactLibrary
             if (!PullSettingsFromHardware())
                 return false;
 
+            isUSB = arduino_.isUSB;
             isConnected  = false;
             isCalibrated = false;
             return true;
@@ -111,19 +113,6 @@ namespace SingleTactLibrary
             isCalibrated = true;
         }
 
-        /// <summary>
-        /// Push Toggle GPIO CMD to Arduino
-        /// </summary>
-        //
-        public void PushToggleToArduino(byte ToggleGPIO)
-        {
-            if (!arduino_.WriteToggleCommand(ToggleGPIO))
-            {
-                MessageBox.Show("Failed to Toggle the GPIO", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-            Thread.Sleep(50);
-        }
 
         /// <summary>
         /// Pull settings from sensor flash (updating local copy)

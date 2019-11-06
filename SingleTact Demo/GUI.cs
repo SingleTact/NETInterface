@@ -36,6 +36,7 @@ namespace SingleTact_Demo
 
         public GUI()
         {
+
             bool sensorStarted = false;
             string serialPortName = null;
             string exceptionMessage = null;
@@ -169,7 +170,6 @@ namespace SingleTact_Demo
                 i2cAddressInputComboBox_.Items
                                         .Add("0x" + i.ToString("X2"));
             }
-
 
             //Populate active sensor combobox
             foreach (string port in serialPortNames)
@@ -687,6 +687,15 @@ namespace SingleTact_Demo
         private void ActiveSensor_SelectedIndexChanged(object sender, EventArgs e)
         {
             activeSingleTact = USBdevices[ActiveSensor.SelectedIndex].singleTact;
+            if (activeSingleTact.isUSB == true)
+            {
+                linkLabel1.Visible = false;
+                Settings.Visible = false;
+            }
+            else
+            {
+                linkLabel1.Visible = true;
+            }
             RefreshFlashSettings_Click(this, null); //Update display
         }
     }
