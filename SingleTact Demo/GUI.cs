@@ -58,8 +58,8 @@ namespace SingleTact_Demo
                 {
                     try
                     {
-                        // if there's more than one device connected
-                        if (ports.Length > 1)
+                        // if there's more than one PPS/Arduino device connected
+                        if (prettyPorts.Count > 1)
                         {
                             // Ask user to select from multiple serial ports.
                             SerialPortSelector selector = new SerialPortSelector(prettyPorts);
@@ -99,7 +99,7 @@ namespace SingleTact_Demo
                                 }
                             }
                         }
-                        else if (ports.Length == 1)  // there is only one device connected
+                        else if (prettyPorts.Count == 1)  // there is only one device connected
                         {
                             portSelected = true;
                             serialPortNames.Add(serialPortName);
@@ -189,7 +189,7 @@ namespace SingleTact_Demo
         }
 
 
-        private String prettyToComPort(String pretty)
+        private string prettyToComPort(String pretty)
         {
             // get just comport to initialise devices
             return pretty.Split(new string[] { " -" }, StringSplitOptions.None)[0];
@@ -206,6 +206,7 @@ namespace SingleTact_Demo
             i2cAddressInputComboBox_.Items.Clear();
 
             //TODO appears to be race condition to populate combo box
+            // This causes the invalid settings warning
             for (int i = reservedAddresses; i < 128; i++)
             {
                 i2cAddressInputComboBox_.Items
@@ -656,7 +657,6 @@ namespace SingleTact_Demo
             {
                 // ReferenceGain still has value from PullSettingsFromHardware
                 // which is OK because the firmware fully controls this anyway.
-                activeSingleTact.Settings.Scaling = (UInt16)(scaleFactor.Value);
                 activeSingleTact.Settings.I2CAddress = (byte)(i2cAddressInputComboBox_.SelectedIndex + reservedAddresses);
                 activeSingleTact.Settings.Accumulator = 5;
                 //singleTact_.Settings.Baselines =
@@ -801,7 +801,11 @@ namespace SingleTact_Demo
 
         private void Button1_Click(object sender, EventArgs e)
         {
-            SetSettingsButton_Click(this, null);
+            StopAcquisitionThread();
+            activeSingleTact.Settings.Scaling = (UInt16)(scaleFactor.Value);
+            activeSingleTact.PushSettingsToHardware();
+            RefreshFlashSettings_Click(null, null);
+            StartAcquisitionThread();
         }
     }
 
