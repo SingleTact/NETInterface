@@ -30,8 +30,8 @@ namespace SingleTact_Demo
         private const int graphXRange_ = 30; // 30 seconds
         private const int reservedAddresses = 4; // Don't use I2C addresses 0 to 3
         private Object workThreadLock = new Object(); //Thread synchronization
-        List<string> serialPortNames = new List<string>();
-        List<String> prettyPorts = new List<string>();
+        private List<string> serialPortNames = new List<string>();
+        private  List<String> prettyPorts = new List<string>();
         private List<USBdevice> USBdevices = new List<USBdevice>();
         private SingleTact activeSingleTact;
         private delegate void CloseMainFormDelegate(); //Used to close the program if hardware is not connected
@@ -188,6 +188,7 @@ namespace SingleTact_Demo
             return names;
         }
 
+
         private String prettyToComPort(String pretty)
         {
             // get just comport to initialise devices
@@ -212,11 +213,20 @@ namespace SingleTact_Demo
             }
 
             //Populate active sensor combobox
+            int j = 0;
             foreach (string port in prettyPorts)
             {
                 string[] portSplit = port.Split('-');
-                // switch order for readability
-                ActiveSensor.Items.Add(portSplit[1] + " - " + portSplit[0]);
+                // replace COM port with index
+                String name = portSplit[1] + " " + (prettyPorts.IndexOf(port) + 1).ToString() + " (calibrated)";
+
+                if (!USBdevices[j].isCalibrated)
+                {
+                    name = name.Replace("calibrated", "uncalibrated");
+                }
+               
+                ActiveSensor.Items.Add(name);
+                j++;
             }
             ActiveSensor.SelectedIndex = 0;
             activeSingleTact = USBdevices[0].singleTact;
@@ -313,7 +323,11 @@ namespace SingleTact_Demo
 
                 if (graphPane.CurveList.Count <= index)  // initialise curves
                 {
-                    string name = prettyPorts[index].ToString();
+                    string name = prettyPorts[index].ToString().Split('-')[1] + " " + (index+1).ToString() + " (calibrated)";
+                    if (!USBdevices[index].isCalibrated)
+                    {
+                        name = name.Replace("calibrated", "uncalibrated");
+                    }
                     LineItem myCurve = new LineItem(
                         name,
                         data_pt.data[0],

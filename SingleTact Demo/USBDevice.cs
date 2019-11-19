@@ -18,6 +18,7 @@ namespace SingleTact_Demo
         private List<SingleTactFrame> _frameList;
         private SingleTact _singleTact;
         private double _lastTimestamp = 0.0;
+        public bool isCalibrated = false;
 
 
         public bool Initialise(string portName)
@@ -31,6 +32,7 @@ namespace SingleTact_Demo
                 _arduino.Initialise(portName); //Start Arduino driver
                 _singleTact.Initialise(_arduino);
                 _singleTact.I2cAddressForCommunications = ((byte)(4));
+                isCalibrated = _singleTact.isCalibrated;
                 return true;
             }
             catch
