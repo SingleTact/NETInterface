@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Management;
 using System.Text;
 using System.Windows.Forms;
 
@@ -11,14 +12,14 @@ namespace SingleTact_Demo
 {
    public partial class SerialPortSelector : Form
    {
-      public SerialPortSelector(String[] serialPorts)
+      public SerialPortSelector(List<String> serialPorts)
       {
          InitializeComponent();
+            // Changes the selection mode from double-click to single click.
+            foreach (String port in serialPorts)
+                SerialPortCheckBoxes.Items.Add(port);
 
-         foreach (string port in serialPorts)
-            SerialPortCheckBoxes.Items.Add(port);
-         // Changes the selection mode from double-click to single click.
-         SerialPortCheckBoxes.CheckOnClick = true;
+            SerialPortCheckBoxes.CheckOnClick = true;
 
         }
 
@@ -32,7 +33,8 @@ namespace SingleTact_Demo
       }
 
       private List<string> selectedPorts_ = new List<string>();
-      public List<string> SelectedPorts
+
+        public List<string> SelectedPorts
       {
          get{ return selectedPorts_;}
       }

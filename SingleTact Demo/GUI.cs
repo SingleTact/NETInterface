@@ -17,6 +17,7 @@ using System.IO;
 using ZedGraph;
 using System.Threading;
 using SingleTactLibrary;
+using System.Management;
 
 namespace SingleTact_Demo
 {
@@ -30,6 +31,7 @@ namespace SingleTact_Demo
         private const int reservedAddresses = 4; // Don't use I2C addresses 0 to 3
         private Object workThreadLock = new Object(); //Thread synchronization
         List<string> serialPortNames = new List<string>();
+        List<String> prettyPorts = new List<string>();
         private List<USBdevice> USBdevices = new List<USBdevice>();
         private SingleTact activeSingleTact;
         private delegate void CloseMainFormDelegate(); //Used to close the program if hardware is not connected
@@ -44,7 +46,8 @@ namespace SingleTact_Demo
             InitializeComponent();
 
             // Get available serial ports.
-            string[] ports = SerialPort.GetPortNames();
+            String[] ports = SerialPort.GetPortNames();
+            prettyPorts = getPrettyPortNames(ports);
 
             if (0 != ports.Length)
             {
@@ -59,9 +62,15 @@ namespace SingleTact_Demo
                         if (ports.Length > 1)
                         {
                             // Ask user to select from multiple serial ports.
-                            SerialPortSelector selector = new SerialPortSelector(ports);
+                            SerialPortSelector selector = new SerialPortSelector(prettyPorts);
                             selector.ShowDialog();
                             serialPortNames = selector.SelectedPorts;
+                            List<String> comPorts = new List<string>();
+                            foreach (String portName in serialPortNames)
+                            {
+                                comPorts.Add(prettyToComPort(portName));
+                            }
+                            serialPortNames = comPorts;
 
                             if (serialPortNames.Count == 0) // no port selected, loop
                             {
@@ -97,7 +106,6 @@ namespace SingleTact_Demo
                             USBdevice USB = new USBdevice();
                             USB.Initialise(serialPortName);
                             USBdevices.Add(USB);
-
                         }
                     }
                     catch (Exception ex)
@@ -154,6 +162,38 @@ namespace SingleTact_Demo
             this.Close();
         }
 
+        private List<String> getPrettyPortNames(String[] serialPorts)
+        {  // Get a human readable version of comport similar to device manager
+            String name = "";
+            List<String> details;
+            List<String> names = new List<string>();
+
+            using (var searcher = new ManagementObjectSearcher("SELECT * FROM WIN32_SerialPort"))
+            {
+                var ports = searcher.Get().Cast<ManagementBaseObject>().ToList();
+                details = (from n in serialPorts
+                           join p in ports on n equals p["DeviceID"].ToString()
+                           select n + " - " + p["Caption"]).ToList();
+            }
+
+            foreach (string detail in details)
+            {
+                if (detail.Contains("Arduino"))
+                {
+                    name = detail.Replace("Arduino Leonardo", "PPS Sensor");
+                    name = name.Split(new string[] { " (" }, StringSplitOptions.None)[0];
+                    names.Add(name);
+                }
+            }
+            return names;
+        }
+
+        private String prettyToComPort(String pretty)
+        {
+            // get just comport to initialise devices
+            return pretty.Split(new string[] { " -" }, StringSplitOptions.None)[0];
+        }
+
 
         /// <summary>
         /// Fill appropriate Values into GUI Comboboxes
@@ -172,10 +212,28 @@ namespace SingleTact_Demo
             }
 
             //Populate active sensor combobox
-            foreach (string port in serialPortNames)
-                ActiveSensor.Items.Add(port);
+            foreach (string port in prettyPorts)
+            {
+                string[] portSplit = port.Split('-');
+                // switch order for readability
+                ActiveSensor.Items.Add(portSplit[1] + " - " + portSplit[0]);
+            }
             ActiveSensor.SelectedIndex = 0;
             activeSingleTact = USBdevices[0].singleTact;
+
+            int maxWidth = 0;
+            System.Windows.Forms.Label dummy = new System.Windows.Forms.Label();
+            // find widest label to resize dropdown dynamically
+            foreach (var obj in ActiveSensor.Items)
+            {
+                dummy.Text = obj.ToString();
+                int temp = dummy.PreferredWidth;
+                if (temp > maxWidth)
+                {
+                    maxWidth = temp;
+                }
+            }
+            ActiveSensor.DropDownWidth = maxWidth;
 
         }
 
@@ -255,7 +313,7 @@ namespace SingleTact_Demo
 
                 if (graphPane.CurveList.Count <= index)  // initialise curves
                 {
-                    string name = "Sensor " + (graphPane.CurveList.Count + 1).ToString() + " - " + serialPortNames[index].ToString();
+                    string name = prettyPorts[index].ToString();
                     LineItem myCurve = new LineItem(
                         name,
                         data_pt.data[0],
@@ -697,6 +755,11 @@ namespace SingleTact_Demo
                 linkLabel1.Visible = true;
             }
             RefreshFlashSettings_Click(this, null); //Update display
+        }
+
+        private void GUI_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

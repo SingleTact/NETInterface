@@ -77,8 +77,8 @@ namespace SingleTact_Demo
             | System.Windows.Forms.AnchorStyles.Right)));
             this.graph_.IsEnableHPan = false;
             this.graph_.IsEnableHZoom = false;
-            this.graph_.Location = new System.Drawing.Point(191, 22);
-            this.graph_.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
+            this.graph_.Location = new System.Drawing.Point(605, 63);
+            this.graph_.Margin = new System.Windows.Forms.Padding(32, 26, 32, 26);
             this.graph_.Name = "graph_";
             this.graph_.ScrollGrace = 0D;
             this.graph_.ScrollMaxX = 0D;
@@ -87,7 +87,7 @@ namespace SingleTact_Demo
             this.graph_.ScrollMinX = 0D;
             this.graph_.ScrollMinY = 0D;
             this.graph_.ScrollMinY2 = 0D;
-            this.graph_.Size = new System.Drawing.Size(740, 514);
+            this.graph_.Size = new System.Drawing.Size(2343, 1463);
             this.graph_.TabIndex = 1;
             // 
             // AcquisitionWorker
@@ -106,10 +106,10 @@ namespace SingleTact_Demo
             // 
             this.picPpsLogo.Image = ((System.Drawing.Image)(resources.GetObject("picPpsLogo.Image")));
             this.picPpsLogo.InitialImage = ((System.Drawing.Image)(resources.GetObject("picPpsLogo.InitialImage")));
-            this.picPpsLogo.Location = new System.Drawing.Point(7, 22);
-            this.picPpsLogo.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.picPpsLogo.Location = new System.Drawing.Point(22, 63);
+            this.picPpsLogo.Margin = new System.Windows.Forms.Padding(6);
             this.picPpsLogo.Name = "picPpsLogo";
-            this.picPpsLogo.Size = new System.Drawing.Size(172, 55);
+            this.picPpsLogo.Size = new System.Drawing.Size(545, 157);
             this.picPpsLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.picPpsLogo.TabIndex = 46;
             this.picPpsLogo.TabStop = false;
@@ -120,11 +120,10 @@ namespace SingleTact_Demo
             this.Settings.AccessibleRole = System.Windows.Forms.AccessibleRole.None;
             this.Settings.Controls.Add(this.tabPage1);
             this.Settings.Controls.Add(this.tabPage2);
-            this.Settings.Location = new System.Drawing.Point(7, 275);
-            this.Settings.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            this.Settings.Location = new System.Drawing.Point(22, 783);
             this.Settings.Name = "Settings";
             this.Settings.SelectedIndex = 0;
-            this.Settings.Size = new System.Drawing.Size(177, 152);
+            this.Settings.Size = new System.Drawing.Size(561, 433);
             this.Settings.TabIndex = 56;
             this.Settings.Visible = false;
             // 
@@ -139,11 +138,10 @@ namespace SingleTact_Demo
             this.tabPage1.Controls.Add(this.textScale);
             this.tabPage1.Controls.Add(this.label8);
             this.tabPage1.Controls.Add(this.label7);
-            this.tabPage1.Location = new System.Drawing.Point(4, 22);
-            this.tabPage1.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            this.tabPage1.Location = new System.Drawing.Point(12, 58);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(1, 1, 1, 1);
-            this.tabPage1.Size = new System.Drawing.Size(169, 126);
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(537, 363);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Settings";
             // 
@@ -151,18 +149,20 @@ namespace SingleTact_Demo
             // 
             this.textAddress.BackColor = System.Drawing.SystemColors.Control;
             this.textAddress.Enabled = false;
-            this.textAddress.Location = new System.Drawing.Point(103, 15);
+            this.textAddress.Location = new System.Drawing.Point(326, 43);
+            this.textAddress.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
             this.textAddress.Name = "textAddress";
-            this.textAddress.Size = new System.Drawing.Size(64, 20);
+            this.textAddress.Size = new System.Drawing.Size(194, 44);
             this.textAddress.TabIndex = 39;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(4, 17);
+            this.label1.Location = new System.Drawing.Point(13, 48);
+            this.label1.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(79, 13);
+            this.label1.Size = new System.Drawing.Size(218, 38);
             this.label1.TabIndex = 38;
             this.label1.Text = "I2C Address:";
             // 
@@ -170,27 +170,30 @@ namespace SingleTact_Demo
             // 
             this.textGain.BackColor = System.Drawing.SystemColors.Control;
             this.textGain.Enabled = false;
-            this.textGain.Location = new System.Drawing.Point(103, 41);
+            this.textGain.Location = new System.Drawing.Point(326, 117);
+            this.textGain.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
             this.textGain.Name = "textGain";
-            this.textGain.Size = new System.Drawing.Size(64, 20);
+            this.textGain.Size = new System.Drawing.Size(194, 44);
             this.textGain.TabIndex = 40;
             // 
             // textTare
             // 
             this.textTare.BackColor = System.Drawing.SystemColors.Control;
             this.textTare.Enabled = false;
-            this.textTare.Location = new System.Drawing.Point(103, 68);
+            this.textTare.Location = new System.Drawing.Point(326, 194);
+            this.textTare.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
             this.textTare.Name = "textTare";
-            this.textTare.Size = new System.Drawing.Size(64, 20);
+            this.textTare.Size = new System.Drawing.Size(194, 44);
             this.textTare.TabIndex = 41;
             // 
             // label9
             // 
             this.label9.AutoSize = true;
             this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label9.Location = new System.Drawing.Point(4, 95);
+            this.label9.Location = new System.Drawing.Point(13, 270);
+            this.label9.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(83, 13);
+            this.label9.Size = new System.Drawing.Size(223, 38);
             this.label9.TabIndex = 45;
             this.label9.Text = "Scale Factor:";
             // 
@@ -198,18 +201,20 @@ namespace SingleTact_Demo
             // 
             this.textScale.BackColor = System.Drawing.SystemColors.Control;
             this.textScale.Enabled = false;
-            this.textScale.Location = new System.Drawing.Point(103, 93);
+            this.textScale.Location = new System.Drawing.Point(326, 265);
+            this.textScale.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
             this.textScale.Name = "textScale";
-            this.textScale.Size = new System.Drawing.Size(64, 20);
+            this.textScale.Size = new System.Drawing.Size(194, 44);
             this.textScale.TabIndex = 42;
             // 
             // label8
             // 
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label8.Location = new System.Drawing.Point(4, 69);
+            this.label8.Location = new System.Drawing.Point(13, 196);
+            this.label8.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(59, 13);
+            this.label8.Size = new System.Drawing.Size(160, 38);
             this.label8.TabIndex = 44;
             this.label8.Text = "Baseline:";
             // 
@@ -217,9 +222,10 @@ namespace SingleTact_Demo
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(4, 43);
+            this.label7.Location = new System.Drawing.Point(13, 122);
+            this.label7.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(100, 13);
+            this.label7.Size = new System.Drawing.Size(270, 38);
             this.label7.TabIndex = 43;
             this.label7.Text = "Reference Gain:";
             // 
@@ -230,20 +236,18 @@ namespace SingleTact_Demo
             this.tabPage2.Controls.Add(this.label5);
             this.tabPage2.Controls.Add(this.i2cAddressInputComboBox_);
             this.tabPage2.Controls.Add(this.SetSettingsButton);
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            this.tabPage2.Location = new System.Drawing.Point(12, 58);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(1, 1, 1, 1);
-            this.tabPage2.Size = new System.Drawing.Size(169, 126);
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(537, 363);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Update Flash";
             // 
             // label2
             // 
-            this.label2.Location = new System.Drawing.Point(7, 13);
-            this.label2.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
+            this.label2.Location = new System.Drawing.Point(22, 37);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(157, 58);
+            this.label2.Size = new System.Drawing.Size(497, 165);
             this.label2.TabIndex = 55;
             this.label2.Text = "Warning: changing the I2C Address can damage the hardware. Only update this if yo" +
     "u are sure it is necessary.";
@@ -252,25 +256,28 @@ namespace SingleTact_Demo
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(7, 74);
+            this.label5.Location = new System.Drawing.Point(22, 211);
+            this.label5.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(79, 13);
+            this.label5.Size = new System.Drawing.Size(218, 38);
             this.label5.TabIndex = 53;
             this.label5.Text = "I2C Address:";
             // 
             // i2cAddressInputComboBox_
             // 
             this.i2cAddressInputComboBox_.FormattingEnabled = true;
-            this.i2cAddressInputComboBox_.Location = new System.Drawing.Point(86, 74);
+            this.i2cAddressInputComboBox_.Location = new System.Drawing.Point(272, 211);
+            this.i2cAddressInputComboBox_.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
             this.i2cAddressInputComboBox_.Name = "i2cAddressInputComboBox_";
-            this.i2cAddressInputComboBox_.Size = new System.Drawing.Size(77, 21);
+            this.i2cAddressInputComboBox_.Size = new System.Drawing.Size(235, 45);
             this.i2cAddressInputComboBox_.TabIndex = 54;
             // 
             // SetSettingsButton
             // 
-            this.SetSettingsButton.Location = new System.Drawing.Point(6, 96);
+            this.SetSettingsButton.Location = new System.Drawing.Point(19, 273);
+            this.SetSettingsButton.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
             this.SetSettingsButton.Name = "SetSettingsButton";
-            this.SetSettingsButton.Size = new System.Drawing.Size(153, 23);
+            this.SetSettingsButton.Size = new System.Drawing.Size(485, 65);
             this.SetSettingsButton.TabIndex = 51;
             this.SetSettingsButton.Text = "Update I2C Address";
             this.SetSettingsButton.UseVisualStyleBackColor = true;
@@ -279,29 +286,26 @@ namespace SingleTact_Demo
             // ActiveSensor
             // 
             this.ActiveSensor.FormattingEnabled = true;
-            this.ActiveSensor.Location = new System.Drawing.Point(92, 128);
-            this.ActiveSensor.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            this.ActiveSensor.Location = new System.Drawing.Point(257, 364);
             this.ActiveSensor.Name = "ActiveSensor";
-            this.ActiveSensor.Size = new System.Drawing.Size(91, 21);
+            this.ActiveSensor.Size = new System.Drawing.Size(314, 45);
             this.ActiveSensor.TabIndex = 69;
             this.ActiveSensor.SelectedIndexChanged += new System.EventHandler(this.ActiveSensor_SelectedIndexChanged);
             // 
             // ActiveSensorLabel
             // 
             this.ActiveSensorLabel.AutoSize = true;
-            this.ActiveSensorLabel.Location = new System.Drawing.Point(5, 130);
-            this.ActiveSensorLabel.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
+            this.ActiveSensorLabel.Location = new System.Drawing.Point(12, 367);
             this.ActiveSensorLabel.Name = "ActiveSensorLabel";
-            this.ActiveSensorLabel.Size = new System.Drawing.Size(85, 13);
+            this.ActiveSensorLabel.Size = new System.Drawing.Size(249, 37);
             this.ActiveSensorLabel.TabIndex = 70;
             this.ActiveSensorLabel.Text = "Selected Sensor";
             // 
             // tareAll
             // 
-            this.tareAll.Location = new System.Drawing.Point(7, 178);
-            this.tareAll.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            this.tareAll.Location = new System.Drawing.Point(22, 507);
             this.tareAll.Name = "tareAll";
-            this.tareAll.Size = new System.Drawing.Size(173, 23);
+            this.tareAll.Size = new System.Drawing.Size(548, 65);
             this.tareAll.TabIndex = 68;
             this.tareAll.Text = "Tare All Sensors";
             this.tareAll.UseVisualStyleBackColor = true;
@@ -309,9 +313,10 @@ namespace SingleTact_Demo
             // 
             // SetBaselineButton
             // 
-            this.SetBaselineButton.Location = new System.Drawing.Point(7, 151);
+            this.SetBaselineButton.Location = new System.Drawing.Point(22, 430);
+            this.SetBaselineButton.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
             this.SetBaselineButton.Name = "SetBaselineButton";
-            this.SetBaselineButton.Size = new System.Drawing.Size(173, 23);
+            this.SetBaselineButton.Size = new System.Drawing.Size(548, 65);
             this.SetBaselineButton.TabIndex = 67;
             this.SetBaselineButton.Text = "Tare Selected Sensor";
             this.SetBaselineButton.UseVisualStyleBackColor = true;
@@ -319,9 +324,10 @@ namespace SingleTact_Demo
             // 
             // buttonSave
             // 
-            this.buttonSave.Location = new System.Drawing.Point(7, 206);
+            this.buttonSave.Location = new System.Drawing.Point(22, 586);
+            this.buttonSave.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
             this.buttonSave.Name = "buttonSave";
-            this.buttonSave.Size = new System.Drawing.Size(173, 23);
+            this.buttonSave.Size = new System.Drawing.Size(548, 65);
             this.buttonSave.TabIndex = 63;
             this.buttonSave.Text = "Export Chart Data";
             this.buttonSave.UseVisualStyleBackColor = true;
@@ -332,10 +338,9 @@ namespace SingleTact_Demo
             this.linkLabel1.ActiveLinkColor = System.Drawing.Color.Black;
             this.linkLabel1.AutoSize = true;
             this.linkLabel1.LinkColor = System.Drawing.Color.Black;
-            this.linkLabel1.Location = new System.Drawing.Point(5, 253);
-            this.linkLabel1.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
+            this.linkLabel1.Location = new System.Drawing.Point(16, 720);
             this.linkLabel1.Name = "linkLabel1";
-            this.linkLabel1.Size = new System.Drawing.Size(68, 13);
+            this.linkLabel1.Size = new System.Drawing.Size(189, 37);
             this.linkLabel1.TabIndex = 71;
             this.linkLabel1.TabStop = true;
             this.linkLabel1.Text = "▼ Advanced";
@@ -344,9 +349,9 @@ namespace SingleTact_Demo
             // 
             // GUI
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(19F, 37F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(939, 545);
+            this.ClientSize = new System.Drawing.Size(2974, 1551);
             this.Controls.Add(this.linkLabel1);
             this.Controls.Add(this.ActiveSensor);
             this.Controls.Add(this.ActiveSensorLabel);
@@ -357,10 +362,12 @@ namespace SingleTact_Demo
             this.Controls.Add(this.picPpsLogo);
             this.Controls.Add(this.graph_);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MinimumSize = new System.Drawing.Size(401, 222);
+            this.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
+            this.MinimumSize = new System.Drawing.Size(1192, 442);
             this.Name = "GUI";
             this.Text = "PPS SingleTact Demo [XXHz]";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GUI_FormClosing);
+            this.Load += new System.EventHandler(this.GUI_Load);
             ((System.ComponentModel.ISupportInitialize)(this.picPpsLogo)).EndInit();
             this.Settings.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
