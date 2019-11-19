@@ -231,6 +231,12 @@ namespace SingleTact_Demo
             ActiveSensor.SelectedIndex = 0;
             activeSingleTact = USBdevices[0].singleTact;
 
+            if(activeSingleTact.Settings.Scaling < 100)
+            {
+                activeSingleTact.Settings.Scaling = 100;
+            }
+
+            scaleFactor.Value = activeSingleTact.Settings.Scaling;
             int maxWidth = 0;
             System.Windows.Forms.Label dummy = new System.Windows.Forms.Label();
             // find widest label to resize dropdown dynamically
@@ -486,7 +492,7 @@ namespace SingleTact_Demo
         }
 
         /// <summary>
-        /// Stop the Acquisition Thread
+        /// Start the Acquisition Thread
         /// </summary>
         private void StartAcquisitionThread()
         {
@@ -614,9 +620,9 @@ namespace SingleTact_Demo
                 {
                     textAddress.Text = "0x" + activeSingleTact.Settings.I2CAddress.ToString("X2");
                     textGain.Text = activeSingleTact.Settings.ReferenceGain.ToString("00") + " (" + (activeSingleTact.Settings.ReferenceGain + 1).ToString("0") + "x)";
-                    textScale.Text = activeSingleTact.Settings.Scaling.ToString("00") + " (" + ((activeSingleTact.Settings.Scaling) / 100.0).ToString("#0.00") + ")";
                     textTare.Text = activeSingleTact.Settings.Baselines.ElementAt(0).ToString("0000");
-
+                    scaleFactor.Value = activeSingleTact.Settings.Scaling;
+                    scaleFactorLabel.Text = "Scale Factor: " + (scaleFactor.Value / 100.0).ToString("#0.00");
                     i2cAddressInputComboBox_.SelectedIndex = activeSingleTact.Settings.I2CAddress - reservedAddresses;
 
                 }
@@ -650,6 +656,7 @@ namespace SingleTact_Demo
             {
                 // ReferenceGain still has value from PullSettingsFromHardware
                 // which is OK because the firmware fully controls this anyway.
+                activeSingleTact.Settings.Scaling = (UInt16)(scaleFactor.Value);
                 activeSingleTact.Settings.I2CAddress = (byte)(i2cAddressInputComboBox_.SelectedIndex + reservedAddresses);
                 activeSingleTact.Settings.Accumulator = 5;
                 //singleTact_.Settings.Baselines =
@@ -769,9 +776,16 @@ namespace SingleTact_Demo
                 linkLabel1.Visible = true;
                 SetSettingsButton.Enabled = false;
             }
+            else if (!activeSingleTact.isUSB && activeSingleTact.isCalibrated)
+            {
+                linkLabel1.Visible = true;
+                scaleFactor.Enabled = false;
+                SetSettingsButton.Enabled = true;
+            }
             else
             {
                 linkLabel1.Visible = true;
+                SetSettingsButton.Enabled = true;
             }
             RefreshFlashSettings_Click(this, null); //Update display
         }
@@ -780,5 +794,15 @@ namespace SingleTact_Demo
         {
 
         }
+        private void scaleFactor__Scroll(object sender, EventArgs e)
+        {
+            scaleFactorLabel.Text = "Scale Factor: " + (scaleFactor.Value / 100.0).ToString("#0.00");
+        }
+
+        private void Button1_Click(object sender, EventArgs e)
+        {
+            SetSettingsButton_Click(this, null);
+        }
     }
+
 }

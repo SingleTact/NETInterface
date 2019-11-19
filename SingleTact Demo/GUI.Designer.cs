@@ -45,12 +45,12 @@ namespace SingleTact_Demo
             this.picPpsLogo = new System.Windows.Forms.PictureBox();
             this.Settings = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.scaleFactor = new System.Windows.Forms.TrackBar();
             this.textAddress = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.textGain = new System.Windows.Forms.TextBox();
             this.textTare = new System.Windows.Forms.TextBox();
-            this.label9 = new System.Windows.Forms.Label();
-            this.textScale = new System.Windows.Forms.TextBox();
+            this.scaleFactorLabel = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
@@ -64,9 +64,11 @@ namespace SingleTact_Demo
             this.SetBaselineButton = new System.Windows.Forms.Button();
             this.buttonSave = new System.Windows.Forms.Button();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.picPpsLogo)).BeginInit();
             this.Settings.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.scaleFactor)).BeginInit();
             this.tabPage2.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -123,27 +125,40 @@ namespace SingleTact_Demo
             this.Settings.Location = new System.Drawing.Point(22, 783);
             this.Settings.Name = "Settings";
             this.Settings.SelectedIndex = 0;
-            this.Settings.Size = new System.Drawing.Size(561, 433);
+            this.Settings.Size = new System.Drawing.Size(561, 505);
             this.Settings.TabIndex = 56;
             this.Settings.Visible = false;
             // 
             // tabPage1
             // 
             this.tabPage1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.tabPage1.Controls.Add(this.button1);
             this.tabPage1.Controls.Add(this.textAddress);
             this.tabPage1.Controls.Add(this.label1);
             this.tabPage1.Controls.Add(this.textGain);
             this.tabPage1.Controls.Add(this.textTare);
-            this.tabPage1.Controls.Add(this.label9);
-            this.tabPage1.Controls.Add(this.textScale);
+            this.tabPage1.Controls.Add(this.scaleFactorLabel);
             this.tabPage1.Controls.Add(this.label8);
             this.tabPage1.Controls.Add(this.label7);
+            this.tabPage1.Controls.Add(this.scaleFactor);
             this.tabPage1.Location = new System.Drawing.Point(12, 58);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(537, 363);
+            this.tabPage1.Size = new System.Drawing.Size(537, 435);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Settings";
+            // 
+            // scaleFactor
+            // 
+            this.scaleFactor.Location = new System.Drawing.Point(317, 270);
+            this.scaleFactor.Maximum = 6400;
+            this.scaleFactor.Minimum = 100;
+            this.scaleFactor.Name = "scaleFactor";
+            this.scaleFactor.Size = new System.Drawing.Size(219, 136);
+            this.scaleFactor.TabIndex = 46;
+            this.scaleFactor.TickFrequency = 640;
+            this.scaleFactor.Value = 1;
+            this.scaleFactor.Scroll += new System.EventHandler(this.scaleFactor__Scroll);
             // 
             // textAddress
             // 
@@ -183,25 +198,16 @@ namespace SingleTact_Demo
             this.textTare.Size = new System.Drawing.Size(194, 44);
             this.textTare.TabIndex = 41;
             // 
-            // label9
+            // scaleFactorLabel
             // 
-            this.label9.AutoSize = true;
-            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label9.Location = new System.Drawing.Point(13, 270);
-            this.label9.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(223, 38);
-            this.label9.TabIndex = 45;
-            this.label9.Text = "Scale Factor:";
-            // 
-            // textScale
-            // 
-            this.textScale.BackColor = System.Drawing.SystemColors.Control;
-            this.textScale.Location = new System.Drawing.Point(326, 265);
-            this.textScale.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
-            this.textScale.Name = "textScale";
-            this.textScale.Size = new System.Drawing.Size(194, 44);
-            this.textScale.TabIndex = 42;
+            this.scaleFactorLabel.AutoSize = true;
+            this.scaleFactorLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.scaleFactorLabel.Location = new System.Drawing.Point(13, 270);
+            this.scaleFactorLabel.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
+            this.scaleFactorLabel.Name = "scaleFactorLabel";
+            this.scaleFactorLabel.Size = new System.Drawing.Size(223, 38);
+            this.scaleFactorLabel.TabIndex = 45;
+            this.scaleFactorLabel.Text = "Scale Factor:";
             // 
             // label8
             // 
@@ -235,7 +241,7 @@ namespace SingleTact_Demo
             this.tabPage2.Location = new System.Drawing.Point(12, 58);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(537, 363);
+            this.tabPage2.Size = new System.Drawing.Size(537, 435);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Update Flash";
             // 
@@ -343,6 +349,16 @@ namespace SingleTact_Demo
             this.linkLabel1.VisitedLinkColor = System.Drawing.Color.Black;
             this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabel1_LinkClicked);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(326, 345);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(194, 61);
+            this.button1.TabIndex = 47;
+            this.button1.Text = "Update";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.Button1_Click);
+            // 
             // GUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(19F, 37F);
@@ -368,6 +384,7 @@ namespace SingleTact_Demo
             this.Settings.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.scaleFactor)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
             this.ResumeLayout(false);
@@ -392,8 +409,7 @@ namespace SingleTact_Demo
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textGain;
         private System.Windows.Forms.TextBox textTare;
-        private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.TextBox textScale;
+        private System.Windows.Forms.Label scaleFactorLabel;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.ComboBox ActiveSensor;
@@ -403,5 +419,7 @@ namespace SingleTact_Demo
         private System.Windows.Forms.Button buttonSave;
         private System.Windows.Forms.LinkLabel linkLabel1;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TrackBar scaleFactor;
+        private System.Windows.Forms.Button button1;
     }
 }
