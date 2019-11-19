@@ -148,7 +148,6 @@ namespace SingleTact_Demo
             // textAddress
             // 
             this.textAddress.BackColor = System.Drawing.SystemColors.Control;
-            this.textAddress.Enabled = false;
             this.textAddress.Location = new System.Drawing.Point(326, 43);
             this.textAddress.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
             this.textAddress.Name = "textAddress";
@@ -169,7 +168,6 @@ namespace SingleTact_Demo
             // textGain
             // 
             this.textGain.BackColor = System.Drawing.SystemColors.Control;
-            this.textGain.Enabled = false;
             this.textGain.Location = new System.Drawing.Point(326, 117);
             this.textGain.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
             this.textGain.Name = "textGain";
@@ -179,7 +177,6 @@ namespace SingleTact_Demo
             // textTare
             // 
             this.textTare.BackColor = System.Drawing.SystemColors.Control;
-            this.textTare.Enabled = false;
             this.textTare.Location = new System.Drawing.Point(326, 194);
             this.textTare.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
             this.textTare.Name = "textTare";
@@ -200,7 +197,6 @@ namespace SingleTact_Demo
             // textScale
             // 
             this.textScale.BackColor = System.Drawing.SystemColors.Control;
-            this.textScale.Enabled = false;
             this.textScale.Location = new System.Drawing.Point(326, 265);
             this.textScale.Margin = new System.Windows.Forms.Padding(10, 9, 10, 9);
             this.textScale.Name = "textScale";

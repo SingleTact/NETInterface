@@ -759,10 +759,15 @@ namespace SingleTact_Demo
         private void ActiveSensor_SelectedIndexChanged(object sender, EventArgs e)
         {
             activeSingleTact = USBdevices[ActiveSensor.SelectedIndex].singleTact;
-            if (activeSingleTact.isUSB == true)
+            if (activeSingleTact.isUSB && activeSingleTact.isCalibrated)
             {
                 linkLabel1.Visible = false;
                 Settings.Visible = false;
+            }
+            else if (activeSingleTact.isUSB && !activeSingleTact.isCalibrated)
+            {
+                linkLabel1.Visible = true;
+                SetSettingsButton.Enabled = false;
             }
             else
             {
