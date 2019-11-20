@@ -20,7 +20,7 @@ namespace SingleTactLibrary
         const int INDEX_SERIAL_NUMBER_MSB = 1;
         const int INDEX_SERIAL_NUMBER_LSB = 2;
         const int INDEX_PWM_PIN_MODE = 3;
-        const int INDEX_SENSOR_MAPPING_PWM_ANALOG = 4;
+        const int INDEX_FIRMWARE_REVISION = 4;
         const int INDEX_Accumulator = 5;
         const int INDEX_REFERENCE_GAIN = 6;
         const int INDEX_CONVERSION_SIZE = 7;
@@ -29,7 +29,7 @@ namespace SingleTactLibrary
         const int INDEX_SCALING_MSB = 10;
         const int INDEX_SCALING_LSB = 11;
         const int INDEX_NUMBER_ELEMENTS = 12;
-        const int INDEX_RESERVED = 13;
+        const int INDEX_CALIBRATION = 13;
         const int INDEX_INDEX_OF_SCANLIST = 15;
         const int INDEX_OF_BASELINES = 41;
 
@@ -77,12 +77,12 @@ namespace SingleTactLibrary
         }
 
         /// <summary>
-        /// Which sensor element is used for PWM output and analogue output
+        /// Get Firmware version
         /// </summary>
-        public byte SensorMappingPWM_Analogue
+        public byte FirmwareVersion
         {
-            get { return settingsRaw_[INDEX_SENSOR_MAPPING_PWM_ANALOG]; }
-            set { settingsRaw_[INDEX_SENSOR_MAPPING_PWM_ANALOG] = value; }
+            get { return settingsRaw_[INDEX_FIRMWARE_REVISION]; }
+            set { settingsRaw_[INDEX_FIRMWARE_REVISION] = value; }
         }
 
         /// <summary>
@@ -136,11 +136,11 @@ namespace SingleTactLibrary
             set { settingsRaw_[INDEX_OUTPUT_CURRENT] = value; }
         }
 
-        //Reserved Register, use the first bit to determine Lock/Unlock
-        public byte Reserved
+        //Calibration register
+        public byte Calibrated
         {
-            get { return settingsRaw_[INDEX_RESERVED]; }
-            set { settingsRaw_[INDEX_RESERVED] = value; }
+            get { return settingsRaw_[INDEX_CALIBRATION]; }
+            set { settingsRaw_[INDEX_CALIBRATION] = value; }
         }
 
         /// <summary>

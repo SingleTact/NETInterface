@@ -27,6 +27,7 @@ namespace SingleTactLibrary
         private int itr_ = 0;
         public bool isConnected;
         public bool isCalibrated;
+        public string firmwareVersion;
 
         public SingleTact()
         {
@@ -53,7 +54,8 @@ namespace SingleTactLibrary
 
             isUSB = arduino_.isUSB;
             isConnected  = false;
-            isCalibrated = false;
+            isCalibrated = (Settings.Calibrated == 1) ? true : false;
+            firmwareVersion = Settings.FirmwareVersion.ToString();
             return true;
         }
 

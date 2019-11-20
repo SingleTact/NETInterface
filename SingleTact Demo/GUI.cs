@@ -23,6 +23,7 @@ namespace SingleTact_Demo
 {
     public partial class GUI : Form
     {
+        private string version = "2.0";
         private bool backgroundIsFinished_ = false;  // Flag to check background thread is finished
         private double measuredFrequency_ = 50;  // Sensor update rate
         private int timerItr_ = 0;  // Some things are slower that the timer frequency
@@ -39,7 +40,6 @@ namespace SingleTact_Demo
         public GUI()
         {
 
-            bool sensorStarted = false;
             string serialPortName = null;
             string exceptionMessage = null;
 
@@ -65,6 +65,7 @@ namespace SingleTact_Demo
                             SerialPortSelector selector = new SerialPortSelector(prettyPorts);
                             selector.ShowDialog();
                             serialPortNames = selector.SelectedPorts;
+                            prettyPorts = serialPortNames;  // remove unselected ports
                             List<String> comPorts = new List<string>();
                             foreach (String portName in serialPortNames)
                             {
@@ -113,7 +114,7 @@ namespace SingleTact_Demo
                         exceptionMessage = ex.Message;
                     }
                 }
-                PopulateSetComboBoxes();
+                PopulateGUIFields();
             }
 
             try
@@ -199,7 +200,7 @@ namespace SingleTact_Demo
         /// <summary>
         /// Fill appropriate Values into GUI Comboboxes
         /// </summary>
-        private void PopulateSetComboBoxes()
+        private void PopulateGUIFields()
         {
 
             // Populate i2c addresses
@@ -251,6 +252,9 @@ namespace SingleTact_Demo
                 }
             }
             ActiveSensor.DropDownWidth = maxWidth;
+
+            // Get firmware version
+            firmwareLabel.Text = activeSingleTact.firmwareVersion;
 
         }
 
@@ -416,8 +420,14 @@ namespace SingleTact_Demo
                     // write column headers
                     string columnNames = "Time(s)" + separator;
                     // populate columns with serial port names
-                    foreach(string portName in serialPortNames)
+                    foreach(string portName in prettyPorts)
                     {
+                        int index = prettyPorts.IndexOf(portName);
+                        string name = portName.ToString().Split('-')[1] + " " + (index + 1).ToString() + " (calibrated)";
+                        if (!USBdevices[index].isCalibrated)
+                        {
+                            name = name.Replace("calibrated", "uncalibrated");
+                        }
                         columnNames += portName + " (PSI)" + separator;
                     }
                     columnNames += "NB (0 = 0 PSI;  511 = Full Scale Range)";
@@ -576,7 +586,7 @@ namespace SingleTact_Demo
             //Update update rate
             timerItr_++;
             if (0 == timerItr_ % 5)
-                this.Text = "PPS SingleTact Demo [ " + measuredFrequency_.ToString("##0") + " Hz ]";
+                this.Text = "PPS SingleTact Demo - Version " + version + " [ " + measuredFrequency_.ToString("##0") + " Hz ]";
         }
 
         /// <summary>
@@ -715,11 +725,11 @@ namespace SingleTact_Demo
             bool backgroundWasRunning = AcquisitionWorker.IsBusy;
 
             if (backgroundWasRunning)
-            StopAcquisitionThread();
+                StopAcquisitionThread();
 
             try
             {
-                activeSingleTact.Settings.Reserved = (activeSingleTact.Settings.Reserved == 0) ? (byte)1 : (byte)0;
+                activeSingleTact.Settings.Calibrated = (activeSingleTact.Settings.Calibrated == 0) ? (byte)1 : (byte)0;
             }
             catch (Exception)
             {
@@ -728,12 +738,9 @@ namespace SingleTact_Demo
 
             activeSingleTact.PushSettingsToHardware();
             RefreshFlashSettings_Click(this, null);
-
-
             if (backgroundWasRunning)
             StartAcquisitionThread();
         }
-
         private void Send_Calibration_Click(object sender, EventArgs e)
         {
             // Get the Info that whether the settings in the MainRegister is locked or not
@@ -741,13 +748,14 @@ namespace SingleTact_Demo
             int[] calibrationTable = new int[1024];
 
             if (backgroundWasRunning)
-            StopAcquisitionThread();
+                StopAcquisitionThread();
 
             activeSingleTact.PushCalibrationToHardware(calibrationTable);
 
             if (backgroundWasRunning)
-            StartAcquisitionThread();
+                StartAcquisitionThread();
         }
+       
 
         private void LinkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
@@ -774,11 +782,13 @@ namespace SingleTact_Demo
             else if (activeSingleTact.isUSB && !activeSingleTact.isCalibrated)
             {
                 linkLabel1.Visible = true;
+                updateButton.Visible = true;
                 SetSettingsButton.Enabled = false;
             }
             else if (!activeSingleTact.isUSB && activeSingleTact.isCalibrated)
             {
                 linkLabel1.Visible = true;
+                updateButton.Visible = false;
                 scaleFactor.Enabled = false;
                 SetSettingsButton.Enabled = true;
             }
