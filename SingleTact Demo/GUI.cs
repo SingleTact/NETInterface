@@ -245,7 +245,6 @@ namespace SingleTact_Demo
                 activeSingleTact.Settings.Scaling = 100;
             }
 
-            scaleFactor.Value = activeSingleTact.Settings.Scaling;
             int maxWidth = 0;
             System.Windows.Forms.Label dummy = new System.Windows.Forms.Label();
             // find widest label to resize dropdown dynamically
@@ -652,8 +651,6 @@ namespace SingleTact_Demo
                     textAddress.Text = "0x" + activeSingleTact.Settings.I2CAddress.ToString("X2");
                     textGain.Text = activeSingleTact.Settings.ReferenceGain.ToString("00") + " (" + (activeSingleTact.Settings.ReferenceGain + 1).ToString("0") + "x)";
                     textTare.Text = activeSingleTact.Settings.Baselines.ElementAt(0).ToString("0000");
-                    scaleFactor.Value = activeSingleTact.Settings.Scaling;
-                    scaleFactorLabel.Text = "Scale Factor: " + (scaleFactor.Value / 100.0).ToString("#0.00");
                     i2cAddressInputComboBox_.SelectedIndex = activeSingleTact.Settings.I2CAddress - reservedAddresses;
 
                 }
@@ -796,20 +793,23 @@ namespace SingleTact_Demo
             activeSingleTact = USBdevices[ActiveSensor.SelectedIndex].singleTact;
             if (activeSingleTact.isUSB && activeSingleTact.isCalibrated)
             {
-                linkLabel1.Visible = false;
-                Settings.Visible = false;
+                 linkLabel1.Visible = true;
+                if (Settings.TabPages.Count > 1)
+                {
+                    Settings.TabPages.RemoveAt(Settings.TabPages.Count - 1);
+                }
             }
             else if (activeSingleTact.isUSB && !activeSingleTact.isCalibrated)
             {
                 linkLabel1.Visible = true;
-                updateButton.Visible = true;
-                SetSettingsButton.Enabled = false;
+                if (Settings.TabPages.Count > 1)
+                {
+                    Settings.TabPages.RemoveAt(Settings.TabPages.Count - 1);
+                }
             }
             else if (!activeSingleTact.isUSB && activeSingleTact.isCalibrated)
             {
                 linkLabel1.Visible = true;
-                updateButton.Visible = false;
-                scaleFactor.Enabled = false;
                 SetSettingsButton.Enabled = true;
             }
             else
@@ -824,19 +824,8 @@ namespace SingleTact_Demo
         {
 
         }
-        private void scaleFactor__Scroll(object sender, EventArgs e)
-        {
-            scaleFactorLabel.Text = "Scale Factor: " + (scaleFactor.Value / 100.0).ToString("#0.00");
-        }
-
-        private void Button1_Click(object sender, EventArgs e)
-        {
-            StopAcquisitionThread();
-            activeSingleTact.Settings.Scaling = (UInt16)(scaleFactor.Value);
-            activeSingleTact.PushSettingsToHardware();
-            RefreshFlashSettings_Click(null, null);
-            StartAcquisitionThread();
-        }
+       
+    
     }
 
 }

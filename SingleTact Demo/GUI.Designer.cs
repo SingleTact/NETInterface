@@ -47,15 +47,12 @@ namespace SingleTact_Demo
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.firmwareLabel = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.updateButton = new System.Windows.Forms.Button();
-            this.textAddress = new System.Windows.Forms.TextBox();
+            this.textAddress = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.textGain = new System.Windows.Forms.Label();
-            this.textTare = new System.Windows.Forms.TextBox();
-            this.scaleFactorLabel = new System.Windows.Forms.Label();
+            this.textTare = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
-            this.scaleFactor = new System.Windows.Forms.TrackBar();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.label2 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
@@ -70,7 +67,6 @@ namespace SingleTact_Demo
             ((System.ComponentModel.ISupportInitialize)(this.picPpsLogo)).BeginInit();
             this.Settings.SuspendLayout();
             this.tabPage1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.scaleFactor)).BeginInit();
             this.tabPage2.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -139,15 +135,12 @@ namespace SingleTact_Demo
             this.tabPage1.BackColor = System.Drawing.Color.WhiteSmoke;
             this.tabPage1.Controls.Add(this.firmwareLabel);
             this.tabPage1.Controls.Add(this.label3);
-            this.tabPage1.Controls.Add(this.updateButton);
             this.tabPage1.Controls.Add(this.textAddress);
             this.tabPage1.Controls.Add(this.label1);
             this.tabPage1.Controls.Add(this.textGain);
             this.tabPage1.Controls.Add(this.textTare);
-            this.tabPage1.Controls.Add(this.scaleFactorLabel);
             this.tabPage1.Controls.Add(this.label8);
             this.tabPage1.Controls.Add(this.label7);
-            this.tabPage1.Controls.Add(this.scaleFactor);
             this.tabPage1.Location = new System.Drawing.Point(4, 25);
             this.tabPage1.Margin = new System.Windows.Forms.Padding(1);
             this.tabPage1.Name = "tabPage1";
@@ -159,10 +152,10 @@ namespace SingleTact_Demo
             // firmwareLabel
             // 
             this.firmwareLabel.AutoSize = true;
-            this.firmwareLabel.Location = new System.Drawing.Point(170, 13);
+            this.firmwareLabel.Location = new System.Drawing.Point(131, 13);
             this.firmwareLabel.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             this.firmwareLabel.Name = "firmwareLabel";
-            this.firmwareLabel.Size = new System.Drawing.Size(45, 16);
+            this.firmwareLabel.Size = new System.Drawing.Size(79, 16);
             this.firmwareLabel.TabIndex = 49;
             this.firmwareLabel.Text = "0.0.0.0";
             // 
@@ -177,24 +170,13 @@ namespace SingleTact_Demo
             this.label3.TabIndex = 48;
             this.label3.Text = "Firmware Version:";
             // 
-            // updateButton
-            // 
-            this.updateButton.Location = new System.Drawing.Point(137, 169);
-            this.updateButton.Margin = new System.Windows.Forms.Padding(1);
-            this.updateButton.Name = "updateButton";
-            this.updateButton.Size = new System.Drawing.Size(82, 26);
-            this.updateButton.TabIndex = 47;
-            this.updateButton.Text = "Update";
-            this.updateButton.UseVisualStyleBackColor = true;
-            this.updateButton.Click += new System.EventHandler(this.Button1_Click);
-            // 
             // textAddress
             // 
-            this.textAddress.BackColor = System.Drawing.SystemColors.Control;
-            this.textAddress.Location = new System.Drawing.Point(137, 38);
-            this.textAddress.Margin = new System.Windows.Forms.Padding(4);
+            this.textAddress.BackColor = System.Drawing.Color.Transparent;
+            this.textAddress.Location = new System.Drawing.Point(131, 41);
+            this.textAddress.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.textAddress.Name = "textAddress";
-            this.textAddress.Size = new System.Drawing.Size(84, 22);
+            this.textAddress.Size = new System.Drawing.Size(79, 13);
             this.textAddress.TabIndex = 39;
             // 
             // label1
@@ -211,31 +193,20 @@ namespace SingleTact_Demo
             // textGain
             // 
             this.textGain.BackColor = System.Drawing.Color.Transparent;
-            this.textGain.Location = new System.Drawing.Point(137, 70);
+            this.textGain.Location = new System.Drawing.Point(131, 73);
             this.textGain.Margin = new System.Windows.Forms.Padding(4);
             this.textGain.Name = "textGain";
-            this.textGain.Size = new System.Drawing.Size(84, 22);
+            this.textGain.Size = new System.Drawing.Size(79, 13);
             this.textGain.TabIndex = 40;
             // 
             // textTare
             // 
-            this.textTare.BackColor = System.Drawing.SystemColors.Control;
-            this.textTare.Location = new System.Drawing.Point(137, 104);
+            this.textTare.BackColor = System.Drawing.Color.Transparent;
+            this.textTare.Location = new System.Drawing.Point(131, 105);
             this.textTare.Margin = new System.Windows.Forms.Padding(4);
             this.textTare.Name = "textTare";
-            this.textTare.Size = new System.Drawing.Size(84, 22);
+            this.textTare.Size = new System.Drawing.Size(79, 13);
             this.textTare.TabIndex = 41;
-            // 
-            // scaleFactorLabel
-            // 
-            this.scaleFactorLabel.AutoSize = true;
-            this.scaleFactorLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.scaleFactorLabel.Location = new System.Drawing.Point(5, 137);
-            this.scaleFactorLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.scaleFactorLabel.Name = "scaleFactorLabel";
-            this.scaleFactorLabel.Size = new System.Drawing.Size(83, 13);
-            this.scaleFactorLabel.TabIndex = 45;
-            this.scaleFactorLabel.Text = "Scale Factor:";
             // 
             // label8
             // 
@@ -259,19 +230,6 @@ namespace SingleTact_Demo
             this.label7.TabIndex = 43;
             this.label7.Text = "Reference Gain:";
             // 
-            // scaleFactor
-            // 
-            this.scaleFactor.Location = new System.Drawing.Point(133, 137);
-            this.scaleFactor.Margin = new System.Windows.Forms.Padding(1);
-            this.scaleFactor.Maximum = 6400;
-            this.scaleFactor.Minimum = 100;
-            this.scaleFactor.Name = "scaleFactor";
-            this.scaleFactor.Size = new System.Drawing.Size(92, 45);
-            this.scaleFactor.TabIndex = 46;
-            this.scaleFactor.TickFrequency = 640;
-            this.scaleFactor.Value = 100;
-            this.scaleFactor.Scroll += new System.EventHandler(this.scaleFactor__Scroll);
-            // 
             // tabPage2
             // 
             this.tabPage2.BackColor = System.Drawing.Color.WhiteSmoke;
@@ -285,7 +243,7 @@ namespace SingleTact_Demo
             this.tabPage2.Padding = new System.Windows.Forms.Padding(1);
             this.tabPage2.Size = new System.Drawing.Size(228, 218);
             this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Update Flash";
+            this.tabPage2.Text = "Update Setting";
             // 
             // label2
             // 
@@ -421,7 +379,6 @@ namespace SingleTact_Demo
             this.Settings.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.scaleFactor)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
             this.ResumeLayout(false);
@@ -442,11 +399,10 @@ namespace SingleTact_Demo
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ComboBox i2cAddressInputComboBox_;
         private System.Windows.Forms.Button SetSettingsButton;
-        private System.Windows.Forms.TextBox textAddress;
+        private System.Windows.Forms.Label textAddress;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label textGain;
-        private System.Windows.Forms.TextBox textTare;
-        private System.Windows.Forms.Label scaleFactorLabel;
+        private System.Windows.Forms.Label textTare;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.ComboBox ActiveSensor;
