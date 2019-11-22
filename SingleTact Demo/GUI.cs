@@ -23,7 +23,7 @@ namespace SingleTact_Demo
 {
     public partial class GUI : Form
     {
-        private string version = "2.0";
+        private string version = "GitHub Source";
         private bool backgroundIsFinished_ = false;  // Flag to check background thread is finished
         private double measuredFrequency_ = 50;  // Sensor update rate
         private int timerItr_ = 0;  // Some things are slower that the timer frequency
