@@ -120,6 +120,9 @@ namespace SingleTact_Demo
             // 
             this.Settings.AccessibleName = "Settings";
             this.Settings.AccessibleRole = System.Windows.Forms.AccessibleRole.None;
+            this.Settings.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.Settings.Controls.Add(this.tabPage1);
             this.Settings.Controls.Add(this.tabPage2);
             this.Settings.Location = new System.Drawing.Point(9, 339);
@@ -155,7 +158,7 @@ namespace SingleTact_Demo
             this.firmwareLabel.Location = new System.Drawing.Point(131, 13);
             this.firmwareLabel.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             this.firmwareLabel.Name = "firmwareLabel";
-            this.firmwareLabel.Size = new System.Drawing.Size(79, 16);
+            this.firmwareLabel.Size = new System.Drawing.Size(45, 16);
             this.firmwareLabel.TabIndex = 49;
             this.firmwareLabel.Text = "0.0.0.0";
             // 
