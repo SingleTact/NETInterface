@@ -120,9 +120,8 @@ namespace SingleTact_Demo
             // 
             this.Settings.AccessibleName = "Settings";
             this.Settings.AccessibleRole = System.Windows.Forms.AccessibleRole.None;
-            this.Settings.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.Settings.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.Settings.Controls.Add(this.tabPage1);
             this.Settings.Controls.Add(this.tabPage2);
             this.Settings.Location = new System.Drawing.Point(9, 339);
