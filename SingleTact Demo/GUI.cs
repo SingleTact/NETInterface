@@ -354,7 +354,7 @@ namespace SingleTact_Demo
                     string name = prettyPorts[index].ToString().Split('-')[1] + " " + (index+1).ToString();
                     if (USBdevices[index].singleTact.firmwareVersion > 0)
                     {
-                        if (!USBdevices[index].isCalibrated)
+                        if (USBdevices[index].isCalibrated)
                         {
                             name = name + "(calibrated)";
                         }else
@@ -449,7 +449,7 @@ namespace SingleTact_Demo
                         string name = portName.ToString().Split('-')[1] + " " + (index + 1).ToString();
                         if (USBdevices[index].singleTact.firmwareVersion > 0)
                         {
-                            if (!USBdevices[index].isCalibrated)
+                            if (USBdevices[index].isCalibrated)
                             {
                                 name = name + "(calibrated)";
                             }
