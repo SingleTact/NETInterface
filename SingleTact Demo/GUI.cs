@@ -23,7 +23,6 @@ namespace SingleTact_Demo
 {
     public partial class GUI : Form
     {
-        private string version = "GitHub Source";
         private bool backgroundIsFinished_ = false;  // Flag to check background thread is finished
         private double measuredFrequency_ = 50;  // Sensor update rate
         private int timerItr_ = 0;  // Some things are slower that the timer frequency
@@ -616,7 +615,7 @@ namespace SingleTact_Demo
             //Update update rate
             timerItr_++;
             if (0 == timerItr_ % 5)
-                this.Text = "PPS SingleTact Demo - Version " + version + " [ " + measuredFrequency_.ToString("##0") + " Hz ]";
+                this.Text = Application.ProductName + " - Version " + Application.ProductVersion + " [ " + measuredFrequency_.ToString("##0") + " Hz ]";
         }
 
         /// <summary>
