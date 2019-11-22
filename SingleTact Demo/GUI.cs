@@ -220,13 +220,20 @@ namespace SingleTact_Demo
             {
                 string[] portSplit = port.Split('-');
                 // replace COM port with index
-                String name = portSplit[1] + " " + (prettyPorts.IndexOf(port) + 1).ToString() + " (calibrated)";
+                String name = portSplit[1] + " " + (prettyPorts.IndexOf(port) + 1).ToString();
 
-                if (!USBdevices[j].isCalibrated)
+                if (USBdevices[j].singleTact.firmwareVersion > 0)
                 {
-                    name = name.Replace("calibrated", "uncalibrated");
+                    if (!USBdevices[j].isCalibrated)
+                    {
+                        name = name + "(calibrated)";
+                    }
+                    else
+                    {
+                        name = name + "(uncalibrated)";
+                    }
                 }
-               
+
                 ActiveSensor.Items.Add(name);
                 j++;
             }
@@ -254,7 +261,7 @@ namespace SingleTact_Demo
             ActiveSensor.DropDownWidth = maxWidth;
 
             // Get firmware version
-            firmwareLabel.Text = activeSingleTact.firmwareVersion;
+            firmwareLabel.Text = activeSingleTact.firmwareVersion.ToString();
 
         }
 
@@ -334,11 +341,17 @@ namespace SingleTact_Demo
 
                 if (graphPane.CurveList.Count <= index)  // initialise curves
                 {
-                    string name = prettyPorts[index].ToString().Split('-')[1] + " " + (index+1).ToString() + " (calibrated)";
-                    if (!USBdevices[index].isCalibrated)
+                    string name = prettyPorts[index].ToString().Split('-')[1] + " " + (index+1).ToString();
+                    if (USBdevices[index].singleTact.firmwareVersion > 0)
                     {
-                        name = name.Replace("calibrated", "uncalibrated");
-                    }
+                        if (!USBdevices[index].isCalibrated)
+                        {
+                            name = name + "(calibrated)";
+                        }else
+                        {
+                            name = name + "(uncalibrated)";
+                        }
+                    }                   
                     LineItem myCurve = new LineItem(
                         name,
                         data_pt.data[0],
@@ -423,10 +436,17 @@ namespace SingleTact_Demo
                     foreach(string portName in prettyPorts)
                     {
                         int index = prettyPorts.IndexOf(portName);
-                        string name = portName.ToString().Split('-')[1] + " " + (index + 1).ToString() + " (calibrated)";
-                        if (!USBdevices[index].isCalibrated)
+                        string name = portName.ToString().Split('-')[1] + " " + (index + 1).ToString();
+                        if (USBdevices[index].singleTact.firmwareVersion > 0)
                         {
-                            name = name.Replace("calibrated", "uncalibrated");
+                            if (!USBdevices[index].isCalibrated)
+                            {
+                                name = name + "(calibrated)";
+                            }
+                            else
+                            {
+                                name = name + "(uncalibrated)";
+                            }
                         }
                         columnNames += portName + " (PSI)" + separator;
                     }
