@@ -50,7 +50,7 @@ namespace SingleTact_Demo
             this.updateButton = new System.Windows.Forms.Button();
             this.textAddress = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.textGain = new System.Windows.Forms.TextBox();
+            this.textGain = new System.Windows.Forms.Label();
             this.textTare = new System.Windows.Forms.TextBox();
             this.scaleFactorLabel = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
@@ -127,7 +127,7 @@ namespace SingleTact_Demo
             this.Settings.Controls.Add(this.tabPage1);
             this.Settings.Controls.Add(this.tabPage2);
             this.Settings.Location = new System.Drawing.Point(9, 339);
-            this.Settings.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            this.Settings.Margin = new System.Windows.Forms.Padding(1);
             this.Settings.Name = "Settings";
             this.Settings.SelectedIndex = 0;
             this.Settings.Size = new System.Drawing.Size(236, 247);
@@ -149,9 +149,9 @@ namespace SingleTact_Demo
             this.tabPage1.Controls.Add(this.label7);
             this.tabPage1.Controls.Add(this.scaleFactor);
             this.tabPage1.Location = new System.Drawing.Point(4, 25);
-            this.tabPage1.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            this.tabPage1.Margin = new System.Windows.Forms.Padding(1);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(1);
             this.tabPage1.Size = new System.Drawing.Size(228, 218);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Settings";
@@ -180,7 +180,7 @@ namespace SingleTact_Demo
             // updateButton
             // 
             this.updateButton.Location = new System.Drawing.Point(137, 169);
-            this.updateButton.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            this.updateButton.Margin = new System.Windows.Forms.Padding(1);
             this.updateButton.Name = "updateButton";
             this.updateButton.Size = new System.Drawing.Size(82, 26);
             this.updateButton.TabIndex = 47;
@@ -192,7 +192,7 @@ namespace SingleTact_Demo
             // 
             this.textAddress.BackColor = System.Drawing.SystemColors.Control;
             this.textAddress.Location = new System.Drawing.Point(137, 38);
-            this.textAddress.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textAddress.Margin = new System.Windows.Forms.Padding(4);
             this.textAddress.Name = "textAddress";
             this.textAddress.Size = new System.Drawing.Size(84, 22);
             this.textAddress.TabIndex = 39;
@@ -210,9 +210,9 @@ namespace SingleTact_Demo
             // 
             // textGain
             // 
-            this.textGain.BackColor = System.Drawing.SystemColors.Control;
+            this.textGain.BackColor = System.Drawing.Color.Transparent;
             this.textGain.Location = new System.Drawing.Point(137, 70);
-            this.textGain.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textGain.Margin = new System.Windows.Forms.Padding(4);
             this.textGain.Name = "textGain";
             this.textGain.Size = new System.Drawing.Size(84, 22);
             this.textGain.TabIndex = 40;
@@ -221,7 +221,7 @@ namespace SingleTact_Demo
             // 
             this.textTare.BackColor = System.Drawing.SystemColors.Control;
             this.textTare.Location = new System.Drawing.Point(137, 104);
-            this.textTare.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textTare.Margin = new System.Windows.Forms.Padding(4);
             this.textTare.Name = "textTare";
             this.textTare.Size = new System.Drawing.Size(84, 22);
             this.textTare.TabIndex = 41;
@@ -262,7 +262,7 @@ namespace SingleTact_Demo
             // scaleFactor
             // 
             this.scaleFactor.Location = new System.Drawing.Point(133, 137);
-            this.scaleFactor.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            this.scaleFactor.Margin = new System.Windows.Forms.Padding(1);
             this.scaleFactor.Maximum = 6400;
             this.scaleFactor.Minimum = 100;
             this.scaleFactor.Name = "scaleFactor";
@@ -280,10 +280,10 @@ namespace SingleTact_Demo
             this.tabPage2.Controls.Add(this.i2cAddressInputComboBox_);
             this.tabPage2.Controls.Add(this.SetSettingsButton);
             this.tabPage2.Location = new System.Drawing.Point(4, 25);
-            this.tabPage2.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            this.tabPage2.Margin = new System.Windows.Forms.Padding(1);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(1, 1, 1, 1);
-            this.tabPage2.Size = new System.Drawing.Size(228, 211);
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(1);
+            this.tabPage2.Size = new System.Drawing.Size(228, 218);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Update Flash";
             // 
@@ -312,7 +312,7 @@ namespace SingleTact_Demo
             // 
             this.i2cAddressInputComboBox_.FormattingEnabled = true;
             this.i2cAddressInputComboBox_.Location = new System.Drawing.Point(115, 91);
-            this.i2cAddressInputComboBox_.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.i2cAddressInputComboBox_.Margin = new System.Windows.Forms.Padding(4);
             this.i2cAddressInputComboBox_.Name = "i2cAddressInputComboBox_";
             this.i2cAddressInputComboBox_.Size = new System.Drawing.Size(101, 24);
             this.i2cAddressInputComboBox_.TabIndex = 54;
@@ -320,7 +320,7 @@ namespace SingleTact_Demo
             // SetSettingsButton
             // 
             this.SetSettingsButton.Location = new System.Drawing.Point(8, 118);
-            this.SetSettingsButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.SetSettingsButton.Margin = new System.Windows.Forms.Padding(4);
             this.SetSettingsButton.Name = "SetSettingsButton";
             this.SetSettingsButton.Size = new System.Drawing.Size(204, 28);
             this.SetSettingsButton.TabIndex = 51;
@@ -332,7 +332,7 @@ namespace SingleTact_Demo
             // 
             this.ActiveSensor.FormattingEnabled = true;
             this.ActiveSensor.Location = new System.Drawing.Point(108, 157);
-            this.ActiveSensor.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            this.ActiveSensor.Margin = new System.Windows.Forms.Padding(1);
             this.ActiveSensor.Name = "ActiveSensor";
             this.ActiveSensor.Size = new System.Drawing.Size(135, 24);
             this.ActiveSensor.TabIndex = 69;
@@ -351,7 +351,7 @@ namespace SingleTact_Demo
             // tareAll
             // 
             this.tareAll.Location = new System.Drawing.Point(9, 219);
-            this.tareAll.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            this.tareAll.Margin = new System.Windows.Forms.Padding(1);
             this.tareAll.Name = "tareAll";
             this.tareAll.Size = new System.Drawing.Size(231, 28);
             this.tareAll.TabIndex = 68;
@@ -362,7 +362,7 @@ namespace SingleTact_Demo
             // SetBaselineButton
             // 
             this.SetBaselineButton.Location = new System.Drawing.Point(9, 186);
-            this.SetBaselineButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.SetBaselineButton.Margin = new System.Windows.Forms.Padding(4);
             this.SetBaselineButton.Name = "SetBaselineButton";
             this.SetBaselineButton.Size = new System.Drawing.Size(231, 28);
             this.SetBaselineButton.TabIndex = 67;
@@ -373,7 +373,7 @@ namespace SingleTact_Demo
             // buttonSave
             // 
             this.buttonSave.Location = new System.Drawing.Point(9, 253);
-            this.buttonSave.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonSave.Margin = new System.Windows.Forms.Padding(4);
             this.buttonSave.Name = "buttonSave";
             this.buttonSave.Size = new System.Drawing.Size(231, 28);
             this.buttonSave.TabIndex = 63;
@@ -411,7 +411,7 @@ namespace SingleTact_Demo
             this.Controls.Add(this.picPpsLogo);
             this.Controls.Add(this.graph_);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MinimumSize = new System.Drawing.Size(511, 213);
             this.Name = "GUI";
             this.Text = "PPS SingleTact Demo [XXHz]";
@@ -444,7 +444,7 @@ namespace SingleTact_Demo
         private System.Windows.Forms.Button SetSettingsButton;
         private System.Windows.Forms.TextBox textAddress;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox textGain;
+        private System.Windows.Forms.Label textGain;
         private System.Windows.Forms.TextBox textTare;
         private System.Windows.Forms.Label scaleFactorLabel;
         private System.Windows.Forms.Label label8;
