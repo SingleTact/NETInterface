@@ -234,7 +234,7 @@ namespace SingleTact_Demo
 
                 if (USBdevices[j].singleTact.firmwareVersion > 0)
                 {
-                    if (USBdevices[j].isCalibrated)
+                    if (!USBdevices[j].isCalibrated)
                     {
                         name = name + "(calibrated)";
                     }
