@@ -237,11 +237,7 @@ namespace SingleTact_Demo
                     if (USBdevices[j].isCalibrated)
                     {
                         name = name + "(calibrated)";
-                    }
-                    else
-                    {
-                        name = name + "(uncalibrated)";
-                    }
+                    }                   
                 }
 
                 ActiveSensor.Items.Add(name);
@@ -356,9 +352,6 @@ namespace SingleTact_Demo
                         if (USBdevices[index].isCalibrated)
                         {
                             name = name + "(calibrated)";
-                        }else
-                        {
-                            name = name + "(uncalibrated)";
                         }
                     }                   
                     LineItem myCurve = new LineItem(
@@ -451,11 +444,7 @@ namespace SingleTact_Demo
                             if (USBdevices[index].isCalibrated)
                             {
                                 name = name + "(calibrated)";
-                            }
-                            else
-                            {
-                                name = name + "(uncalibrated)";
-                            }
+                            }                            
                         }
                         columnNames += portName + " (PSI)" + separator;
                     }
