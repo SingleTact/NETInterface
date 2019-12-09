@@ -20,10 +20,10 @@ namespace SingleTactLibrary
         const int INDEX_SERIAL_NUMBER_MSB = 1;
         const int INDEX_SERIAL_NUMBER_LSB = 2;
         const int INDEX_PWM_PIN_MODE = 3;
-        const int INDEX_FIRMWARE_REVISION = 4;
+        const int INDEX_CONVERSION_SIZE = 4;
         const int INDEX_Accumulator = 5;
         const int INDEX_REFERENCE_GAIN = 6;
-        const int INDEX_CONVERSION_SIZE = 7;
+        const int INDEX_FIRMWARE_REVISION = 7;
         const int INDEX_DISCHARGE_TIMER = 8;
         const int INDEX_OUTPUT_CURRENT = 9;
         const int INDEX_SCALING_MSB = 10;
