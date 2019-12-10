@@ -23,7 +23,6 @@ namespace SingleTactLibrary
         List<byte> incommingSerialBuffer_ = new List<byte>();
 
         byte cmdItr_ = 0;
-        private UInt16 lastItr_ = 0;
         public bool isUSB = false;
 
         public const int TIMESTAMP_SIZE = 4;

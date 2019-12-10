@@ -414,8 +414,6 @@ namespace SingleTact_Demo
         private System.Windows.Forms.Button buttonSave;
         private System.Windows.Forms.LinkLabel linkLabel1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TrackBar scaleFactor;
-        private System.Windows.Forms.Button updateButton;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label firmwareLabel;
     }
