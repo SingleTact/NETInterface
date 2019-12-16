@@ -173,27 +173,58 @@ namespace SingleTact_Demo
             this.Close();
         }
 
+        private class USBInfo
+        {
+            public string detail;
+            public string VID;
+            public string PID;
+        }
         private List<String> getPrettyPortNames(String[] serialPorts)
         {  // Get a human readable version of comport similar to device manager
-            String name = "";
-            List<String> details;
+            List<USBInfo> devices = new List<USBInfo>();
             List<String> names = new List<string>();
 
             using (var searcher = new ManagementObjectSearcher("SELECT * FROM WIN32_SerialPort"))
             {
                 var ports = searcher.Get().Cast<ManagementBaseObject>().ToList();
-                details = (from n in serialPorts
-                           join p in ports on n equals p["DeviceID"].ToString()
-                           select n + " - " + p["Caption"]).ToList();
+
+                ManagementObjectCollection collection;
+                collection = searcher.Get();
+
+                foreach (var device in collection)
+                {
+                    USBInfo temp = new USBInfo();
+                    temp.detail = (String)device.GetPropertyValue("DeviceID") + " - " + (String)device.GetPropertyValue("Caption");
+                    String DeviceID = (String)device.GetPropertyValue("PNPDeviceID");
+                    int VIDIndex = DeviceID.IndexOf("VID_");
+                    int PIDIndex = DeviceID.IndexOf("PID_");
+
+                    temp.PID = DeviceID.Substring(PIDIndex + 4, 4);
+                    temp.VID = DeviceID.Substring(VIDIndex + 4, 4);
+                    devices.Add(temp);
+                }
             }
 
-            foreach (string detail in details)
+            foreach (USBInfo device in devices.ToList())
             {
-                if (detail.Contains("Arduino"))
+                if (device.detail.Contains("Arduino"))
                 {
-                    name = detail.Replace("Arduino Leonardo", "PPS Sensor");
+                    String name = device.detail.Replace("Arduino Leonardo", "PPS Sensor");
                     name = name.Split(new string[] { " (" }, StringSplitOptions.None)[0];
                     names.Add(name);
+                    devices.Remove(device);
+                }
+            }
+            if (devices.Count > 0)
+            {
+                foreach (USBInfo device in devices.ToList())
+                {
+                    if (device.PID.Equals("8036") && device.VID.Equals("2341"))
+                    {
+                        String name = device.detail.Replace("USB Serial Device", "PPS Sensor");
+                        name = name.Split(new string[] { " (" }, StringSplitOptions.None)[0];
+                        names.Add(name);
+                    }
                 }
             }
             return names;
