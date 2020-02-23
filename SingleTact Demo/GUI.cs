@@ -505,8 +505,12 @@ namespace SingleTact_Demo
                         }
                     }
                     if (NBtoForceFactor == 0)
-                    {                         
+                    {
                         columnNames += "NB (0 = 0 PSI;  511 = Full Scale Range)";
+                    }
+                    else
+                    {
+                        columnNames += "(Selected Full Scale Range: " + NBtoForceFactor + "N)";
                     }
                     dataWriter.WriteLine(columnNames);
 
@@ -881,50 +885,39 @@ namespace SingleTact_Demo
         }
         private void sensorRange_SelectedIndexChanged(object sender, EventArgs e)
         {
+            double tempFactor = 0;
             try
             {
-                NBtoForceFactor = Convert.ToDouble(sensorRange.SelectedItem);
+                tempFactor = Convert.ToDouble(sensorRange.SelectedItem);
             }
             catch
             {
-                NBtoForceFactor = 0;
+                tempFactor = 0;
             }
+            if (tempFactor == NBtoForceFactor)
+                return;
+            NBtoForceFactor = tempFactor;
+            double greenBoxMax = 0;
             if (NBtoForceFactor != 0)
             {
                 graph_.GraphPane.YAxis.Title.Text = "Force (N)";
                 graph_.GraphPane.YAxis.Scale.Max = 1.5 * NBtoForceFactor; //Valid range
                 graph_.GraphPane.YAxis.Scale.Min = -0.5 * NBtoForceFactor;
-                graph_.GraphPane.YAxis.AxisGap = (float)NBtoForceFactor / 500;
-                if (graph_.GraphPane.GraphObjList.Count != 0)
-                    graph_.GraphPane.GraphObjList.RemoveAt(0);
-
-                // Draw a box item to highlight the valid range
-                BoxObj box = new BoxObj(0, NBtoForceFactor, 30, NBtoForceFactor, Color.Empty,
-                                        Color.FromArgb(150, Color.LightGreen));
-                box.Fill = new Fill(Color.FromArgb(200, Color.LightGreen),
-                                    Color.FromArgb(200, Color.LightGreen), 45.0F);
-                // Use the BehindGrid zorder to draw the highlight beneath the grid lines
-                box.ZOrder = ZOrder.F_BehindGrid;
-                graph_.GraphPane.GraphObjList.Add(box);
+                greenBoxMax = NBtoForceFactor;
             }
             else
             {
                 graph_.GraphPane.YAxis.Title.Text = "Output (511 = Full Scale Range)";
                 graph_.GraphPane.YAxis.Scale.Max = 768; //Valid range
-                graph_.GraphPane.YAxis.Scale.Min = -255;
-
-                if (graph_.GraphPane.GraphObjList.Count != 0)
-                    graph_.GraphPane.GraphObjList.RemoveAt(0);
-
-                // Draw a box item to highlight the valid range
-                BoxObj box = new BoxObj(0, 512, 30, 512, Color.Empty,
-                                        Color.FromArgb(150, Color.LightGreen));
-                box.Fill = new Fill(Color.FromArgb(200, Color.LightGreen),
-                                    Color.FromArgb(200, Color.LightGreen), 45.0F);
-                // Use the BehindGrid zorder to draw the highlight beneath the grid lines
-                box.ZOrder = ZOrder.F_BehindGrid;
-                graph_.GraphPane.GraphObjList.Add(box);
+                graph_.GraphPane.YAxis.Scale.Min = -255;               
+                greenBoxMax = 512;
             }
+            BoxObj b = (BoxObj)graph_.GraphPane.GraphObjList[0];
+            b.Location.X = 0;
+            b.Location.Y = Math.Min(graph_.GraphPane.YAxis.Scale.Max, greenBoxMax);
+            b.Location.Height = Math.Min(graph_.GraphPane.YAxis.Scale.Max - graph_.GraphPane.YAxis.Scale.Min, greenBoxMax);
+            graph_.GraphPane.XAxis.Scale.Max = 30;
+            graph_.GraphPane.XAxis.Scale.Min = 0;
             USBdevices[0].setTimestamp(0);
             USBdevices[0].removeAllFrame();
             USBdevices[0].singleTact.resetTimeStamp();
