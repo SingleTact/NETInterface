@@ -35,6 +35,7 @@ namespace SingleTact_Demo
         private List<USBdevice> USBdevices = new List<USBdevice>();
         private SingleTact activeSingleTact;
         private delegate void CloseMainFormDelegate(); //Used to close the program if hardware is not connected
+        private double NBtoForceFactor = 0;
 
         public GUI()
         {
@@ -157,12 +158,34 @@ namespace SingleTact_Demo
         private void updateUIforOneDevice()
         {
             //hide GUI elements intended for multiple USBs
+            //hide GUI elements intended for multiple USBs         
             tareAll.Text = "Tare";
-            tareAll.Top -= 60;
-            buttonSave.Top -= 60;
-            Settings.Top -= 60;
-            linkLabel1.Top -= 60;
-            Settings.Height += 60;
+            int UIOffset = 60;
+            if (USBdevices[0].isCalibrated == true && USBdevices[0].singleTact.Settings.FirmwareVersion > 0)
+            {
+                sensorRange.Visible = true;
+                sensorRangeLabel.Visible = true;
+                if (USBdevices[0].singleTact.Settings.ReferenceGain == 1)
+                {
+                    sensorRange.Items.Add(' ');
+                    sensorRange.Items.Add("4.5");
+                    sensorRange.Items.Add("45");
+                    sensorRange.Items.Add("450");
+                }
+                if (USBdevices[0].singleTact.Settings.ReferenceGain == 5)
+                {
+                    sensorRange.Items.Add(' ');
+                    sensorRange.Items.Add("1");
+                    sensorRange.Items.Add("10");
+                    sensorRange.Items.Add("100");
+                }
+                UIOffset = 30;
+            }          
+            tareAll.Top -= UIOffset;
+            buttonSave.Top -= UIOffset;
+            Settings.Top -= UIOffset;
+            linkLabel1.Top -= UIOffset;
+            Settings.Height += UIOffset;
             SetBaselineButton.Visible = false;
             ActiveSensorLabel.Visible = false;
             ActiveSensor.Visible = false;
@@ -342,6 +365,12 @@ namespace SingleTact_Demo
         /// <param name="measurements"></param>
         private void AddData(double time, double[] measurements, USBdevice USB)
         {
+            if (NBtoForceFactor != 0)
+            {
+                for (int i = 0; i < measurements.Length; i++)
+                    measurements[i] = measurements[i] * NBtoForceFactor / 512;
+            }
+
             USB.dataBuffer.AddData(measurements, time);  // update 
         }
 
@@ -395,8 +424,16 @@ namespace SingleTact_Demo
                     //Update green valid region box
                     BoxObj b = (BoxObj)graphPane.GraphObjList[0];
                     b.Location.X = graphPane.XAxis.Scale.Max - graphXRange_;
-                    b.Location.Y = Math.Min(graphPane.YAxis.Scale.Max, 512);
-                    b.Location.Height = Math.Min(graphPane.YAxis.Scale.Max - graphPane.YAxis.Scale.Min, 512);
+                    if (NBtoForceFactor != 0)
+                    {
+                        b.Location.Y = Math.Min(graphPane.YAxis.Scale.Max, NBtoForceFactor);
+                        b.Location.Height = Math.Min(graphPane.YAxis.Scale.Max - graphPane.YAxis.Scale.Min, NBtoForceFactor);
+                    }
+                    else
+                    {
+                        b.Location.Y = Math.Min(graphPane.YAxis.Scale.Max, 512);
+                        b.Location.Height = Math.Min(graphPane.YAxis.Scale.Max - graphPane.YAxis.Scale.Min, 512);
+                    }
                     graph_.AxisChange();
 
                 }
@@ -458,9 +495,19 @@ namespace SingleTact_Demo
                                 name = name + "(calibrated)";
                             }                            
                         }
-                        columnNames += portName + " (PSI)" + separator;
+                        if (NBtoForceFactor != 0)
+                        {
+                            columnNames += portName + " (N)" + separator;
+                        }
+                        else
+                        {
+                            columnNames += portName + " (NB)" + separator;
+                        }
                     }
-                    columnNames += "NB (0 = 0 PSI;  511 = Full Scale Range)";
+                    if (NBtoForceFactor == 0)
+                    {                         
+                        columnNames += "NB (0 = 0 PSI;  511 = Full Scale Range)";
+                    }
                     dataWriter.WriteLine(columnNames);
 
                     // write data
@@ -831,6 +878,60 @@ namespace SingleTact_Demo
                 SetSettingsButton.Enabled = true;
             }
             RefreshFlashSettings_Click(this, null); //Update display
+        }
+        private void sensorRange_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                NBtoForceFactor = Convert.ToDouble(sensorRange.SelectedItem);
+            }
+            catch
+            {
+                NBtoForceFactor = 0;
+            }
+            if (NBtoForceFactor != 0)
+            {
+                graph_.GraphPane.YAxis.Title.Text = "Force (N)";
+                graph_.GraphPane.YAxis.Scale.Max = 1.5 * NBtoForceFactor; //Valid range
+                graph_.GraphPane.YAxis.Scale.Min = -0.5 * NBtoForceFactor;
+                graph_.GraphPane.YAxis.AxisGap = (float)NBtoForceFactor / 500;
+                if (graph_.GraphPane.GraphObjList.Count != 0)
+                    graph_.GraphPane.GraphObjList.RemoveAt(0);
+
+                // Draw a box item to highlight the valid range
+                BoxObj box = new BoxObj(0, NBtoForceFactor, 30, NBtoForceFactor, Color.Empty,
+                                        Color.FromArgb(150, Color.LightGreen));
+                box.Fill = new Fill(Color.FromArgb(200, Color.LightGreen),
+                                    Color.FromArgb(200, Color.LightGreen), 45.0F);
+                // Use the BehindGrid zorder to draw the highlight beneath the grid lines
+                box.ZOrder = ZOrder.F_BehindGrid;
+                graph_.GraphPane.GraphObjList.Add(box);
+            }
+            else
+            {
+                graph_.GraphPane.YAxis.Title.Text = "Output (511 = Full Scale Range)";
+                graph_.GraphPane.YAxis.Scale.Max = 768; //Valid range
+                graph_.GraphPane.YAxis.Scale.Min = -255;
+
+                if (graph_.GraphPane.GraphObjList.Count != 0)
+                    graph_.GraphPane.GraphObjList.RemoveAt(0);
+
+                // Draw a box item to highlight the valid range
+                BoxObj box = new BoxObj(0, 512, 30, 512, Color.Empty,
+                                        Color.FromArgb(150, Color.LightGreen));
+                box.Fill = new Fill(Color.FromArgb(200, Color.LightGreen),
+                                    Color.FromArgb(200, Color.LightGreen), 45.0F);
+                // Use the BehindGrid zorder to draw the highlight beneath the grid lines
+                box.ZOrder = ZOrder.F_BehindGrid;
+                graph_.GraphPane.GraphObjList.Add(box);
+            }
+            USBdevices[0].setTimestamp(0);
+            USBdevices[0].removeAllFrame();
+            USBdevices[0].singleTact.resetTimeStamp();
+            graph_.GraphPane.CurveList[0].Clear();
+            graph_.AxisChange();
+            graph_.Invalidate();
+            graph_.Refresh();
         }
 
         private void GUI_Load(object sender, EventArgs e)

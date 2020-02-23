@@ -60,6 +60,8 @@ namespace SingleTact_Demo
             this.SetSettingsButton = new System.Windows.Forms.Button();
             this.ActiveSensor = new System.Windows.Forms.ComboBox();
             this.ActiveSensorLabel = new System.Windows.Forms.Label();
+            this.sensorRange = new System.Windows.Forms.ComboBox();
+            this.sensorRangeLabel = new System.Windows.Forms.Label();
             this.tareAll = new System.Windows.Forms.Button();
             this.SetBaselineButton = new System.Windows.Forms.Button();
             this.buttonSave = new System.Windows.Forms.Button();
@@ -288,6 +290,28 @@ namespace SingleTact_Demo
             this.SetSettingsButton.UseVisualStyleBackColor = true;
             this.SetSettingsButton.Click += new System.EventHandler(this.SetSettingsButton_Click);
             // 
+            // sensorRange
+            // 
+            this.sensorRange.FormattingEnabled = true;
+            this.sensorRange.Location = new System.Drawing.Point(108, 157);
+            this.sensorRange.Margin = new System.Windows.Forms.Padding(1);
+            this.sensorRange.Name = "Sensor Range";
+            this.sensorRange.Size = new System.Drawing.Size(135, 24);
+            this.sensorRange.TabIndex = 69;
+            this.sensorRange.SelectedIndexChanged += new System.EventHandler(this.sensorRange_SelectedIndexChanged);
+            this.sensorRange.Visible = false;
+            // 
+            // sensorRangeLabel
+            // 
+            this.sensorRangeLabel.AutoSize = true;
+            this.sensorRangeLabel.Location = new System.Drawing.Point(5, 159);
+            this.sensorRangeLabel.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
+            this.sensorRangeLabel.Name = "sensorRangeLabel";
+            this.sensorRangeLabel.Size = new System.Drawing.Size(108, 16);
+            this.sensorRangeLabel.TabIndex = 70;
+            this.sensorRangeLabel.Text = "Sensor Range (N)";
+            this.sensorRangeLabel.Visible = false;
+            // 
             // ActiveSensor
             // 
             this.ActiveSensor.FormattingEnabled = true;
@@ -370,6 +394,8 @@ namespace SingleTact_Demo
             this.Controls.Add(this.Settings);
             this.Controls.Add(this.picPpsLogo);
             this.Controls.Add(this.graph_);
+            this.Controls.Add(this.sensorRange);
+            this.Controls.Add(this.sensorRangeLabel);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.MinimumSize = new System.Drawing.Size(511, 213);
@@ -409,6 +435,8 @@ namespace SingleTact_Demo
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.ComboBox ActiveSensor;
         private System.Windows.Forms.Label ActiveSensorLabel;
+        private System.Windows.Forms.ComboBox sensorRange;
+        private System.Windows.Forms.Label sensorRangeLabel;
         private System.Windows.Forms.Button tareAll;
         private System.Windows.Forms.Button SetBaselineButton;
         private System.Windows.Forms.Button buttonSave;

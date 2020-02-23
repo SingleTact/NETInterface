@@ -50,6 +50,14 @@ namespace SingleTact_Demo
             _frameList.Add(frame);
         }
 
+        /// <summary>
+        /// Remove all frame to frame list
+        /// </summary>
+        public void removeAllFrame()
+        {
+            _frameList.Clear();
+        }
+
 
         /// <summary>
         /// Update last timestamp

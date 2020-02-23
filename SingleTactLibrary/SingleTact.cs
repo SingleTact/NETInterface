@@ -116,6 +116,10 @@ namespace SingleTactLibrary
         }
 
 
+        public void resetTimeStamp()
+        {
+            isFirst = true;
+        }
         /// <summary>
         /// Pull settings from sensor flash (updating local copy)
         /// </summary>
