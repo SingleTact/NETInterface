@@ -616,7 +616,7 @@ namespace SingleTact_Demo
                             AddData(USBdevices[0].lastTimeStamp, newFrame.SensorData, USB); //Add to stripchart
                     
                     }
-                    else  // USB has been unplugged
+                    /*else  // USB has been unplugged
                     {
                         new Thread(() =>
                         {
@@ -638,7 +638,7 @@ namespace SingleTact_Demo
                         backgroundIsFinished_ = false;
                         StopAcquisitionThread();
                         break;
-                    }
+                    }*/
 
                     //Calculate rate
                     double delta = newFrame.TimeStamp - USB.lastTimeStamp; // calculate delta relative to previous sensor's last reading
