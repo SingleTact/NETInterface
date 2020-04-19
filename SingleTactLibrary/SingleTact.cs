@@ -163,38 +163,34 @@ namespace SingleTactLibrary
             {
                 UInt16 itr = (UInt16)((newByteData[0 + ArduinoSingleTactDriver.TIMESTAMP_SIZE] << 8) + newByteData[1 + ArduinoSingleTactDriver.TIMESTAMP_SIZE]);
 
-                if (itr_ != itr)
+                if (itr_ == itr && lastFrame_ != null)
                 {
-                    itr_ = itr;
-                    
-                    UInt32 timeStampRaw = (UInt32)((newByteData[0] << 24) + (newByteData[1] << 16) + (newByteData[2] << 8) + newByteData[3]);
-                    if (isFirst == true)
-                    {
-                        isFirst = false;
-                        startTime = timeStampRaw;
-                    }
-                    timeStampRaw -= startTime;
-                    double timeStamp = (double)timeStampRaw / 10000.0; //10kHz clock
-
-                    UInt16[] sensorData = new UInt16[(int)(newByteData.Length - ArduinoSingleTactDriver.TIMESTAMP_SIZE - 4) / 2];
-
-                    //Do it manually to avoid confusion with Endianess - Windows is little, sensor is big.
-                    //ToDo find a more elegent solution!
-                    for (int i = 0; i < sensorData.Length; i++)
-                    {
-                        sensorData[i] = (UInt16)((newByteData[2 * i + 4 + ArduinoSingleTactDriver.TIMESTAMP_SIZE] << 8) + newByteData[2 * i + 5 + ArduinoSingleTactDriver.TIMESTAMP_SIZE]);
-                    }
-
-                    SingleTactFrame toReturn = new SingleTactFrame(sensorData, timeStamp);
-                    lastFrame_ = toReturn.DeepClone(); // keep a local copy of the last frame, used in taring
-                    return toReturn;
+                    return lastFrame_;
                 }
-                else
+                itr_ = itr;
+
+                UInt32 timeStampRaw = (UInt32)((newByteData[0] << 24) + (newByteData[1] << 16) + (newByteData[2] << 8) + newByteData[3]);
+                if (isFirst == true)
                 {
-                    return null;
+                    isFirst = false;
+                    startTime = timeStampRaw;
                 }
+                timeStampRaw -= startTime;
+                double timeStamp = (double)timeStampRaw / 10000.0; //10kHz clock
+
+                UInt16[] sensorData = new UInt16[(int)(newByteData.Length - ArduinoSingleTactDriver.TIMESTAMP_SIZE - 4) / 2];
+
+                //Do it manually to avoid confusion with Endianess - Windows is little, sensor is big.
+                //ToDo find a more elegent solution!
+                for (int i = 0; i < sensorData.Length; i++)
+                {
+                    sensorData[i] = (UInt16)((newByteData[2 * i + 4 + ArduinoSingleTactDriver.TIMESTAMP_SIZE] << 8) + newByteData[2 * i + 5 + ArduinoSingleTactDriver.TIMESTAMP_SIZE]);
+                }
+
+                SingleTactFrame toReturn = new SingleTactFrame(sensorData, timeStamp);
+                lastFrame_ = toReturn.DeepClone(); // keep a local copy of the last frame, used in taring
+                return toReturn;
             }
-
             else  // USB has been unplugged
             {
                 return null;
