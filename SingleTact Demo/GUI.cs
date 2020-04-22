@@ -48,7 +48,17 @@ namespace SingleTact_Demo
             // Get available serial ports.
             String[] ports = SerialPort.GetPortNames();
             prettyPorts = getPrettyPortNames(ports);
-
+            if (prettyPorts.Count == 0)
+            {
+                MessageBox.Show(
+                            "Failed to start sensor: no serial ports detected.\n\n",
+                           "Hardware initialisation failed",
+                           MessageBoxButtons.OK,
+                           MessageBoxIcon.Exclamation);
+                // There's no point showing the GUI.  Force the app to auto-close.
+                this.Shown += new EventHandler(this.CloseOnStart);
+                Environment.Exit(-1);
+            }
             if (0 != ports.Length)
             {
                 // Assume Arduino is on the first port during startup.
@@ -110,26 +120,29 @@ namespace SingleTact_Demo
                     catch
                     {
                         MessageBox.Show(
-                            "Failed to start sensor.\n\n",
+                            "Failed to start sensor: no serial ports detected.\n\n",
                             "Hardware initialisation failed",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Exclamation);
                         // There's no point showing the GUI.  Force the app to auto-close.
                         this.Shown += new EventHandler(this.CloseOnStart);
+                        Environment.Exit(-1);
                     }
                 }
                 try
                 {
                     PopulateGUIFields();
-                }catch
+                }
+                catch
                 {
                     MessageBox.Show(
-                        "Failed to start sensor.\n\n",
+                        "Failed to start sensor: no serial ports detected.\n\n",
                         "Hardware initialisation failed",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Exclamation);
                     // There's no point showing the GUI.  Force the app to auto-close.
                     this.Shown += new EventHandler(this.CloseOnStart);
+                    Environment.Exit(-1);
                 }
             }
 
@@ -170,6 +183,7 @@ namespace SingleTact_Demo
 
                 // There's no point showing the GUI.  Force the app to auto-close.
                 this.Shown += new EventHandler(this.CloseOnStart);
+                Environment.Exit(-1);
             }
         }
 
