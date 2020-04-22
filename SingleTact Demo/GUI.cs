@@ -107,12 +107,30 @@ namespace SingleTact_Demo
                             updateUIforOneDevice();
                         }
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        exceptionMessage = ex.Message;
+                        MessageBox.Show(
+                            "Failed to start sensor.\n\n",
+                            "Hardware initialisation failed",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Exclamation);
+                        // There's no point showing the GUI.  Force the app to auto-close.
+                        this.Shown += new EventHandler(this.CloseOnStart);
                     }
                 }
-                PopulateGUIFields();
+                try
+                {
+                    PopulateGUIFields();
+                }catch
+                {
+                    MessageBox.Show(
+                        "Failed to start sensor.\n\n",
+                        "Hardware initialisation failed",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Exclamation);
+                    // There's no point showing the GUI.  Force the app to auto-close.
+                    this.Shown += new EventHandler(this.CloseOnStart);
+                }
             }
 
             try
