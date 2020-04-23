@@ -51,7 +51,7 @@ namespace SingleTact_Demo
             if (prettyPorts.Count == 0)
             {
                 MessageBox.Show(
-                            "Failed to start sensor: no serial ports detected.\n\n",
+                            "Failed to start sensor: no serial ports detected.\n\nPlease connect the device then restart this application.",
                            "Hardware initialisation failed",
                            MessageBoxButtons.OK,
                            MessageBoxIcon.Exclamation);
@@ -120,7 +120,7 @@ namespace SingleTact_Demo
                     catch
                     {
                         MessageBox.Show(
-                            "Failed to start sensor: no serial ports detected.\n\n",
+                            "Failed to start sensor: no serial ports detected.\n\nPlease connect the device then restart this application.",
                             "Hardware initialisation failed",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Exclamation);
@@ -136,7 +136,7 @@ namespace SingleTact_Demo
                 catch
                 {
                     MessageBox.Show(
-                        "Failed to start sensor: no serial ports detected.\n\n",
+                        "Failed to start sensor: no serial ports detected.\n\nPlease connect the device then restart this application.",
                         "Hardware initialisation failed",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Exclamation);
@@ -173,7 +173,7 @@ namespace SingleTact_Demo
                 if (exceptionMessage != null)
                     summary += exceptionMessage;
                 else
-                    summary += "Please connect the Arduino then restart this application.";
+                    summary += "Please connect the device then restart this application.";
 
                 MessageBox.Show(
                     summary,
