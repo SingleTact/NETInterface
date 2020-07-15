@@ -46,8 +46,10 @@ namespace SingleTact_Demo
             InitializeComponent();
 
             // Get available serial ports.
-            String[] ports = SerialPort.GetPortNames();
-            prettyPorts = getPrettyPortNames(ports);
+            String[] portsTemp = SerialPort.GetPortNames();
+            List<String> deviceID = new List<string>();
+            (prettyPorts, deviceID) = getPrettyPortNames(portsTemp);
+            String[] ports = deviceID.ToArray();
             if (prettyPorts.Count == 0)
             {
                 MessageBox.Show(
@@ -228,10 +230,10 @@ namespace SingleTact_Demo
             this.Close();
         }
 
-        private List<String> getPrettyPortNames(String[] serialPorts)
+        private (List<String>, List<String>) getPrettyPortNames(String[] serialPorts)
         {  // Get a human readable version of comport similar to device manager
             List<String> names = new List<string>();
-
+            List<String> deviceIDs = new List<string>();
             using (var searcher = new ManagementObjectSearcher("SELECT * FROM WIN32_SerialPort"))
             {
                 var ports = searcher.Get().Cast<ManagementBaseObject>().ToList();
@@ -256,13 +258,15 @@ namespace SingleTact_Demo
                     if (caption.Contains("Arduino"))
                     {
                         names.Add(deviceID + " - " + caption);
+                        deviceIDs.Add(deviceID);
                     }else if(PID.Equals("8036") && VID.Equals("2341"))
                     {
                         names.Add(deviceID + " - PPS Sensor");
+                        deviceIDs.Add(deviceID);
                     }
                 }
             }            
-            return names;
+            return (names, deviceIDs);
         }
 
 
