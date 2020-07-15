@@ -61,6 +61,7 @@ namespace SingleTact_Demo
                 this.Shown += new EventHandler(this.CloseOnStart);
                 Environment.Exit(-1);
             }
+
             if (0 != ports.Length)
             {
                 // Assume Arduino is on the first port during startup.
