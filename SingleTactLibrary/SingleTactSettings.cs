@@ -19,8 +19,8 @@ namespace SingleTactLibrary
         const int INDEX_SMBUSADDRESS = 0;
         const int INDEX_SERIAL_NUMBER_MSB = 1;
         const int INDEX_SERIAL_NUMBER_LSB = 2;
-        const int INDEX_PWM_PIN_MODE = 3;
-        const int INDEX_CONVERSION_SIZE = 4;
+        const int INDEX_SN_MSB = 3;
+        const int INDEX_SN_LSB = 4;
         const int INDEX_Accumulator = 5;
         const int INDEX_REFERENCE_GAIN = 6;
         const int INDEX_FIRMWARE_REVISION = 7;
@@ -68,12 +68,12 @@ namespace SingleTactLibrary
         }
 
         /// <summary>
-        /// PWM Pin mode
+        /// Serial Number
         /// </summary>
-        public PWMPinModes PWMPinMode
+        public UInt16 SerialNumber
         {
-            get { return (PWMPinModes)settingsRaw_[INDEX_PWM_PIN_MODE]; }
-            set { settingsRaw_[INDEX_PWM_PIN_MODE] = (byte)(value); }
+            get { return (UInt16)(settingsRaw_[INDEX_SN_MSB] * 256 + settingsRaw_[INDEX_SN_LSB]); }
+            set { settingsRaw_[INDEX_SN_MSB] = (byte)(value >> 8); settingsRaw_[INDEX_SN_LSB] = (byte)(value & 0xFF); }
         }
 
         /// <summary>
@@ -101,15 +101,6 @@ namespace SingleTactLibrary
         {
             get { return settingsRaw_[INDEX_REFERENCE_GAIN]; }
             set { settingsRaw_[INDEX_REFERENCE_GAIN] = value; }
-        }
-
-        /// <summary>
-        /// See CY8051F70x datasheet, chapter 15
-        /// </summary>
-        public byte ConversionSize
-        {
-            get { return settingsRaw_[INDEX_CONVERSION_SIZE]; }
-            set { settingsRaw_[INDEX_CONVERSION_SIZE] = value; }
         }
 
         /// <summary>

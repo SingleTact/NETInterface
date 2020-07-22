@@ -431,6 +431,8 @@ namespace SingleTact_Demo
                         {
                             name = name + "(calibrated)";
                         }
+                        if (USB.singleTact.Settings.SerialNumber != 0)
+                            name += " SN" + USB.singleTact.Settings.SerialNumber.ToString("D5");
                     }                   
                     LineItem myCurve = new LineItem(
                         name,
