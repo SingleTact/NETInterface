@@ -64,7 +64,7 @@ namespace SingleTactLibrary
         /// </summary>
         public void PushSettingsToHardware()
         {
-            for (int i = 0; i < 7; i++)  //We need to do this over 7 transfers
+            for (int i = 0; i < 2; i++)  //We need to do this over 2 transfers
             {
                 const int PacketSize = 16;
 
