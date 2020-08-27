@@ -9,6 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using Microsoft.AppCenter;
+using Microsoft.AppCenter.Analytics;
+using Microsoft.AppCenter.Crashes;
 
 namespace SingleTact_Demo
 {
@@ -22,6 +25,8 @@ namespace SingleTact_Demo
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            AppCenter.Start("a653d802-28db-4d01-b426-17dabe236a61",
+                   typeof(Analytics), typeof(Crashes));
             try
             {
                 Application.Run(new GUI());
