@@ -754,6 +754,7 @@ namespace SingleTact_Demo
                     textAddress.Text = "0x" + activeSingleTact.Settings.I2CAddress.ToString("X2");
                     textGain.Text = activeSingleTact.Settings.ReferenceGain.ToString("00") + " (" + (activeSingleTact.Settings.ReferenceGain + 1).ToString("0") + "x)";
                     textTare.Text = activeSingleTact.Settings.Baselines.ElementAt(0).ToString("0000");
+                    textScale.Text = activeSingleTact.Settings.Scaling.ToString();
                     i2cAddressInputComboBox_.SelectedIndex = activeSingleTact.Settings.I2CAddress - reservedAddresses;
 
                 }
