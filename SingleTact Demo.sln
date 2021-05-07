@@ -1,12 +1,16 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30523.141
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SingleTact Demo", "SingleTact Demo\SingleTact Demo.csproj", "{FBC82521-1493-4A04-8523-CDC2F3627D28}"
 	ProjectSection(ProjectDependencies) = postProject
 		{2623C116-7211-42AB-BD34-8D14BEF6831B} = {2623C116-7211-42AB-BD34-8D14BEF6831B}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SingleTactLibrary", "SingleTactLibrary\SingleTactLibrary.csproj", "{2623C116-7211-42AB-BD34-8D14BEF6831B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SingleTact Barebones", "SingleTact Barebones\SingleTact Barebones.csproj", "{4C586081-9951-4BCC-BF0E-888D52386F06}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,8 +42,23 @@ Global
 		{2623C116-7211-42AB-BD34-8D14BEF6831B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{2623C116-7211-42AB-BD34-8D14BEF6831B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{2623C116-7211-42AB-BD34-8D14BEF6831B}.Release|x86.ActiveCfg = Release|Any CPU
+		{4C586081-9951-4BCC-BF0E-888D52386F06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C586081-9951-4BCC-BF0E-888D52386F06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C586081-9951-4BCC-BF0E-888D52386F06}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{4C586081-9951-4BCC-BF0E-888D52386F06}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{4C586081-9951-4BCC-BF0E-888D52386F06}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4C586081-9951-4BCC-BF0E-888D52386F06}.Debug|x86.Build.0 = Debug|Any CPU
+		{4C586081-9951-4BCC-BF0E-888D52386F06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C586081-9951-4BCC-BF0E-888D52386F06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C586081-9951-4BCC-BF0E-888D52386F06}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{4C586081-9951-4BCC-BF0E-888D52386F06}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{4C586081-9951-4BCC-BF0E-888D52386F06}.Release|x86.ActiveCfg = Release|Any CPU
+		{4C586081-9951-4BCC-BF0E-888D52386F06}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {871373C7-98E2-40EF-95A9-A8B5512A5919}
 	EndGlobalSection
 EndGlobal
