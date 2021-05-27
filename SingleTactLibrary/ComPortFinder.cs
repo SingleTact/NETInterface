@@ -81,6 +81,11 @@ namespace SingleTactLibrary
             }
             return SingleTactUSBList;
         }
+        public string prettyToComPort(String pretty)
+        {
+            // get just comport to initialise devices
+            return pretty.Split(new string[] { " -" }, StringSplitOptions.None)[0];
+        }
 
     }
 }
