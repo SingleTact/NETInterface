@@ -52,7 +52,6 @@ namespace SingleTact_Demo
                MessageBoxButtons.OK,
                MessageBoxIcon.Exclamation);
                 // There's no point showing the GUI.  Force the app to auto-close.
-                this.Shown += new EventHandler(this.CloseOnStart);
                 Environment.Exit(-1);
             }
             else
@@ -60,7 +59,7 @@ namespace SingleTact_Demo
                 for (int i = 0; i < comPortList.Count; i++)
                 {
                     USBdevice USB = new USBdevice();
-                    USB.Initialise(prettyToComPort(comPortList[i]));
+                    USB.Initialise(finder.prettyToComPort(comPortList[i]));
                     USBdevices.Add(USB);
                 }
                 if (comPortList.Count == 1)
@@ -103,7 +102,6 @@ namespace SingleTact_Demo
                     MessageBoxIcon.Exclamation);
 
                 // There's no point showing the GUI.  Force the app to auto-close.
-                this.Shown += new EventHandler(this.CloseOnStart);
                 Environment.Exit(-1);
             }
         }
@@ -143,18 +141,6 @@ namespace SingleTact_Demo
             ActiveSensorLabel.Visible = false;
             ActiveSensor.Visible = false;
         }
-
-        private void CloseOnStart(object sender, EventArgs e)
-        {
-            this.Close();
-        }
-
-        private string prettyToComPort(String pretty)
-        {
-            // get just comport to initialise devices
-            return pretty.Split(new string[] { " -" }, StringSplitOptions.None)[0];
-        }
-
 
         /// <summary>
         /// Fill appropriate Values into GUI Comboboxes
