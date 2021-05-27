@@ -37,7 +37,7 @@ namespace SingleTact_Demo
         /// </summary>
         /// <param name="measurements">Measurements</param>
         /// <param name="time">Time in ms</param>
-        public void AddData(double[] measurements, double time)
+        public int AddData(double[] measurements, double time)
         {
             //Resize data store to fit number of measurements
             while (measurements.Length > data.Count)
@@ -53,6 +53,11 @@ namespace SingleTact_Demo
             }
 
             mostRecentTime_ = time;
+            if (data[0].Count >= MAX_NUMBER_MESUREMENTS * 0.9)
+            {
+                return -1;
+            }
+            return 0;
         }
 
         public SingleTactData Clone()

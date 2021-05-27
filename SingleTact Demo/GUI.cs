@@ -31,127 +31,49 @@ namespace SingleTact_Demo
         private const int reservedAddresses = 4; // Don't use I2C addresses 0 to 3
         private Object workThreadLock = new Object(); //Thread synchronization
         private List<string> serialPortNames = new List<string>();
-        private  List<String> prettyPorts = new List<string>();
+        private List<String> prettyPorts = new List<string>();
         private List<USBdevice> USBdevices = new List<USBdevice>();
         private SingleTact activeSingleTact;
         private delegate void CloseMainFormDelegate(); //Used to close the program if hardware is not connected
         private double NBtoForceFactor = 0;
-
+        private bool shownMemoryFullMessage = false;
         public GUI()
         {
-
-            string serialPortName = null;
             string exceptionMessage = null;
 
             InitializeComponent();
 
             // Get available serial ports.
-            String[] portsTemp = SerialPort.GetPortNames();
-            List<String> deviceID = new List<string>();
-            (prettyPorts, deviceID) = getPrettyPortNames(portsTemp);
-            String[] ports = deviceID.ToArray();
-            if (prettyPorts.Count == 0)
+            List<string> deviceList = findSingletact();
+            if (deviceList.Count == 0)
             {
                 MessageBox.Show(
-                            "Failed to start sensor: no serial ports detected.\n\nPlease connect the device then restart this application.",
-                           "Hardware initialisation failed",
-                           MessageBoxButtons.OK,
-                           MessageBoxIcon.Exclamation);
+                "Failed to start sensor: no serial ports detected.\n\nPlease connect the device then restart this application.",
+               "Hardware initialisation failed",
+               MessageBoxButtons.OK,
+               MessageBoxIcon.Exclamation);
                 // There's no point showing the GUI.  Force the app to auto-close.
                 this.Shown += new EventHandler(this.CloseOnStart);
                 Environment.Exit(-1);
-            }
-
-            if (0 != ports.Length)
+            }else if (deviceList.Count == 1)
             {
-                // Assume Arduino is on the first port during startup.
-                serialPortName = ports[0];
-                bool portSelected = false;
-                while (!portSelected)
+                USBdevice USB = new USBdevice();
+                USB.Initialise(deviceList[0]);
+                USBdevices.Add(USB);
+                updateUIforOneDevice();
+            }
+            else
+            {
+                foreach (string portName in serialPortNames)
                 {
-                    try
-                    {
-                        // if there's more than one PPS/Arduino device connected
-                        if (prettyPorts.Count > 1)
-                        {
-                            // Ask user to select from multiple serial ports.
-                            SerialPortSelector selector = new SerialPortSelector(prettyPorts);
-                            selector.ShowDialog();
-                            serialPortNames = selector.SelectedPorts;
-                            prettyPorts = serialPortNames;  // remove unselected ports
-                            List<String> comPorts = new List<string>();
-                            foreach (String portName in serialPortNames)
-                            {
-                                comPorts.Add(prettyToComPort(portName));
-                            }
-                            serialPortNames = comPorts;
-
-                            if (serialPortNames.Count == 0) // no port selected, loop
-                            {
-                                MessageBox.Show("Please select at least one port");
-                            }
-
-                            else
-                            {
-
-                                portSelected = true;
-
-                                if (serialPortNames.Count == 1) // User selected one port only
-                                {
-                                    //hide GUI elements intended for multiple USBs
-                                    updateUIforOneDevice();
-                                }
-
-                                foreach (string portName in serialPortNames)
-                                {
-                                    USBdevice USB = new USBdevice();
-                                    USB.Initialise(portName);
-                                    USBdevices.Add(USB);
-                                }
-                            }
-                        }
-                        else if (prettyPorts.Count == 1)  // there is only one device connected
-                        {
-                            portSelected = true;
-                            serialPortNames.Add(serialPortName);
-                            USBdevice USB = new USBdevice();
-                            USB.Initialise(serialPortName);
-                            USBdevices.Add(USB);
-                            updateUIforOneDevice();
-                        }
-                    }
-                    catch
-                    {
-                        MessageBox.Show(
-                            "Failed to start sensor: no serial ports detected.\n\nPlease connect the device then restart this application.",
-                            "Hardware initialisation failed",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Exclamation);
-                        // There's no point showing the GUI.  Force the app to auto-close.
-                        this.Shown += new EventHandler(this.CloseOnStart);
-                        Environment.Exit(-1);
-                    }
-                }
-                try
-                {
-                    PopulateGUIFields();
-                }
-                catch
-                {
-                    MessageBox.Show(
-                        "Failed to start sensor: no serial ports detected.\n\nPlease connect the device then restart this application.",
-                        "Hardware initialisation failed",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Exclamation);
-                    // There's no point showing the GUI.  Force the app to auto-close.
-                    this.Shown += new EventHandler(this.CloseOnStart);
-                    Environment.Exit(-1);
+                    USBdevice USB = new USBdevice();
+                    USB.Initialise(portName);
+                    USBdevices.Add(USB);                    
                 }
             }
-
             try
             {
-                var usb = USBdevices[0];  // Force exception to occur if there are no USB devices
+                PopulateGUIFields();
                 foreach (USBdevice USB in USBdevices)
                 {
                     USB.singleTact.PushSettingsToHardware();
@@ -166,10 +88,10 @@ namespace SingleTact_Demo
             {
                 string summary = "Failed to start sensor";
 
-                if (serialPortName == null)
+                if (deviceList.Count == 0)
                     summary += ": no serial ports detected.";
                 else
-                    summary += " on " + serialPortName + ".";
+                    summary += " on " + deviceList[0] + ".";
 
                 summary += "\n\n";
 
@@ -188,6 +110,46 @@ namespace SingleTact_Demo
                 this.Shown += new EventHandler(this.CloseOnStart);
                 Environment.Exit(-1);
             }
+        }
+
+        private List<string> findSingletact()
+        {
+            List<string> SingleTactUSBList = new List<string>();
+            List<String> deviceID = new List<string>();
+            (prettyPorts, deviceID) = getPrettyPortNames();
+            if (deviceID.Count == 1)
+            {
+                SingleTactUSBList.Add(deviceID[0]);
+            }
+            else if (deviceID.Count > 1)
+            {
+                // if there's more than one PPS/Arduino device connected
+                bool portSelected = false;
+                while (!portSelected)
+                {
+                    if (prettyPorts.Count > 1)
+                    {
+                        // Ask user to select from multiple serial ports.
+                        SerialPortSelector selector = new SerialPortSelector(prettyPorts);
+                        selector.ShowDialog();
+                        serialPortNames = selector.SelectedPorts;
+                        prettyPorts = serialPortNames;  // remove unselected ports
+                        foreach (String portName in serialPortNames)
+                        {
+                            SingleTactUSBList.Add(prettyToComPort(portName));
+                        }
+                        if (SingleTactUSBList.Count == 0) // no port selected, loop
+                        {
+                            MessageBox.Show("Please select at least one port");
+                        }
+                        else
+                        {
+                            portSelected = true;   
+                        }
+                    }
+                }
+            }
+            return SingleTactUSBList;
         }
 
         private void updateUIforOneDevice()
@@ -231,10 +193,10 @@ namespace SingleTact_Demo
             this.Close();
         }
 
-        private (List<String>, List<String>) getPrettyPortNames(String[] serialPorts)
+        private (List<String>, List<String>) getPrettyPortNames()
         {  // Get a human readable version of comport similar to device manager
             List<String> names = new List<string>();
-            List<String> deviceIDs = new List<string>();
+            List<String> COMNumber = new List<string>();
             using (var searcher = new ManagementObjectSearcher("SELECT * FROM WIN32_SerialPort"))
             {
                 var ports = searcher.Get().Cast<ManagementBaseObject>().ToList();
@@ -259,15 +221,15 @@ namespace SingleTact_Demo
                     if (caption.Contains("Arduino"))
                     {
                         names.Add(deviceID + " - " + caption);
-                        deviceIDs.Add(deviceID);
+                        COMNumber.Add(deviceID);
                     }else if(PID.Equals("8036") && VID.Equals("2341"))
                     {
                         names.Add(deviceID + " - PPS Sensor");
-                        deviceIDs.Add(deviceID);
+                        COMNumber.Add(deviceID);
                     }
                 }
             }            
-            return (names, deviceIDs);
+            return (names, COMNumber);
         }
 
 
@@ -408,7 +370,12 @@ namespace SingleTact_Demo
                     measurements[i] = measurements[i] * NBtoForceFactor / 512;
             }
 
-            USB.dataBuffer.AddData(measurements, time);  // update 
+            int result = USB.dataBuffer.AddData(measurements, time);  // update 
+            if (result == -1 && !shownMemoryFullMessage)
+            {
+                shownMemoryFullMessage = true;
+                MessageBox.Show("Memory almost full. Please save the data.");
+            }
         }
 
         private void updateGraph(USBdevice USB)
