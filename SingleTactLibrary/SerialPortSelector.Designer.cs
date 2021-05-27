@@ -1,4 +1,4 @@
-﻿namespace SingleTact_Demo
+﻿namespace SingleTactLibrary
 {
    partial class SerialPortSelector
    {

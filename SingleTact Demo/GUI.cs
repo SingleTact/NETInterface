@@ -30,9 +30,8 @@ namespace SingleTact_Demo
         private const int graphXRange_ = 30; // 30 seconds
         private const int reservedAddresses = 4; // Don't use I2C addresses 0 to 3
         private Object workThreadLock = new Object(); //Thread synchronization
-        private List<string> serialPortNames = new List<string>();
-        private List<String> prettyPorts = new List<string>();
         private List<USBdevice> USBdevices = new List<USBdevice>();
+        private List<string> comPortList = new List<string>();
         private SingleTact activeSingleTact;
         private delegate void CloseMainFormDelegate(); //Used to close the program if hardware is not connected
         private double NBtoForceFactor = 0;
@@ -42,35 +41,32 @@ namespace SingleTact_Demo
             string exceptionMessage = null;
 
             InitializeComponent();
-
+            var finder = new ComPortFinder();
             // Get available serial ports.
-            List<string> deviceList = findSingletact();
-            if (deviceList.Count == 0)
+            comPortList = finder.findSingleTact();
+            if (comPortList.Count == 0)
             {
                 MessageBox.Show(
-                "Failed to start sensor: no serial ports detected.\n\nPlease connect the device then restart this application.",
+                "Failed to start sensor: no serial ports found.\n\nPlease connect the device then restart this application.",
                "Hardware initialisation failed",
                MessageBoxButtons.OK,
                MessageBoxIcon.Exclamation);
                 // There's no point showing the GUI.  Force the app to auto-close.
                 this.Shown += new EventHandler(this.CloseOnStart);
                 Environment.Exit(-1);
-            }else if (deviceList.Count == 1)
-            {
-                USBdevice USB = new USBdevice();
-                USB.Initialise(deviceList[0]);
-                USBdevices.Add(USB);
-                updateUIforOneDevice();
             }
             else
             {
-                foreach (string portName in serialPortNames)
+                for (int i = 0; i < comPortList.Count; i++)
                 {
                     USBdevice USB = new USBdevice();
-                    USB.Initialise(portName);
-                    USBdevices.Add(USB);                    
+                    USB.Initialise(prettyToComPort(comPortList[i]));
+                    USBdevices.Add(USB);
                 }
+                if (comPortList.Count == 1)
+                    updateUIforOneDevice();
             }
+
             try
             {
                 PopulateGUIFields();
@@ -88,10 +84,10 @@ namespace SingleTact_Demo
             {
                 string summary = "Failed to start sensor";
 
-                if (deviceList.Count == 0)
+                if (comPortList.Count == 0)
                     summary += ": no serial ports detected.";
                 else
-                    summary += " on " + deviceList[0] + ".";
+                    summary += " on " + comPortList[0] + ".";
 
                 summary += "\n\n";
 
@@ -110,46 +106,6 @@ namespace SingleTact_Demo
                 this.Shown += new EventHandler(this.CloseOnStart);
                 Environment.Exit(-1);
             }
-        }
-
-        private List<string> findSingletact()
-        {
-            List<string> SingleTactUSBList = new List<string>();
-            List<String> deviceID = new List<string>();
-            (prettyPorts, deviceID) = getPrettyPortNames();
-            if (deviceID.Count == 1)
-            {
-                SingleTactUSBList.Add(deviceID[0]);
-            }
-            else if (deviceID.Count > 1)
-            {
-                // if there's more than one PPS/Arduino device connected
-                bool portSelected = false;
-                while (!portSelected)
-                {
-                    if (prettyPorts.Count > 1)
-                    {
-                        // Ask user to select from multiple serial ports.
-                        SerialPortSelector selector = new SerialPortSelector(prettyPorts);
-                        selector.ShowDialog();
-                        serialPortNames = selector.SelectedPorts;
-                        prettyPorts = serialPortNames;  // remove unselected ports
-                        foreach (String portName in serialPortNames)
-                        {
-                            SingleTactUSBList.Add(prettyToComPort(portName));
-                        }
-                        if (SingleTactUSBList.Count == 0) // no port selected, loop
-                        {
-                            MessageBox.Show("Please select at least one port");
-                        }
-                        else
-                        {
-                            portSelected = true;   
-                        }
-                    }
-                }
-            }
-            return SingleTactUSBList;
         }
 
         private void updateUIforOneDevice()
@@ -193,46 +149,6 @@ namespace SingleTact_Demo
             this.Close();
         }
 
-        private (List<String>, List<String>) getPrettyPortNames()
-        {  // Get a human readable version of comport similar to device manager
-            List<String> names = new List<string>();
-            List<String> COMNumber = new List<string>();
-            using (var searcher = new ManagementObjectSearcher("SELECT * FROM WIN32_SerialPort"))
-            {
-                var ports = searcher.Get().Cast<ManagementBaseObject>().ToList();
-
-                ManagementObjectCollection collection;
-                collection = searcher.Get();
-
-                foreach (var device in collection)
-                {
-                    String deviceID = device.GetPropertyValue("DeviceID").ToString();
-                    String caption = device.GetPropertyValue("Caption").ToString();                   
-                    String DeviceID = device.GetPropertyValue("PNPDeviceID").ToString();
-                    caption = caption.Replace("Arduino Leonardo", "PPS Sensor");
-                    caption = caption.Split(new string[] { " (" }, StringSplitOptions.None)[0];
-                 
-                    int VIDIndex = DeviceID.IndexOf("VID_");
-                    int PIDIndex = DeviceID.IndexOf("PID_");
-
-                    String PID = DeviceID.Substring(PIDIndex + 4, 4);
-                    String VID = DeviceID.Substring(VIDIndex + 4, 4);
-
-                    if (caption.Contains("Arduino"))
-                    {
-                        names.Add(deviceID + " - " + caption);
-                        COMNumber.Add(deviceID);
-                    }else if(PID.Equals("8036") && VID.Equals("2341"))
-                    {
-                        names.Add(deviceID + " - PPS Sensor");
-                        COMNumber.Add(deviceID);
-                    }
-                }
-            }            
-            return (names, COMNumber);
-        }
-
-
         private string prettyToComPort(String pretty)
         {
             // get just comport to initialise devices
@@ -259,11 +175,11 @@ namespace SingleTact_Demo
 
             //Populate active sensor combobox
             int j = 0;
-            foreach (string port in prettyPorts)
+            foreach (string port in comPortList)
             {
                 string[] portSplit = port.Split('-');
                 // replace COM port with index
-                String name = portSplit[1] + " " + (prettyPorts.IndexOf(port) + 1).ToString();
+                String name = portSplit[1] + " " + (comPortList.IndexOf(port) + 1).ToString();
 
                 if (USBdevices[j].singleTact.firmwareVersion > 0)
                 {
@@ -391,7 +307,7 @@ namespace SingleTact_Demo
 
                 if (graphPane.CurveList.Count <= index)  // initialise curves
                 {
-                    string name = prettyPorts[index].ToString().Split('-')[1] + " " + (index+1).ToString();
+                    string name = comPortList[index].ToString().Split('-')[1] + " " + (index+1).ToString();
                     if (USBdevices[index].singleTact.firmwareVersion > 0)
                     {
                         if (USBdevices[index].isCalibrated)
@@ -490,9 +406,9 @@ namespace SingleTact_Demo
                     // write column headers
                     string columnNames = "Time(s)" + separator;
                     // populate columns with serial port names
-                    foreach(string portName in prettyPorts)
+                    foreach(string portName in comPortList)
                     {
-                        int index = prettyPorts.IndexOf(portName);
+                        int index = comPortList.IndexOf(portName);
                         string name = portName.ToString().Split('-')[1] + " " + (index + 1).ToString();
                         if (USBdevices[index].singleTact.firmwareVersion > 0)
                         {
@@ -628,8 +544,8 @@ namespace SingleTact_Demo
                         {
                             guiTimer_.Stop();
                             backgroundIsFinished_ = true;
-                            var index = USBdevices.IndexOf(USB);
-                            var comPort = serialPortNames[index];
+                            var index = USBdevices.IndexOf(USB);                            
+                            var comPort = comPortList[index];
                             var result = MessageBox.Show(
                                 comPort.ToString() + " has been unplugged.\nWould you like to save your data before exiting?",
                                 "Error!",

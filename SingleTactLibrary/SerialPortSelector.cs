@@ -8,7 +8,7 @@ using System.Management;
 using System.Text;
 using System.Windows.Forms;
 
-namespace SingleTact_Demo
+namespace SingleTactLibrary
 {
    public partial class SerialPortSelector : Form
    {
