@@ -70,11 +70,15 @@
     <Compile Include="SingleTactFrame.cs" />
     <Compile Include="SingleTactParameters.cs" />
     <Compile Include="SingleTactSettings.cs" />
+    <Compile Include="USBDevice.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="SerialPortSelector.resx">
       <DependentUpon>SerialPortSelector.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="singletact.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

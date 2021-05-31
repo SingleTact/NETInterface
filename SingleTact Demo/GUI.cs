@@ -30,7 +30,7 @@ namespace SingleTact_Demo
         private const int graphXRange_ = 30; // 30 seconds
         private const int reservedAddresses = 4; // Don't use I2C addresses 0 to 3
         private Object workThreadLock = new Object(); //Thread synchronization
-        private List<USBdevice> USBdevices = new List<USBdevice>();
+        private List<USBdevice_GUI> USBdevices = new List<USBdevice_GUI>();
         private List<string> comPortList = new List<string>();
         private SingleTact activeSingleTact;
         private delegate void CloseMainFormDelegate(); //Used to close the program if hardware is not connected
@@ -58,7 +58,7 @@ namespace SingleTact_Demo
             {
                 for (int i = 0; i < comPortList.Count; i++)
                 {
-                    USBdevice USB = new USBdevice();
+                    USBdevice_GUI USB = new USBdevice_GUI();
                     USB.Initialise(finder.prettyToComPort(comPortList[i]));
                     USBdevices.Add(USB);
                 }
@@ -264,7 +264,7 @@ namespace SingleTact_Demo
         /// </summary>
         /// <param name="time"></param>
         /// <param name="measurements"></param>
-        private void AddData(double time, double[] measurements, USBdevice USB)
+        private void AddData(double time, double[] measurements, USBdevice_GUI USB)
         {
             if (NBtoForceFactor != 0)
             {
@@ -280,7 +280,7 @@ namespace SingleTact_Demo
             }
         }
 
-        private void updateGraph(USBdevice USB)
+        private void updateGraph(USBdevice_GUI USB)
         {
             int index = USBdevices.IndexOf(USB); // get current sensor number
             SingleTactData data_pt = USB.dataBuffer;
@@ -428,7 +428,7 @@ namespace SingleTact_Demo
                     for (int i = 0; i < data_length; i++)  // for each sensor reading
                     {
                         bool first = true;
-                        foreach (USBdevice USB in USBdevices)
+                        foreach (USBdevice_GUI USB in USBdevices)
                         {
                             try
                             {
@@ -511,7 +511,7 @@ namespace SingleTact_Demo
 
             while (!worker.CancellationPending) //Do the work
             {
-                foreach (USBdevice USB in USBdevices)
+                foreach (USBdevice_GUI USB in USBdevices)
                 {
                     SingleTact singleTact = USB.singleTact;
                     SingleTactFrame newFrame = singleTact.ReadSensorData(); //Get sensor data
@@ -566,7 +566,7 @@ namespace SingleTact_Demo
         private void guiTimer__Tick(object sender, EventArgs e)
         {
 
-            foreach (USBdevice USB in USBdevices)
+            foreach (USBdevice_GUI USB in USBdevices)
             {
                 if(!backgroundIsFinished_)
                     updateGraph(USB);

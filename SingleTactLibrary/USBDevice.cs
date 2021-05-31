@@ -2,22 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using SingleTactLibrary;
 
 
-namespace SingleTact_Demo
+namespace SingleTactLibrary
 {
     /// <summary>
     /// Class to contain all aspects of a Singletact USB connection
     /// Including data, frames, and serial port
     /// </summary>
-    class USBdevice
+    public class USBdevice
     {
-        private ArduinoSingleTactDriver _arduino;
-        private SingleTactData _dataBuffer;
-        private List<SingleTactFrame> _frameList;
-        private SingleTact _singleTact;
-        private double _lastTimestamp = 0.0;
+        protected ArduinoSingleTactDriver _arduino;
+        protected List<SingleTactFrame> _frameList;
+        protected SingleTact _singleTact;
+        protected double _lastTimestamp = 0.0;
         public bool isCalibrated = false;
 
 
@@ -25,7 +23,6 @@ namespace SingleTact_Demo
         {
             try
             {
-                _dataBuffer = new SingleTactData();
                 _frameList = new List<SingleTactFrame>();
                 _singleTact = new SingleTact();
                 _arduino = new ArduinoSingleTactDriver();
@@ -66,14 +63,6 @@ namespace SingleTact_Demo
         {
             _lastTimestamp = time;
         }
-
-
-        /// <summary>
-        /// Get copy of USB device's data buffer
-        /// </summary>
-        public SingleTactData dataBuffer
-        { get { return _dataBuffer; } }
-
 
         /// <summary>
         /// Get copy of USB device's last data timestamp
