@@ -305,7 +305,7 @@ namespace SingleTact_Demo
                     }                   
                     LineItem myCurve = new LineItem(
                         name,
-                        data_pt.data[0],
+                        new PointPairList(),
                         colours[index],
                         SymbolType.None,
                         3.0f);
@@ -314,7 +314,12 @@ namespace SingleTact_Demo
                 else
                 {
                     // update curve data with new readings
-                    graphPane.CurveList[index].Points = data_pt.data[0];
+                    if (data_pt.data[0].Count > 1)
+                    {
+                        graphPane.CurveList[index].AddPoint(data_pt.data[0].Peek());//grab the latest value from the buffer.
+                        if (graphPane.CurveList[index].NPts > 100 * 60) //only keep 6000 points on the screen
+                            graphPane.CurveList[index].RemovePoint(0);
+                    }
                 }
 
                 // This is to update the max and min value
