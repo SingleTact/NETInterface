@@ -342,7 +342,11 @@ namespace SingleTact_Demo
                         b.Location.Y = Math.Min(graphPane.YAxis.Scale.Max, 512);
                         b.Location.Height = Math.Min(graphPane.YAxis.Scale.Max - graphPane.YAxis.Scale.Min, 512);
                     }
-                    graph_.AxisChange();
+                    try
+                    {
+                        graph_.AxisChange();
+                    }
+                    catch { }
 
                 }
                 graph_.Refresh();
