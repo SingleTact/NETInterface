@@ -28,6 +28,7 @@ namespace SingleTact_Demo
         private int timerItr_ = 0;  // Some things are slower that the timer frequency
         private bool isFirstFrame_ = true; // Is first frame after boot
         private const int graphXRange_ = 30; // 30 seconds
+        private int memorySpaceUse = 0;
         private const int reservedAddresses = 4; // Don't use I2C addresses 0 to 3
         private Object workThreadLock = new Object(); //Thread synchronization
         private List<USBdevice_GUI> USBdevices = new List<USBdevice_GUI>();
@@ -35,7 +36,6 @@ namespace SingleTact_Demo
         private SingleTact activeSingleTact;
         private delegate void CloseMainFormDelegate(); //Used to close the program if hardware is not connected
         private double NBtoForceFactor = 0;
-        private bool shownMemoryFullMessage = false;
         public GUI()
         {
             string exceptionMessage = null;
@@ -272,12 +272,7 @@ namespace SingleTact_Demo
                     measurements[i] = measurements[i] * NBtoForceFactor / 512;
             }
 
-            int result = USB.dataBuffer.AddData(measurements, time);  // update 
-            if (result == -1 && !shownMemoryFullMessage)
-            {
-                shownMemoryFullMessage = true;
-                MessageBox.Show("Memory almost full. Please save the data.");
-            }
+            memorySpaceUse = USB.dataBuffer.AddData(measurements, time);  // update 
         }
 
         private void updateGraph(USBdevice_GUI USB)
@@ -293,7 +288,7 @@ namespace SingleTact_Demo
 
                 if (graphPane.CurveList.Count <= index)  // initialise curves
                 {
-                    string name = comPortList[index].ToString().Split('-')[1] + " " + (index+1).ToString();
+                    string name = comPortList[index].ToString().Split('-')[1] + " " + (index + 1).ToString();
                     if (USBdevices[index].singleTact.firmwareVersion > 0)
                     {
                         if (USBdevices[index].isCalibrated)
@@ -302,7 +297,7 @@ namespace SingleTact_Demo
                         }
                         if (USB.singleTact.Settings.SerialNumber != 0)
                             name += " SN" + USB.singleTact.Settings.SerialNumber.ToString("D5");
-                    }                   
+                    }
                     LineItem myCurve = new LineItem(
                         name,
                         new PointPairList(),
@@ -585,6 +580,7 @@ namespace SingleTact_Demo
             timerItr_++;
             if (0 == timerItr_ % 5)
                 this.Text = Application.ProductName + " - Version " + Application.ProductVersion + " [ " + measuredFrequency_.ToString("##0") + " Hz ]";
+            memorySpaceBar.Value = memorySpaceUse;
         }
 
         /// <summary>
@@ -849,8 +845,19 @@ namespace SingleTact_Demo
         {
 
         }
-       
-    
+
+        private void memorySpaceBar_Click(object sender, EventArgs e)
+        {
+            foreach (USBdevice_GUI USB in USBdevices)
+            {
+                USB.dataBuffer.data[0].Clear();
+            }
+        }
+
+        private void memorySpaceBar_MouseHover(object sender, EventArgs e)
+        {            
+            toolTip1.Show("Click to clear the buffer.", memorySpaceBar);
+        }
     }
 
 }

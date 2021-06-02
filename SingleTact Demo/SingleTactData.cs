@@ -53,11 +53,7 @@ namespace SingleTact_Demo
             }
 
             mostRecentTime_ = time;
-            if (data[0].Count >= MAX_NUMBER_MESUREMENTS * 0.9)
-            {
-                return -1;
-            }
-            return 0;
+            return (data[0].Count * 100 / MAX_NUMBER_MESUREMENTS);
         }
 
         public SingleTactData Clone()

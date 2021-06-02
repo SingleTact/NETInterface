@@ -45,6 +45,8 @@ namespace SingleTact_Demo
             this.picPpsLogo = new System.Windows.Forms.PictureBox();
             this.Settings = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.memorySpaceBar = new System.Windows.Forms.ProgressBar();
+            this.label6 = new System.Windows.Forms.Label();
             this.textScale = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.firmwareLabel = new System.Windows.Forms.Label();
@@ -68,6 +70,7 @@ namespace SingleTact_Demo
             this.SetBaselineButton = new System.Windows.Forms.Button();
             this.buttonSave = new System.Windows.Forms.Button();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.picPpsLogo)).BeginInit();
             this.Settings.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -140,6 +143,8 @@ namespace SingleTact_Demo
             // tabPage1
             // 
             this.tabPage1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.tabPage1.Controls.Add(this.memorySpaceBar);
+            this.tabPage1.Controls.Add(this.label6);
             this.tabPage1.Controls.Add(this.textScale);
             this.tabPage1.Controls.Add(this.label4);
             this.tabPage1.Controls.Add(this.firmwareLabel);
@@ -157,6 +162,26 @@ namespace SingleTact_Demo
             this.tabPage1.Size = new System.Drawing.Size(287, 280);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Settings";
+            // 
+            // memorySpaceBar
+            // 
+            this.memorySpaceBar.Location = new System.Drawing.Point(164, 211);
+            this.memorySpaceBar.Name = "memorySpaceBar";
+            this.memorySpaceBar.Size = new System.Drawing.Size(99, 16);
+            this.memorySpaceBar.TabIndex = 53;
+            this.memorySpaceBar.Click += new System.EventHandler(this.memorySpaceBar_Click);
+            this.memorySpaceBar.MouseHover += new System.EventHandler(this.memorySpaceBar_MouseHover);
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.Location = new System.Drawing.Point(6, 211);
+            this.label6.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(90, 17);
+            this.label6.TabIndex = 52;
+            this.label6.Text = "Buffer Use:";
             // 
             // textScale
             // 
@@ -471,5 +496,8 @@ namespace SingleTact_Demo
         private System.Windows.Forms.Label firmwareLabel;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label textScale;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.ProgressBar memorySpaceBar;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }
