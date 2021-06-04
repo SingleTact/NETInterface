@@ -856,7 +856,7 @@ namespace SingleTact_Demo
 
         private void memorySpaceBar_MouseHover(object sender, EventArgs e)
         {            
-            toolTip1.Show("Click to clear the buffer.", memorySpaceBar);
+            toolTip1.Show("Click here to clear the buffer.", memorySpaceBar);
         }
     }
 
