@@ -64,18 +64,23 @@ namespace SingleTactLibrary
         /// </summary>
         public void PushSettingsToHardware()
         {
-            for (int i = 0; i < 2; i++)  //We need to do this over 2 transfers
+            for (int i = 0; i < 1; i++)  //We need to do this over 1 transfers
             {
                 const int PacketSize = 16;
-
+                int checksumSize = 0;
+                if (Settings.FirmwareVersion > 1 && Settings.FirmwareVersion < 255)
+                    checksumSize = 1;
+                byte checksum = 0;
                 byte[] toSend = new byte[PacketSize];
 
-                for (int j = 0; j < PacketSize; j++)
+                for (int j = 0; j < (PacketSize - checksumSize); j++)
                 {
                     toSend[j] = Settings.SettingsRaw[i * PacketSize + j];
+                    checksum += toSend[j];
                 }
-
-                if (!arduino_.WriteToMainRegister(toSend, (byte)(i * PacketSize), i2cAddress_))
+                if (checksumSize > 0)
+                    toSend[PacketSize - checksumSize] = checksum;
+                if (!arduino_.WriteToMainRegister(toSend, (byte)(i * (PacketSize - checksumSize)), i2cAddress_))
                 {
                     MessageBox.Show("Failed to write settings", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
