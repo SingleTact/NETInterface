@@ -27,7 +27,7 @@ namespace SingleTact_Barebones
             if (comPortList.Count == 0)
             {
                 MessageBox.Show(
-                "Failed to start sensor: no serial ports found.\n\nPlease connect the device then restart this application.",
+                "Failed to start sensor: no serial ports found.\n\nPlease ensure Arduino drivers are installed.\nThis can be checked by looking if the Arduino is identified in Device Manager.\n\nPlease connect the device then restart this application.",
                "Hardware initialisation failed",
                MessageBoxButtons.OK,
                MessageBoxIcon.Exclamation);
