@@ -36,6 +36,8 @@ namespace SingleTact_Demo
         private SingleTact activeSingleTact;
         private delegate void CloseMainFormDelegate(); //Used to close the program if hardware is not connected
         private double NBtoForceFactor = 0;
+        private DateTime systemStartTime = new DateTime();
+        private bool hasStartTime = false;
         public GUI()
         {
             string exceptionMessage = null;
@@ -383,7 +385,10 @@ namespace SingleTact_Demo
             SaveFileDialog saveDataDialog = new SaveFileDialog();
             saveDataDialog.Filter = "*.csv|*.csv";
             saveDataDialog.RestoreDirectory = true;
-            saveDataDialog.FileName = "SingleTactSampleData";
+            string fileName = "SingleTactSampleData";
+            if (hasStartTime)
+                fileName += "_" + ((DateTimeOffset)systemStartTime).ToUnixTimeSeconds();
+            saveDataDialog.FileName = fileName;
             Invoke((Action)(() => { 
                 if (saveDataDialog.ShowDialog() == DialogResult.OK)
                 {
@@ -392,7 +397,11 @@ namespace SingleTact_Demo
                     string separator = safeSeparator();
                     string saveFileName = saveDataDialog.FileName;
                     StreamWriter dataWriter = new StreamWriter(saveFileName, false, Encoding.Default);
-
+                    if (hasStartTime)
+                    {
+                        dataWriter.WriteLine("Start Time" + separator + systemStartTime.ToString());
+                        dataWriter.WriteLine("");
+                    }
                     // write column headers
                     string columnNames = "Time(s)" + separator;
                     // populate columns with serial port names
@@ -522,11 +531,16 @@ namespace SingleTact_Demo
 
                     if (null != newFrame) //If we have data
                     {
-                            USB.addFrame(newFrame);
+                        USB.addFrame(newFrame);
 
-                            // use first timestamp only to quantise readings and match csv output
-                            AddData(USBdevices[0].lastTimeStamp, newFrame.SensorData, USB); //Add to stripchart
-                    
+                        // use first timestamp only to quantise readings and match csv output
+                        AddData(USBdevices[0].lastTimeStamp, newFrame.SensorData, USB); //Add to stripchart
+
+                        if (!hasStartTime)
+                        {
+                            systemStartTime = DateTime.Now - TimeSpan.FromSeconds(USBdevices[0].lastTimeStamp);
+                            hasStartTime = true;
+                        }
                     }
                     else  // USB has been unplugged
                     {
@@ -835,6 +849,7 @@ namespace SingleTact_Demo
             USBdevices[0].setTimestamp(0);
             USBdevices[0].removeAllFrame();
             USBdevices[0].singleTact.resetTimeStamp();
+            hasStartTime = false;
             graph_.GraphPane.CurveList[0].Clear();
             graph_.AxisChange();
             graph_.Invalidate();
@@ -852,6 +867,7 @@ namespace SingleTact_Demo
             {
                 USB.dataBuffer.data[0].Clear();
             }
+            hasStartTime = false;
         }
 
         private void memorySpaceBar_MouseHover(object sender, EventArgs e)
