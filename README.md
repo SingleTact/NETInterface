@@ -1,6 +1,7 @@
 # NETInterface
 This repo demonstrates how to interface between SingleTact, Arduino and Windows
-through a .NET application.
+through a .NET application. 
+Please download the latest executable files from: https://github.com/SingleTact/NETInterface/releases
 
 # Program Your Arduino Board?
 https://github.com/SingleTact/ExampleArduinoInterface
