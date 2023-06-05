@@ -124,6 +124,9 @@ namespace SingleTact_Demo
                     sensorRange.Items.Add("4.5");
                     sensorRange.Items.Add("45");
                     sensorRange.Items.Add("450");
+                    sensorRange.Items.Add("1");
+                    sensorRange.Items.Add("10");
+                    sensorRange.Items.Add("100");
                 }
                 if (USBdevices[0].singleTact.Settings.ReferenceGain == 5)
                 {
@@ -131,6 +134,9 @@ namespace SingleTact_Demo
                     sensorRange.Items.Add("1");
                     sensorRange.Items.Add("10");
                     sensorRange.Items.Add("100");
+                    sensorRange.Items.Add("4.5");
+                    sensorRange.Items.Add("45");
+                    sensorRange.Items.Add("450");
                 }
                 UIOffset = 30;
             }          
