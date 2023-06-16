@@ -689,17 +689,23 @@ namespace SingleTact_Demo
                 // which is OK because the firmware fully controls this anyway.
                 activeSingleTact.Settings.I2CAddress = (byte)(i2cAddressInputComboBox_.SelectedIndex + reservedAddresses);
                 activeSingleTact.Settings.Accumulator = 5;
-                //singleTact_.Settings.Baselines =
+                if (gainBox.Visible == true)
+                {                   
+                    activeSingleTact.Settings.ReferenceGain = Convert.ToByte(gainBox.Text);
+                }
+                if (scaleNumUp.Visible == true)
+                {
+                    activeSingleTact.Settings.Scaling = (ushort)scaleNumUp.Value;
+                }
+                activeSingleTact.PushSettingsToHardware();
+
+                RefreshFlashSettings_Click(this, null);
 
             }
             catch (Exception)
             {
                 MessageBox.Show("Invalid settings", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-            activeSingleTact.PushSettingsToHardware();
-
-            RefreshFlashSettings_Click(this, null);
+            }            
 
 
             if (backgroundWasRunning)
@@ -743,7 +749,7 @@ namespace SingleTact_Demo
             activeSingleTact = USBdevices[ActiveSensor.SelectedIndex].singleTact;
             if (activeSingleTact.isUSB && activeSingleTact.isCalibrated)
             {
-                 linkLabel1.Visible = true;
+                linkLabel1.Visible = true;
                 if (Settings.TabPages.Count > 1)
                 {
                     Settings.TabPages.RemoveAt(Settings.TabPages.Count - 1);
@@ -752,10 +758,7 @@ namespace SingleTact_Demo
             else if (activeSingleTact.isUSB && !activeSingleTact.isCalibrated)
             {
                 linkLabel1.Visible = true;
-                if (Settings.TabPages.Count > 1)
-                {
-                    Settings.TabPages.RemoveAt(Settings.TabPages.Count - 1);
-                }
+                SetSettingsButton.Enabled = true;
             }
             else if (!activeSingleTact.isUSB && activeSingleTact.isCalibrated)
             {
@@ -826,6 +829,30 @@ namespace SingleTact_Demo
         private void memorySpaceBar_MouseHover(object sender, EventArgs e)
         {            
             toolTip1.Show("Click here to clear the buffer.", memorySpaceBar);
+        }
+
+        private void picPpsLogo_DoubleClick(object sender, EventArgs e)
+        {
+            if (activeSingleTact.isCalibrated)
+            {
+                scaleNumUp.Visible = true;
+                gainBox.Visible = true;
+                gainBox.SelectedIndex = 0;
+                SetSettingsButton.Text = "Program";
+
+                label2.Text = "Gain / Scale";
+                label5.Visible = false;
+                i2cAddressInputComboBox_.Visible = false;
+
+                if (activeSingleTact.isUSB && activeSingleTact.isCalibrated)
+                {
+                    Settings.TabPages.Insert(1, tabPage2);
+
+                    linkLabel1.Visible = true;
+                    SetSettingsButton.Enabled = true;
+                    i2cAddressInputComboBox_.Enabled = false;
+                }
+            }
         }
     }
 

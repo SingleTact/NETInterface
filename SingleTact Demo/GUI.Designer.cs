@@ -58,6 +58,8 @@ namespace SingleTact_Demo
             this.label8 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.scaleNumUp = new System.Windows.Forms.NumericUpDown();
+            this.gainBox = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.i2cAddressInputComboBox_ = new System.Windows.Forms.ComboBox();
@@ -75,6 +77,7 @@ namespace SingleTact_Demo
             this.Settings.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.scaleNumUp)).BeginInit();
             this.SuspendLayout();
             // 
             // graph_
@@ -123,6 +126,7 @@ namespace SingleTact_Demo
             this.picPpsLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.picPpsLogo.TabIndex = 46;
             this.picPpsLogo.TabStop = false;
+            this.picPpsLogo.DoubleClick += new System.EventHandler(this.picPpsLogo_DoubleClick);
             // 
             // Settings
             // 
@@ -209,7 +213,7 @@ namespace SingleTact_Demo
             this.firmwareLabel.Location = new System.Drawing.Point(164, 16);
             this.firmwareLabel.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             this.firmwareLabel.Name = "firmwareLabel";
-            this.firmwareLabel.Size = new System.Drawing.Size(52, 17);
+            this.firmwareLabel.Size = new System.Drawing.Size(44, 16);
             this.firmwareLabel.TabIndex = 49;
             this.firmwareLabel.Text = "0.0.0.0";
             // 
@@ -287,6 +291,8 @@ namespace SingleTact_Demo
             // tabPage2
             // 
             this.tabPage2.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.tabPage2.Controls.Add(this.scaleNumUp);
+            this.tabPage2.Controls.Add(this.gainBox);
             this.tabPage2.Controls.Add(this.label2);
             this.tabPage2.Controls.Add(this.label5);
             this.tabPage2.Controls.Add(this.i2cAddressInputComboBox_);
@@ -298,6 +304,47 @@ namespace SingleTact_Demo
             this.tabPage2.Size = new System.Drawing.Size(287, 280);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Update Setting";
+            // 
+            // scaleNumUp
+            // 
+            this.scaleNumUp.Increment = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            this.scaleNumUp.Location = new System.Drawing.Point(144, 83);
+            this.scaleNumUp.Maximum = new decimal(new int[] {
+            900,
+            0,
+            0,
+            0});
+            this.scaleNumUp.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.scaleNumUp.Name = "scaleNumUp";
+            this.scaleNumUp.Size = new System.Drawing.Size(125, 22);
+            this.scaleNumUp.TabIndex = 57;
+            this.scaleNumUp.Value = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.scaleNumUp.Visible = false;
+            // 
+            // gainBox
+            // 
+            this.gainBox.FormattingEnabled = true;
+            this.gainBox.Items.AddRange(new object[] {
+            "1",
+            "5"});
+            this.gainBox.Location = new System.Drawing.Point(13, 83);
+            this.gainBox.Margin = new System.Windows.Forms.Padding(5);
+            this.gainBox.Name = "gainBox";
+            this.gainBox.Size = new System.Drawing.Size(123, 24);
+            this.gainBox.TabIndex = 56;
+            this.gainBox.Visible = false;
             // 
             // label2
             // 
@@ -356,7 +403,7 @@ namespace SingleTact_Demo
             this.ActiveSensorLabel.Location = new System.Drawing.Point(6, 199);
             this.ActiveSensorLabel.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             this.ActiveSensorLabel.Name = "ActiveSensorLabel";
-            this.ActiveSensorLabel.Size = new System.Drawing.Size(112, 17);
+            this.ActiveSensorLabel.Size = new System.Drawing.Size(107, 16);
             this.ActiveSensorLabel.TabIndex = 70;
             this.ActiveSensorLabel.Text = "Selected Sensor";
             // 
@@ -377,7 +424,7 @@ namespace SingleTact_Demo
             this.sensorRangeLabel.Location = new System.Drawing.Point(6, 199);
             this.sensorRangeLabel.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             this.sensorRangeLabel.Name = "sensorRangeLabel";
-            this.sensorRangeLabel.Size = new System.Drawing.Size(123, 17);
+            this.sensorRangeLabel.Size = new System.Drawing.Size(115, 16);
             this.sensorRangeLabel.TabIndex = 70;
             this.sensorRangeLabel.Text = "Sensor Range (N)";
             this.sensorRangeLabel.Visible = false;
@@ -423,7 +470,7 @@ namespace SingleTact_Demo
             this.linkLabel1.Location = new System.Drawing.Point(9, 389);
             this.linkLabel1.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             this.linkLabel1.Name = "linkLabel1";
-            this.linkLabel1.Size = new System.Drawing.Size(85, 17);
+            this.linkLabel1.Size = new System.Drawing.Size(80, 16);
             this.linkLabel1.TabIndex = 71;
             this.linkLabel1.TabStop = true;
             this.linkLabel1.Text = "▼ Advanced";
@@ -458,6 +505,7 @@ namespace SingleTact_Demo
             this.tabPage1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.scaleNumUp)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -498,5 +546,7 @@ namespace SingleTact_Demo
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.ProgressBar memorySpaceBar;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.ComboBox gainBox;
+        private System.Windows.Forms.NumericUpDown scaleNumUp;
     }
 }
