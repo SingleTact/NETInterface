@@ -485,6 +485,7 @@ namespace SingleTact_Demo
 
         private void tareAllButton_Click(object sender, EventArgs e)
         {
+            tareAll.Enabled = false;
             StopAcquisitionThread();
             foreach (USBdevice USB in USBdevices)
             {
@@ -495,6 +496,7 @@ namespace SingleTact_Demo
                 }
             }
             StartAcquisitionThread();
+            tareAll.Enabled = true;
         }
 
         /// <summary>
@@ -626,6 +628,7 @@ namespace SingleTact_Demo
         /// <param name="e"></param>
         private void RefreshFlashSettings_Click(object sender, EventArgs e)
         {
+            SetBaselineButton.Enabled = false;
             bool backgroundWasRunning = AcquisitionWorker.IsBusy;
 
             if (backgroundWasRunning)
@@ -664,6 +667,7 @@ namespace SingleTact_Demo
             {
                 StartAcquisitionThread();
             }
+            SetBaselineButton.Enabled = true;
         }
 
         /// <summary>
