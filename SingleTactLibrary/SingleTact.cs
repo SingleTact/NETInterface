@@ -209,30 +209,7 @@ namespace SingleTactLibrary
         /// <returns>true if successful; false otherwise.</returns>
         public bool Tare()
         {
-            ushort scaling = Settings.Scaling;
-
-            if (lastFrame_ == null)
-                return false;
-
-            Settings.Baselines = new UInt16[lastFrame_.nSensors]; //Zeros
-            Settings.Scaling = 100;
-
             PushSettingsToHardware();
-
-            Thread.Sleep(10); // Give it time to capture a new frame
-
-            SingleTactFrame newFrame = ReadSensorData();
-
-            UInt16[] newBaselines = new UInt16[newFrame.SensorDataRaw.Length];
-            for (int i = 0; i < newFrame.SensorDataRaw.Length; i++)
-            {
-                newBaselines[i] = (UInt16)(newFrame.SensorDataRaw[i] - 0xFF);
-            }
-
-            Settings.Baselines = newBaselines;
-            Settings.Scaling = scaling;
-            PushSettingsToHardware();
-
             return true;
         }
 
