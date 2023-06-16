@@ -673,6 +673,7 @@ namespace SingleTact_Demo
         /// <param name="e"></param>
         private void SetSettingsButton_Click(object sender, EventArgs e)
         {
+            SetSettingsButton.Enabled = false;
             bool backgroundWasRunning = AcquisitionWorker.IsBusy;
 
             if (backgroundWasRunning)
@@ -704,16 +705,6 @@ namespace SingleTact_Demo
         }
 
         /// <summary>
-        /// Reset sensor to a default configuration
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ResetSensorButton_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        /// <summary>
         /// Update the sensor baseline
         /// </summary>
         /// <param name="sender"></param>
@@ -728,49 +719,6 @@ namespace SingleTact_Demo
 
             StartAcquisitionThread();
         }
-
-        /// <summary>
-        /// Lock the sensor if needed
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void LockButton_Click(object sender, EventArgs e)
-        {
-            // Get the Info that whether the settings in the MainRegister is locked or not
-            bool backgroundWasRunning = AcquisitionWorker.IsBusy;
-
-            if (backgroundWasRunning)
-                StopAcquisitionThread();
-
-            try
-            {
-                activeSingleTact.Settings.Calibrated = (activeSingleTact.Settings.Calibrated == 0) ? (byte)1 : (byte)0;
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("Invalid settings", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-            activeSingleTact.PushSettingsToHardware();
-            RefreshFlashSettings_Click(this, null);
-            if (backgroundWasRunning)
-            StartAcquisitionThread();
-        }
-        private void Send_Calibration_Click(object sender, EventArgs e)
-        {
-            // Get the Info that whether the settings in the MainRegister is locked or not
-            bool backgroundWasRunning = AcquisitionWorker.IsBusy;
-            int[] calibrationTable = new int[1024];
-
-            if (backgroundWasRunning)
-                StopAcquisitionThread();
-
-            activeSingleTact.PushCalibrationToHardware(calibrationTable);
-
-            if (backgroundWasRunning)
-                StartAcquisitionThread();
-        }
-       
 
         private void LinkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
@@ -860,11 +808,6 @@ namespace SingleTact_Demo
             graph_.AxisChange();
             graph_.Invalidate();
             graph_.Refresh();
-        }
-
-        private void GUI_Load(object sender, EventArgs e)
-        {
-
         }
 
         private void memorySpaceBar_Click(object sender, EventArgs e)

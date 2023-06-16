@@ -452,7 +452,6 @@ namespace SingleTact_Demo
             this.Name = "GUI";
             this.Text = "PPS SingleTact Demo [XXHz]";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GUI_FormClosing);
-            this.Load += new System.EventHandler(this.GUI_Load);
             ((System.ComponentModel.ISupportInitialize)(this.picPpsLogo)).EndInit();
             this.Settings.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
