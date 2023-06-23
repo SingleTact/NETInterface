@@ -660,6 +660,12 @@ namespace SingleTact_Demo
                     Console.WriteLine(ex.ToString());
                     MessageBox.Show("Invalid settings", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+
+                if (activeSingleTact.Settings.ReferenceGain == 0 && activeSingleTact.isCalibrated == true)
+                {
+                    MessageBox.Show("The calibration appears corrupt, please contact SingleTact Tech support.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    System.Diagnostics.Process.Start("https://www.singletact.com/support/");
+                }
             }
             
 
