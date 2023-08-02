@@ -663,7 +663,7 @@ namespace SingleTact_Demo
 
                 if (activeSingleTact.Settings.ReferenceGain == 0 && activeSingleTact.isCalibrated == true)
                 {
-                    MessageBox.Show("The calibration appears corrupt, please contact SingleTact Tech support.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("The calibration appears to be corrupt. \nPlease try power cycling the electronics by unplugging and then plugging in the USB. \nIf the problem still persists, please contact SingleTact Tech Support.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     System.Diagnostics.Process.Start("https://www.singletact.com/support/");
                 }
             }
