@@ -44,6 +44,10 @@ namespace SingleTactLibrary
                     {
                         names.Add(deviceID + " - PPS Sensor");
                         COMNumber.Add(deviceID);
+                    }else if (VID.Equals("2341") || VID.Equals("2A03", StringComparison.OrdinalIgnoreCase))
+                    {
+                        names.Add(deviceID + " - Arduino");
+                        COMNumber.Add(deviceID);
                     }
                 }
             }
