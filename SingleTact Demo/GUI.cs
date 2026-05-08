@@ -5,19 +5,20 @@
 //  distributed except according to those terms.
 //-----------------------------------------------------------------------------
 
+using SingleTactLibrary;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using System.IO.Ports;
+using System.Globalization;
 using System.IO;
-using ZedGraph;
-using System.Threading;
-using SingleTactLibrary;
+using System.IO.Ports;
+using System.Linq;
 using System.Management;
+using System.Text;
+using System.Threading;
+using System.Windows.Forms;
+using ZedGraph;
 
 namespace SingleTact_Demo
 {
@@ -781,14 +782,20 @@ namespace SingleTact_Demo
         private void sensorRange_SelectedIndexChanged(object sender, EventArgs e)
         {
             double tempFactor = 0;
-            try
+
+            if (double.TryParse(
+                sensorRange.SelectedItem?.ToString(),
+                NumberStyles.Float,
+                CultureInfo.InvariantCulture,
+                out var value))
             {
-                tempFactor = Convert.ToDouble(sensorRange.SelectedItem);
+                tempFactor = value;
             }
-            catch
+            else
             {
                 tempFactor = 0;
             }
+
             if (tempFactor == NBtoForceFactor)
                 return;
             NBtoForceFactor = tempFactor;
