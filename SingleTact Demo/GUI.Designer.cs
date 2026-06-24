@@ -103,13 +103,6 @@ namespace SingleTact_Demo
             this.graph_.Size = new System.Drawing.Size(964, 699);
             this.graph_.TabIndex = 1;
             // 
-            // AcquisitionWorker
-            // 
-            this.AcquisitionWorker.WorkerReportsProgress = true;
-            this.AcquisitionWorker.WorkerSupportsCancellation = true;
-            this.AcquisitionWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.AcquisitionWorker_DoWork);
-            this.AcquisitionWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.AcquisitionWorker_RunWorkerCompleted);
-            // 
             // guiTimer_
             // 
             this.guiTimer_.Interval = 1;

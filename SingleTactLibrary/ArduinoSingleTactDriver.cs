@@ -9,8 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.IO.Ports;
 using System.Windows.Forms;
 using System.Threading;
@@ -20,7 +18,23 @@ namespace SingleTactLibrary
     public partial class ArduinoSingleTactDriver : Component
     {
         SerialPort serialPort_;
-        List<byte> incommingSerialBuffer_ = new List<byte>();
+
+        // Raw UART bytes are stored here first. The serial receive event only adds
+        // bytes to this buffer, then the parser moves complete packets out of it.
+        private readonly List<byte> rawSerialBuffer_ = new List<byte>(8192);
+
+        // Complete, validated Arduino packets are stored here. Read/write commands
+        // search this buffer for the matching command ID instead of reading UART.
+        private readonly List<byte[]> packetBuffer_ = new List<byte[]>();
+
+        private readonly object rawLock_ = new object();
+        private readonly object packetLock_ = new object();
+        private readonly object commandLock_ = new object();
+
+        private const int MAX_RAW_BUFFER_BYTES = 8192;
+        private const int MAX_PACKET_BUFFER_COUNT = 200;
+        private const int WRITE_ACK_TIMEOUT_MS = 500;
+        private const int READ_ACK_TIMEOUT_MS = 500;
 
         byte cmdItr_ = 0;
         public bool isUSB = false;
@@ -31,18 +45,11 @@ namespace SingleTactLibrary
         const int I2C_TOPC_NBYTES = 11;
         const int I2C_START_OF_DATA = 12;
 
-        //Minimum packet length is 15 (header + info + footer)
+        // Minimum packet length is 15 (header + info + footer)
         const int MINIMUM_FROMARDUINO_PACKET_LENGTH = 15;
-
 
         public ArduinoSingleTactDriver()
         {
-            InitializeComponent();
-        }
-
-        public ArduinoSingleTactDriver(IContainer container)
-        {
-            container.Add(this);
             InitializeComponent();
         }
 
@@ -55,31 +62,27 @@ namespace SingleTactLibrary
             serialPort_ = new SerialPort(serialPort);
             //serialPort_.BaudRate = 115200*4;
             serialPort_.BaudRate = 115200;
-            serialPort_.ReadBufferSize = 48;
-            serialPort_.WriteBufferSize = 16;
-            serialPort_.ErrorReceived += new System.IO.Ports.SerialErrorReceivedEventHandler(this.SerialErrorReceived);
+
+            // Make the .NET receive buffer bigger than before. The old value of 48
+            // bytes can overflow easily if the application thread is busy.
+            serialPort_.ReadBufferSize = 8192;
+            serialPort_.WriteBufferSize = 256;
+
+            serialPort_.ErrorReceived += new SerialErrorReceivedEventHandler(this.SerialErrorReceived);
+            serialPort_.DataReceived += new SerialDataReceivedEventHandler(this.SerialDataReceived);
+
             serialPort_.Open();
 
-            //Reset the Arduino
+            ClearReceiveBuffers();
+
+            // Reset the Arduino
             serialPort_.DtrEnable = true;
             Thread.Sleep(10);
             serialPort_.DtrEnable = false;
-            Thread.Sleep(2000); //Give Arduino time to boot after reset
+            Thread.Sleep(2000); // Give Arduino time to boot after reset
             serialPort_.RtsEnable = true;
 
-        }
-
-        public void ResetArduino()
-        {
-            if (serialPort_.IsOpen)
-            serialPort_.Close();
-
-            serialPort_.Open();
-            //Reset the Arduino
-            serialPort_.DtrEnable = true;
-            Thread.Sleep(10);
-            serialPort_.DtrEnable = false;
-            Thread.Sleep(2000); //Give Arduino time to boot after reset
+            ClearReceiveBuffers();
         }
 
         private void SerialErrorReceived(object sender, SerialErrorReceivedEventArgs e)
@@ -87,17 +90,72 @@ namespace SingleTactLibrary
             MessageBox.Show("Serial General Error", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-        public void Initialise(object portName)
+        /// <summary>
+        /// UART receive side. This is the only place that reads from the SerialPort.
+        /// It saves bytes to a large raw buffer, then moves complete packets to packetBuffer_.
+        /// </summary>
+        private void SerialDataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            throw new NotImplementedException();
+            try
+            {
+                ReadAvailableSerialBytes();
+            }
+            catch
+            {
+                // USB may have been unplugged or the port may have been closed.
+                // Command methods will return false/null on timeout or write failure.
+            }
         }
 
-        private void ReadSerialBuffer()
+        /// <summary>
+        /// Reads all currently available UART bytes into rawSerialBuffer_, then parses
+        /// any complete packets into packetBuffer_.
+        /// </summary>
+        private void ReadAvailableSerialBytes()
         {
+            if (serialPort_ == null || !serialPort_.IsOpen)
+                return;
 
-            while (serialPort_.BytesToRead > 0)
+            int bytesToRead = serialPort_.BytesToRead;
+            if (bytesToRead <= 0)
+                return;
+
+            byte[] temp = new byte[bytesToRead];
+            int bytesRead = serialPort_.Read(temp, 0, bytesToRead);
+
+            if (bytesRead <= 0)
+                return;
+
+            lock (rawLock_)
             {
-                    incommingSerialBuffer_.Add((byte)serialPort_.ReadByte());
+                for (int i = 0; i < bytesRead; i++)
+                    rawSerialBuffer_.Add(temp[i]);
+
+                TrimRawBufferIfNeeded();
+                MoveRawBytesToPacketsLocked();
+            }
+        }
+
+        private void ClearReceiveBuffers()
+        {
+            lock (rawLock_)
+            {
+                rawSerialBuffer_.Clear();
+            }
+
+            lock (packetLock_)
+            {
+                packetBuffer_.Clear();
+            }
+
+            try
+            {
+                if (serialPort_ != null && serialPort_.IsOpen)
+                    serialPort_.DiscardInBuffer();
+            }
+            catch
+            {
+                // Ignore discard errors during reset/disconnect.
             }
         }
 
@@ -110,7 +168,7 @@ namespace SingleTactLibrary
         /// <returns>Was successful?</returns>
         public bool WriteToMainRegister(byte[] toSend, byte location, byte i2CAddress)
         {
-            if (toSend.Length > 28) //Max write length (limited by 32 byte i2c transfer length = 28 bytes of data + header info)
+            if (toSend.Length > 28) // Max write length (limited by 32 byte i2c transfer length = 28 bytes of data + header info)
             {
                 MessageBox.Show("Trying to write a packet that is too large", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
@@ -122,103 +180,25 @@ namespace SingleTactLibrary
                 return false;
             }
 
-            byte[] cmdToArduino = SerialCommand.GenerateWriteCommand(i2CAddress, cmdItr_++, location, toSend);
-
-            serialPort_.Write(cmdToArduino, 0, cmdToArduino.Length);
-
-            bool acknowledged = false;
-            int attempts = 20;
-            //Typically takes 4 - 6 attempts as the chip needs to
-            //write the settings to flash which takes about 50ms.
-
-            Thread.Sleep(10); //Give comms time to happen
-
-            while (false == acknowledged && attempts > 0)
+            lock (commandLock_)
             {
-                byte[] cmdFromArduino = ProcessSerialBuffer();
+                byte[] cmdToArduino = SerialCommand.GenerateWriteCommand(i2CAddress, cmdItr_++, location, toSend);
+                byte expectedId = cmdToArduino[I2C_ID_BYTE];
 
-                if (null != cmdFromArduino)
+                RemovePacketsWithId(expectedId);
+
+                try
                 {
-                    if (cmdToArduino[I2C_ID_BYTE] == cmdFromArduino[I2C_ID_BYTE])
-                    {
-                        acknowledged = true;
-                        return true;
-                    }
-                    else
-                    {
-                        MessageBox.Show("Comms Error - Failed Acknoledge Write Command", "Communications Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        acknowledged = true; //Move on anyway
-                        return false;
-                    }
+                    serialPort_.Write(cmdToArduino, 0, cmdToArduino.Length);
                 }
-                else
+                catch
                 {
-                    Thread.Sleep(10); //Keep waiting
-                    attempts--;
+                    return false;
                 }
+
+                byte[] cmdFromArduino = WaitForPacket(expectedId, WRITE_ACK_TIMEOUT_MS);
+                return cmdFromArduino != null;
             }
-
-            return false; // no ack, give up
-        }
-
-        /// <summary>
-        /// Write to sensor's Calibration Register
-        /// </summary>
-        /// <param name="toSend">Data to write (max 28 bytes)</param>
-        /// <param name="location">Main register location (can write upto byte 128)</param>
-        /// <param name="i2CAddress">I2C Address</param>
-        /// <returns>Was successful?</returns>
-        public bool WriteToCalibrationRegister(byte[] toSend, byte location, byte i2CAddress)
-        {
-            if (toSend.Length > 28) //Max write length (limited by 32 byte i2c transfer length = 28 bytes of data + header info)
-            {
-                MessageBox.Show("Trying to write a packet that is too large", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-
-            if (toSend.Length + location > 1024)
-            {
-                MessageBox.Show("Trying to write into read only region", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-
-            byte[] cmdToArduino = SerialCommand.GenerateWriteCalCommand(i2CAddress, cmdItr_++, location, toSend);
-
-            serialPort_.Write(cmdToArduino, 0, cmdToArduino.Length);
-
-            bool acknowledged = false;
-            int attempts = 20;
-            //Typically takes 4 - 6 attempts as the chip needs to
-            //write the settings to flash which takes about 50ms.
-
-            Thread.Sleep(10); //Give comms time to happen
-
-            while (false == acknowledged && attempts > 0)
-            {
-                byte[] cmdFromArduino = ProcessSerialBuffer();
-
-                if (null != cmdFromArduino)
-                {
-                    if (cmdToArduino[I2C_ID_BYTE] == cmdFromArduino[I2C_ID_BYTE])
-                    {
-                        acknowledged = true;
-                        return true;
-                    }
-                    else
-                    {
-                        MessageBox.Show("Comms Error - Failed Acknoledge Write Command", "Communications Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        acknowledged = true; //Move on anyway
-                        return false;
-                    }
-                }
-                else
-                {
-                    Thread.Sleep(10); //Keep waiting
-                    attempts--;
-                }
-            }
-
-            return false; // no ack, give up
         }
 
         /// <summary>
@@ -236,170 +216,190 @@ namespace SingleTactLibrary
                 return null;
             }
 
-            if (location + nBytes > 191) //0 - 191 are valid memory locations
+            if (location + nBytes > 191) // 0 - 191 are valid memory locations
             {
                 MessageBox.Show("Error - Trying to read off the end of the main register");
                 return null;
             }
 
-            byte[] cmdToArduino = SerialCommand.GenerateReadCommand(i2CAddress, cmdItr_++, location, nBytes);
-            try
+            lock (commandLock_)
             {
-                serialPort_.Write(cmdToArduino, 0, cmdToArduino.Length);
-            }
-            catch (Exception)  // USB has been unplugged
-            {
-                return null;
-            }
+                byte[] cmdToArduino = SerialCommand.GenerateReadCommand(i2CAddress, cmdItr_++, location, nBytes);
+                byte expectedId = cmdToArduino[I2C_ID_BYTE];
 
-            bool acknowledged = false;
-            long attempts = 50;
+                RemovePacketsWithId(expectedId);
 
-            Thread.Sleep(10); //Give comms time to happen
-
-            while (false == acknowledged && attempts > 0)
-            {
-                byte[] cmdFromArduino = ProcessSerialBuffer();
-
-                if (null != cmdFromArduino)
+                try
                 {
-                    if (cmdToArduino[I2C_ID_BYTE] == cmdFromArduino[I2C_ID_BYTE])
-                    {
-                        acknowledged = true;
-                        byte[] toReturn = new byte[nBytes + TIMESTAMP_SIZE];
-                        Array.Copy(cmdFromArduino, I2C_TIMESTAMP, toReturn, 0, TIMESTAMP_SIZE);
-                        Array.Copy(cmdFromArduino, I2C_START_OF_DATA, toReturn, TIMESTAMP_SIZE, nBytes);
-                        return toReturn;
-                    }
-                    else
-                    {
-                        MessageBox.Show("Comms error - failed ack");
-                        acknowledged = true; //Move on anyway
-                        return null;
-                    }
+                    serialPort_.Write(cmdToArduino, 0, cmdToArduino.Length);
+                }
+                catch
+                {
+                    return null;
+                }
+
+                byte[] cmdFromArduino = WaitForPacket(expectedId, READ_ACK_TIMEOUT_MS);
+
+                if (cmdFromArduino == null)
+                    return null;
+
+                if (cmdFromArduino.Length < I2C_START_OF_DATA + nBytes)
+                    return null;
+
+                byte[] toReturn = new byte[nBytes + TIMESTAMP_SIZE];
+                Array.Copy(cmdFromArduino, I2C_TIMESTAMP, toReturn, 0, TIMESTAMP_SIZE);
+                Array.Copy(cmdFromArduino, I2C_START_OF_DATA, toReturn, TIMESTAMP_SIZE, nBytes);
+                return toReturn;
+            }
+        }
+
+        /// <summary>
+        /// Moves complete packets from rawSerialBuffer_ to packetBuffer_.
+        /// rawLock_ must already be held when this method is called.
+        /// </summary>
+        private void MoveRawBytesToPacketsLocked()
+        {
+            while (rawSerialBuffer_.Count > MINIMUM_FROMARDUINO_PACKET_LENGTH)
+            {
+                if (false == CheckUartHeader(rawSerialBuffer_))
+                {
+                    rawSerialBuffer_.RemoveAt(0);
+                    continue;
+                }
+
+                if (rawSerialBuffer_.Count <= I2C_TOPC_NBYTES)
+                    return;
+
+                int i2cPacketLength = rawSerialBuffer_[I2C_TOPC_NBYTES];
+                int fullPacketLength = i2cPacketLength + MINIMUM_FROMARDUINO_PACKET_LENGTH + 1;
+
+                if (fullPacketLength <= 0)
+                {
+                    rawSerialBuffer_.RemoveAt(0);
+                    continue;
+                }
+
+                if (rawSerialBuffer_.Count < fullPacketLength)
+                    return; // Not enough bytes yet. Wait for the next UART receive event.
+
+                if (CheckUartFooter(rawSerialBuffer_, fullPacketLength - 1))
+                {
+                    byte[] packet = rawSerialBuffer_.GetRange(0, fullPacketLength).ToArray();
+                    rawSerialBuffer_.RemoveRange(0, fullPacketLength);
+                    AddPacket(packet);
                 }
                 else
                 {
-                    Thread.Sleep(10);
-                    attempts--;
+                    // Footer is corrupt. Drop only one byte so we can resync to the next header.
+                    rawSerialBuffer_.RemoveAt(0);
                 }
             }
-
-            return null; // no ack
         }
 
         /// <summary>
-        /// Write to Toggle the PIN
+        /// Check the full footer in the supplied buffer.
         /// </summary>
-        /// <param name="toSend">Pins to Toggle</param>
-        /// <returns>Was successful?</returns>
-        public bool WriteToggleCommand(byte toSend)
+        private bool CheckUartFooter(List<byte> buffer, int endOfPacket)
         {
-            byte[] cmdToArduino = SerialCommand.GenerateToggleCommand(4, cmdItr_++, 0, toSend);
+            if (endOfPacket < 3 || endOfPacket >= buffer.Count)
+                return false;
 
-            serialPort_.Write(cmdToArduino, 0, cmdToArduino.Length);
-
-            bool acknowledged = false;
-            long attempts = 50;
-
-            Thread.Sleep(10); //Give comms time to happen
-
-            while (false == acknowledged && attempts > 0)
-            {
-                byte[] cmdFromArduino = ProcessSerialBuffer();
-
-                if (null != cmdFromArduino)
-                {
-                    if (cmdToArduino[I2C_ID_BYTE] == cmdFromArduino[I2C_ID_BYTE])
-                    {
-                        acknowledged = true;
-                        return true;
-                    }
-                    else
-                    {
-                        MessageBox.Show("Comms Error - Failed Acknoledge Write Command", "Communications Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        acknowledged = true; //Move on anyway
-                        return false;
-                    }
-                }
-                else
-                {
-                    Thread.Sleep(10); //Keep waiting
-                    attempts--;
-                }
-            }
-
-            return false; // no ack, give up
-        }
-
-        /// <summary>
-        /// Check the full footer
-        /// </summary>
-        /// <param name="endOfPacket"></param>
-        /// <returns></returns>
-        private bool CheckUartFooter(int endOfPacket)
-        {
             for (int i = 0; i < 4; i++)
             {
-                if (incommingSerialBuffer_[endOfPacket - i] != 0xFE)
-                return false;  //Footer corrupt
+                if (buffer[endOfPacket - i] != 0xFE)
+                    return false; // Footer corrupt
             }
 
-            return true; //Footer all good
+            return true; // Footer all good
         }
 
         /// <summary>
-        /// Check available header bytes
+        /// Check available header bytes in the supplied buffer.
         /// </summary>
-        /// <returns></returns>
-        private bool CheckUartHeader()
+        private bool CheckUartHeader(List<byte> buffer)
         {
+            if (buffer.Count < 4)
+                return false;
+
             for (int i = 0; i < 4; i++)
             {
-                if (incommingSerialBuffer_[i] != 0xFF && incommingSerialBuffer_[i] != 0xAA)
-                return false; //Header corrupt
+                if (buffer[i] != 0xFF && buffer[i] != 0xAA)
+                    return false; // Header corrupt
             }
-            if (incommingSerialBuffer_[0] == 0xAA)
+
+            if (buffer[0] == 0xAA)
                 isUSB = true;
-            return true; //Header all good
+
+            return true; // Header all good
+        }
+
+        private void AddPacket(byte[] packet)
+        {
+            lock (packetLock_)
+            {
+                packetBuffer_.Add(packet);
+
+                while (packetBuffer_.Count > MAX_PACKET_BUFFER_COUNT)
+                    packetBuffer_.RemoveAt(0);
+
+                Monitor.PulseAll(packetLock_);
+            }
         }
 
         /// <summary>
-        /// Process incomming serial data
+        /// Search the parsed packet buffer for a packet with the requested command ID.
+        /// This does not read the SerialPort directly; UART receive is handled separately.
         /// </summary>
-        /// <returns></returns>
-        private byte[] ProcessSerialBuffer()
+        private byte[] WaitForPacket(byte expectedCommandId, int timeoutMs)
         {
-            ReadSerialBuffer();
+            Stopwatch sw = Stopwatch.StartNew();
 
-            if (incommingSerialBuffer_.Count > MINIMUM_FROMARDUINO_PACKET_LENGTH)
+            lock (packetLock_)
             {
-                if (false == CheckUartHeader())
+                while (sw.ElapsedMilliseconds < timeoutMs)
                 {
-                    incommingSerialBuffer_.RemoveAt(0);
-                    incommingSerialBuffer_.TrimExcess();
-                }
-
-                int i2cPacketLength = incommingSerialBuffer_[I2C_TOPC_NBYTES];
-
-                if (incommingSerialBuffer_.Count > (i2cPacketLength + MINIMUM_FROMARDUINO_PACKET_LENGTH))
-                {
-                    if (CheckUartFooter(i2cPacketLength + MINIMUM_FROMARDUINO_PACKET_LENGTH))
+                    for (int i = 0; i < packetBuffer_.Count; i++)
                     {
-                        byte[] toReturn = new byte[i2cPacketLength + MINIMUM_FROMARDUINO_PACKET_LENGTH + 1];
-                        incommingSerialBuffer_.GetRange(0, i2cPacketLength + MINIMUM_FROMARDUINO_PACKET_LENGTH + 1).CopyTo(toReturn);
-                        incommingSerialBuffer_.RemoveRange(0, i2cPacketLength + MINIMUM_FROMARDUINO_PACKET_LENGTH + 1);
-                        return toReturn; //We have a good packet
+                        byte[] packet = packetBuffer_[i];
+
+                        if (packet.Length > I2C_ID_BYTE && packet[I2C_ID_BYTE] == expectedCommandId)
+                        {
+                            packetBuffer_.RemoveAt(i);
+                            return packet;
+                        }
                     }
-                    else
-                    {
-                        incommingSerialBuffer_.RemoveRange(0, i2cPacketLength + MINIMUM_FROMARDUINO_PACKET_LENGTH + 1); //Bad data
-                        return null;
-                    }
+
+                    int remainingMs = timeoutMs - (int)sw.ElapsedMilliseconds;
+                    if (remainingMs <= 0)
+                        break;
+
+                    Monitor.Wait(packetLock_, Math.Min(remainingMs, 20));
                 }
             }
 
             return null;
+        }
+
+        private void RemovePacketsWithId(byte commandId)
+        {
+            lock (packetLock_)
+            {
+                for (int i = packetBuffer_.Count - 1; i >= 0; i--)
+                {
+                    byte[] packet = packetBuffer_[i];
+                    if (packet.Length > I2C_ID_BYTE && packet[I2C_ID_BYTE] == commandId)
+                        packetBuffer_.RemoveAt(i);
+                }
+            }
+        }
+
+        private void TrimRawBufferIfNeeded()
+        {
+            if (rawSerialBuffer_.Count <= MAX_RAW_BUFFER_BYTES)
+                return;
+
+            int bytesToRemove = rawSerialBuffer_.Count - MAX_RAW_BUFFER_BYTES;
+            rawSerialBuffer_.RemoveRange(0, bytesToRemove);
         }
     }
 }

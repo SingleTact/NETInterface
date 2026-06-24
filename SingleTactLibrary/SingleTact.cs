@@ -89,38 +89,6 @@ namespace SingleTactLibrary
             }
         }
 
-        /// <summary>
-        /// Write local copy of settings to sensor's flash
-        /// </summary>
-        public void PushCalibrationToHardware(int[] calibrationTable)
-        {
-            for (int i = 0; i < 32; i++)  //We need to do this over 32 transfers
-            {
-                const int PacketSize = 16;
-
-                byte[] toSend = new byte[PacketSize];
-
-                for (int j = 0; j < PacketSize / 2; j++)
-                {
-                    // Comment for now
-                    toSend[j * 2] = (byte)(calibrationTable[i * 8 + j] >> 8);
-                    toSend[j * 2 + 1] = (byte)(calibrationTable[i * 8 + j] & 0xFF);
-                }
-
-                if (!arduino_.WriteToCalibrationRegister(toSend, (byte)(i), i2cAddress_))
-                {
-                    MessageBox.Show("Failed to write calibration", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    isCalibrated = false;
-                    System.Environment.Exit(0);
-                }
-
-                Thread.Sleep(100); //Give the sensor time to write to flash
-            }
-
-            isCalibrated = true;
-        }
-
-
         public void resetTimeStamp()
         {
             isFirst = true;

@@ -9,6 +9,7 @@ using SingleTactLibrary;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
@@ -17,6 +18,7 @@ using System.Linq;
 using System.Management;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using ZedGraph;
 
@@ -32,6 +34,16 @@ namespace SingleTact_Demo
         private int memorySpaceUse = 0;
         private const int reservedAddresses = 4; // Don't use I2C addresses 0 to 3
         private Object workThreadLock = new Object(); //Thread synchronization
+        private bool disconnectHandled_ = false; // Prevent duplicate disconnect dialogs when USB reads run in parallel
+
+        // Acquisition is driven by a non-overlapping Threading.Timer instead of a BackgroundWorker while-loop.
+        private const int MAX_ACQUISITION_RATE_HZ = 1000;
+        private const int ACQUISITION_LOOP_PERIOD_MS = 1000 / MAX_ACQUISITION_RATE_HZ;
+        private System.Threading.Timer acquisitionTimer_ = null;
+        private volatile bool acquisitionRunning_ = false;
+        private int acquisitionTickBusy_ = 0;
+        private readonly ManualResetEvent acquisitionIdleEvent_ = new ManualResetEvent(true);
+
         private List<USBdevice_GUI> USBdevices = new List<USBdevice_GUI>();
         private List<string> comPortList = new List<string>();
         private SingleTact activeSingleTact;
@@ -78,7 +90,7 @@ namespace SingleTact_Demo
                     RefreshFlashSettings_Click(this, null); //Get the settings from flash
                 }
                 CreateStripChart();
-                AcquisitionWorker.RunWorkerAsync(); //Start the acquisition thread
+                StartAcquisitionThread(); //Start the acquisition timer
 
                 guiTimer_.Start();
             }
@@ -140,7 +152,7 @@ namespace SingleTact_Demo
                     sensorRange.Items.Add("450");
                 }
                 UIOffset = 30;
-            }          
+            }
             tareAll.Top -= UIOffset;
             buttonSave.Top -= UIOffset;
             Settings.Top -= UIOffset;
@@ -181,7 +193,7 @@ namespace SingleTact_Demo
                     if (USBdevices[j].isCalibrated)
                     {
                         name = name + "(calibrated)";
-                    }                   
+                    }
                 }
 
                 ActiveSensor.Items.Add(name);
@@ -190,7 +202,7 @@ namespace SingleTact_Demo
             ActiveSensor.SelectedIndex = 0;
             activeSingleTact = USBdevices[0].singleTact;
 
-            if(activeSingleTact.Settings.Scaling < 100)
+            if (activeSingleTact.Settings.Scaling < 100)
             {
                 activeSingleTact.Settings.Scaling = 100;
             }
@@ -288,7 +300,7 @@ namespace SingleTact_Demo
         {
             int index = USBdevices.IndexOf(USB); // get current sensor number
             SingleTactData data_pt = USB.dataBuffer;
-            Color[] colours = { Color.Blue, Color.Orange, Color.DarkViolet, Color.Red, Color.DeepPink, Color.DarkSlateGray  };
+            Color[] colours = { Color.Blue, Color.Orange, Color.DarkViolet, Color.Red, Color.DeepPink, Color.DarkSlateGray };
 
             if (data_pt.data.Count > 0 && index < colours.Length)
             {
@@ -381,7 +393,7 @@ namespace SingleTact_Demo
         //Save data to CSV
         private void buttonSave_Click(object sender, EventArgs e)
         {
-            bool backgroundWasRunning = AcquisitionWorker.IsBusy;
+            bool backgroundWasRunning = acquisitionRunning_;
 
             if (backgroundWasRunning)
             {
@@ -396,7 +408,7 @@ namespace SingleTact_Demo
             if (hasStartTime)
                 fileName += "_" + ((DateTimeOffset)systemStartTime).ToUnixTimeSeconds();
             saveDataDialog.FileName = fileName;
-            Invoke((Action)(() => { 
+            Invoke((Action)(() => {
                 if (saveDataDialog.ShowDialog() == DialogResult.OK)
                 {
                     // To fix Issue 3, separate exported values by semi-colon instead
@@ -412,7 +424,7 @@ namespace SingleTact_Demo
                     // write column headers
                     string columnNames = "Time(s)" + separator;
                     // populate columns with serial port names
-                    foreach(string portName in comPortList)
+                    foreach (string portName in comPortList)
                     {
                         int index = comPortList.IndexOf(portName);
                         string name = portName.ToString().Split('-')[1] + " " + (index + 1).ToString();
@@ -421,7 +433,7 @@ namespace SingleTact_Demo
                             if (USBdevices[index].isCalibrated)
                             {
                                 name = name + "(calibrated)";
-                            }                            
+                            }
                         }
                         if (NBtoForceFactor != 0)
                         {
@@ -457,7 +469,7 @@ namespace SingleTact_Demo
                                 if (first) // only save the time the first sensor's reading was taken
                                 {
                                     // round the time value to mitigate any uncertainty around sampling time
-                                    row += Math.Round(dataPoint.X, 3) + separator + dataPoint.Y + separator;
+                                    row += Math.Round(dataPoint.X, 5) + separator + dataPoint.Y + separator;
                                     first = false;
                                 }
                                 else
@@ -501,88 +513,188 @@ namespace SingleTact_Demo
         }
 
         /// <summary>
-        /// Stop acquisition thread
+        /// Stop acquisition timer.
         /// </summary>
         private void StopAcquisitionThread()
         {
-            AcquisitionWorker.CancelAsync();
-            while (false == backgroundIsFinished_)
+            acquisitionRunning_ = false;
+
+            if (acquisitionTimer_ != null)
             {
-                System.Windows.Forms.Application.DoEvents(); //Wait for us to finish
-                Thread.Sleep(1);
+                acquisitionTimer_.Change(Timeout.Infinite, Timeout.Infinite);
+            }
+
+            // Wait until any in-progress timer callback has finished.
+            while (!acquisitionIdleEvent_.WaitOne(10))
+            {
+                System.Windows.Forms.Application.DoEvents();
+            }
+
+            backgroundIsFinished_ = true;
+        }
+
+        /// <summary>
+        /// Start acquisition using a non-overlapping timer.
+        /// </summary>
+        private void StartAcquisitionThread()
+        {
+            if (acquisitionRunning_)
+                return;
+
+            disconnectHandled_ = false;
+            backgroundIsFinished_ = false;
+            acquisitionRunning_ = true;
+            acquisitionIdleEvent_.Set();
+
+            if (acquisitionTimer_ == null)
+            {
+                acquisitionTimer_ = new System.Threading.Timer(
+                    AcquisitionTimer_Tick,
+                    null,
+                    0,
+                    Timeout.Infinite);
+            }
+            else
+            {
+                acquisitionTimer_.Change(0, Timeout.Infinite);
             }
         }
 
         /// <summary>
-        /// Start the Acquisition Thread
+        /// Timer callback. It reads each USB once, then re-arms itself.
+        /// This prevents the callback from overlapping if a sensor read takes longer than 10 ms.
         /// </summary>
-        private void StartAcquisitionThread()
+        private void AcquisitionTimer_Tick(object state)
         {
-            AcquisitionWorker.RunWorkerAsync();
+            if (!acquisitionRunning_)
+                return;
+
+            if (Interlocked.CompareExchange(ref acquisitionTickBusy_, 1, 0) != 0)
+                return;
+
+            acquisitionIdleEvent_.Reset();
+            Stopwatch loopTimer = Stopwatch.StartNew();
+
+            try
+            {
+                if (acquisitionRunning_)
+                {
+                    AcquisitionTimer_ReadOnce();
+                }
+            }
+            finally
+            {
+                Interlocked.Exchange(ref acquisitionTickBusy_, 0);
+                acquisitionIdleEvent_.Set();
+
+                if (acquisitionRunning_ && acquisitionTimer_ != null)
+                {
+                    int delayMs = ACQUISITION_LOOP_PERIOD_MS - (int)loopTimer.ElapsedMilliseconds;
+                    if (delayMs < 0)
+                        delayMs = 0;
+
+                    acquisitionTimer_.Change(delayMs, Timeout.Infinite);
+                }
+                else
+                {
+                    backgroundIsFinished_ = true;
+                }
+            }
         }
 
         /// <summary>
-        /// Do work - process sensor data
+        /// One acquisition cycle: read all USB devices once.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void AcquisitionWorker_DoWork(object sender, DoWorkEventArgs e)
+        private void AcquisitionTimer_ReadOnce()
         {
-            backgroundIsFinished_ = false;
-            BackgroundWorker worker = sender as BackgroundWorker;
-
-            while (!worker.CancellationPending) //Do the work
+            Parallel.ForEach(USBdevices, USB =>
             {
-                foreach (USBdevice_GUI USB in USBdevices)
+                if (!acquisitionRunning_)
+                    return;
+
+                SingleTact singleTact = USB.singleTact;
+                SingleTactFrame newFrame = singleTact.ReadSensorData(); //Get sensor data
+
+                if (null == newFrame) // USB has been unplugged
                 {
-                    SingleTact singleTact = USB.singleTact;
-                    SingleTactFrame newFrame = singleTact.ReadSensorData(); //Get sensor data
+                    bool shouldHandleDisconnect = false;
 
-                    if (null != newFrame) //If we have data
+                    lock (workThreadLock)
                     {
-                        USB.addFrame(newFrame);
-
-                        // use first timestamp only to quantise readings and match csv output
-                        AddData(USBdevices[0].lastTimeStamp, newFrame.SensorData, USB); //Add to stripchart
-
-                        if (!hasStartTime)
+                        if (!disconnectHandled_)
                         {
-                            systemStartTime = DateTime.Now - TimeSpan.FromSeconds(USBdevices[0].lastTimeStamp);
-                            hasStartTime = true;
+                            disconnectHandled_ = true;
+                            shouldHandleDisconnect = true;
                         }
                     }
-                    else  // USB has been unplugged
+
+                    if (shouldHandleDisconnect)
                     {
-                        new Thread(() =>
+                        acquisitionRunning_ = false;
+
+                        if (acquisitionTimer_ != null)
+                            acquisitionTimer_.Change(Timeout.Infinite, Timeout.Infinite);
+
+                        BeginInvoke((Action)(() =>
                         {
                             guiTimer_.Stop();
-                            backgroundIsFinished_ = true;
-                            var index = USBdevices.IndexOf(USB);                            
-                            var comPort = comPortList[index];
-                            var result = MessageBox.Show(
+
+                            int index = USBdevices.IndexOf(USB);
+                            string comPort = index >= 0 && index < comPortList.Count
+                                ? comPortList[index]
+                                : "A USB device";
+
+                            DialogResult result = MessageBox.Show(
                                 comPort.ToString() + " has been unplugged.\nWould you like to save your data before exiting?",
                                 "Error!",
                                 MessageBoxButtons.YesNo,
                                 MessageBoxIcon.Error);
+
                             if (result == DialogResult.Yes)
                             {
                                 buttonSave_Click(this, null);
                             }
+
                             Application.Exit();
-                        }).Start();
-                        backgroundIsFinished_ = false;
-                        StopAcquisitionThread();
-                        break;
+                        }));
+                    }
+
+                    return;
+                }
+
+                // Same timestamp as the previous accepted frame for this USB = stale/duplicate packet.
+                // Do not add it to the graph or CSV.
+                lock (workThreadLock)
+                {
+                    if (USB.lastTimeStamp > 0 && newFrame.TimeStamp <= USB.lastTimeStamp)
+                        return;
+                }
+
+                USB.addFrame(newFrame);
+
+                // Use this USB device's own timestamp. Using USBdevices[0].lastTimeStamp here
+                // makes multi-USB timing incorrect and can make the CSV/graph look half-rate.
+                AddData(newFrame.TimeStamp, newFrame.SensorData, USB); //Add to stripchart
+
+                lock (workThreadLock)
+                {
+                    if (!hasStartTime)
+                    {
+                        systemStartTime = DateTime.Now - TimeSpan.FromSeconds(newFrame.TimeStamp);
+                        hasStartTime = true;
                     }
 
                     //Calculate rate
-                    double delta = newFrame.TimeStamp - USB.lastTimeStamp; // calculate delta relative to previous sensor's last reading
-                        if (delta != 0)
-                            measuredFrequency_ = measuredFrequency_ * 0.95 + 0.05 * (1.0 / (delta));  //Averaging
-                            //measuredFrequency_ = 1/delta;
-                        USB.setTimestamp(newFrame.TimeStamp);
+                    double delta = newFrame.TimeStamp - USB.lastTimeStamp; // calculate delta relative to this USB's previous reading
+                    if (delta > 0)
+                    {
+                        measuredFrequency_ = measuredFrequency_ * 0.95 + 0.05 * (1.0 / delta);  //Averaging
+                        //measuredFrequency_ = 1/delta;
+                    }
+
+                    USB.setTimestamp(newFrame.TimeStamp);
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -595,9 +707,9 @@ namespace SingleTact_Demo
 
             foreach (USBdevice_GUI USB in USBdevices)
             {
-                if(!backgroundIsFinished_)
+                if (!backgroundIsFinished_)
                     updateGraph(USB);
-            }                
+            }
 
             //Update update rate
             timerItr_++;
@@ -606,20 +718,16 @@ namespace SingleTact_Demo
             memorySpaceBar.Value = memorySpaceUse;
         }
 
-        /// <summary>
-        /// Done - we are closing down
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void AcquisitionWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            backgroundIsFinished_ = true;
-        }
-
         private void GUI_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if(AcquisitionWorker.IsBusy)
+            if (acquisitionRunning_)
                 StopAcquisitionThread();
+
+            if (acquisitionTimer_ != null)
+            {
+                acquisitionTimer_.Dispose();
+                acquisitionTimer_ = null;
+            }
         }
 
         /// <summary>
@@ -630,10 +738,10 @@ namespace SingleTact_Demo
         private void RefreshFlashSettings_Click(object sender, EventArgs e)
         {
             SetBaselineButton.Enabled = false;
-            bool backgroundWasRunning = AcquisitionWorker.IsBusy;
+            bool backgroundWasRunning = acquisitionRunning_;
 
             if (backgroundWasRunning)
-            StopAcquisitionThread();
+                StopAcquisitionThread();
 
             if (!activeSingleTact.PullSettingsFromHardware())
             {
@@ -668,7 +776,7 @@ namespace SingleTact_Demo
                     System.Diagnostics.Process.Start("https://www.singletact.com/support/");
                 }
             }
-            
+
 
             if (backgroundWasRunning)
             {
@@ -685,10 +793,10 @@ namespace SingleTact_Demo
         private void SetSettingsButton_Click(object sender, EventArgs e)
         {
             SetSettingsButton.Enabled = false;
-            bool backgroundWasRunning = AcquisitionWorker.IsBusy;
+            bool backgroundWasRunning = acquisitionRunning_;
 
             if (backgroundWasRunning)
-            StopAcquisitionThread();
+                StopAcquisitionThread();
 
             try
             {
@@ -697,7 +805,7 @@ namespace SingleTact_Demo
                 activeSingleTact.Settings.I2CAddress = (byte)(i2cAddressInputComboBox_.SelectedIndex + reservedAddresses);
                 activeSingleTact.Settings.Accumulator = 5;
                 if (gainBox.Visible == true)
-                {                   
+                {
                     activeSingleTact.Settings.ReferenceGain = Convert.ToByte(gainBox.Text);
                 }
                 if (scaleNumUp.Visible == true)
@@ -712,7 +820,7 @@ namespace SingleTact_Demo
             catch (Exception)
             {
                 MessageBox.Show("Invalid settings", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }            
+            }
 
 
             if (backgroundWasRunning)
@@ -811,7 +919,7 @@ namespace SingleTact_Demo
             {
                 graph_.GraphPane.YAxis.Title.Text = "Output (511 = Full Scale Range)";
                 graph_.GraphPane.YAxis.Scale.Max = 768; //Valid range
-                graph_.GraphPane.YAxis.Scale.Min = -255;               
+                graph_.GraphPane.YAxis.Scale.Min = -255;
                 greenBoxMax = 512;
             }
             BoxObj b = (BoxObj)graph_.GraphPane.GraphObjList[0];
@@ -820,9 +928,12 @@ namespace SingleTact_Demo
             b.Location.Height = Math.Min(graph_.GraphPane.YAxis.Scale.Max - graph_.GraphPane.YAxis.Scale.Min, greenBoxMax);
             graph_.GraphPane.XAxis.Scale.Max = 30;
             graph_.GraphPane.XAxis.Scale.Min = 0;
-            USBdevices[0].setTimestamp(0);
-            USBdevices[0].removeAllFrame();
-            USBdevices[0].singleTact.resetTimeStamp();
+            foreach (USBdevice_GUI USB in USBdevices)
+            {
+                USB.setTimestamp(0);
+                USB.removeAllFrame();
+                USB.singleTact.resetTimeStamp();
+            }
             hasStartTime = false;
             graph_.GraphPane.CurveList[0].Clear();
             graph_.AxisChange();
@@ -840,7 +951,7 @@ namespace SingleTact_Demo
         }
 
         private void memorySpaceBar_MouseHover(object sender, EventArgs e)
-        {            
+        {
             toolTip1.Show("Click here to clear the buffer.", memorySpaceBar);
         }
 
