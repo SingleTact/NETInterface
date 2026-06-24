@@ -454,18 +454,23 @@ namespace SingleTact_Demo
                     }
                     dataWriter.WriteLine(columnNames);
 
-                    // write data
+                    // write data from the two-hour AppData-backed buffer
+                    List<List<PointPair>> exportBuffers = new List<List<PointPair>>();
+                    foreach (USBdevice_GUI USB in USBdevices)
+                    {
+                        exportBuffers.Add(USB.dataBuffer.SnapshotPoints(0));
+                    }
+
                     string row = "";
-                    int data_length = USBdevices[0].dataBuffer.data[0].Count;
+                    int data_length = exportBuffers.Count > 0 ? exportBuffers[0].Count : 0;
                     for (int i = 0; i < data_length; i++)  // for each sensor reading
                     {
                         bool first = true;
-                        foreach (USBdevice_GUI USB in USBdevices)
+                        for (int usbIndex = 0; usbIndex < exportBuffers.Count; usbIndex++)
                         {
                             try
                             {
-                                SingleTactData data = USB.dataBuffer;
-                                PointPair dataPoint = data.data[0][i];
+                                PointPair dataPoint = exportBuffers[usbIndex][i];
                                 if (first) // only save the time the first sensor's reading was taken
                                 {
                                     // round the time value to mitigate any uncertainty around sampling time
@@ -945,7 +950,7 @@ namespace SingleTact_Demo
         {
             foreach (USBdevice_GUI USB in USBdevices)
             {
-                USB.dataBuffer.data[0].Clear();
+                USB.dataBuffer.Clear();
             }
             hasStartTime = false;
         }
