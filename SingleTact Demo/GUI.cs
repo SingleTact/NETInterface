@@ -37,7 +37,11 @@ namespace SingleTact_Demo
         private bool disconnectHandled_ = false; // Prevent duplicate disconnect dialogs when USB reads run in parallel
 
         // Acquisition is driven by a non-overlapping Threading.Timer instead of a BackgroundWorker while-loop.
+        // Poll quickly so that the Windows timer resolution does not become the
+        // acquisition bottleneck. Limit the rate per sensor when accepting frames.
         private const int MAX_ACQUISITION_RATE_HZ = 1000;
+        private const int MAX_RECORDED_SAMPLE_RATE_HZ = 150;
+        private const double MIN_RECORDED_SAMPLE_PERIOD_SECONDS = 1.0 / MAX_RECORDED_SAMPLE_RATE_HZ;
         private const int ACQUISITION_LOOP_PERIOD_MS = 1000 / MAX_ACQUISITION_RATE_HZ;
         private System.Threading.Timer acquisitionTimer_ = null;
         private volatile bool acquisitionRunning_ = false;
@@ -461,34 +465,50 @@ namespace SingleTact_Demo
                         exportBuffers.Add(USB.dataBuffer.SnapshotPoints(0));
                     }
 
-                    string row = "";
-                    int data_length = exportBuffers.Count > 0 ? exportBuffers[0].Count : 0;
-                    for (int i = 0; i < data_length; i++)  // for each sensor reading
+                    // Use the slowest sensor as the shared CSV timeline. Pair every row
+                    // with the nearest real sample from each faster sensor. Index-based
+                    // pairing used to exhaust a slower list and append trailing nulls.
+                    int referenceIndex = -1;
+                    int referenceCount = int.MaxValue;
+                    for (int usbIndex = 0; usbIndex < exportBuffers.Count; usbIndex++)
                     {
-                        bool first = true;
-                        for (int usbIndex = 0; usbIndex < exportBuffers.Count; usbIndex++)
+                        if (exportBuffers[usbIndex].Count < referenceCount)
                         {
-                            try
-                            {
-                                PointPair dataPoint = exportBuffers[usbIndex][i];
-                                if (first) // only save the time the first sensor's reading was taken
-                                {
-                                    // round the time value to mitigate any uncertainty around sampling time
-                                    row += Math.Round(dataPoint.X, 5) + separator + dataPoint.Y + separator;
-                                    first = false;
-                                }
-                                else
-                                {
-                                    row += dataPoint.Y + separator;
-                                }
-                            }
-                            catch  // index out of range, unequal number of sensor readings
-                            {
-                                row += "null" + separator;
-                            }
+                            referenceIndex = usbIndex;
+                            referenceCount = exportBuffers[usbIndex].Count;
                         }
-                        dataWriter.WriteLine(row);
-                        row = "";
+                    }
+
+                    if (referenceIndex >= 0 && referenceCount > 0)
+                    {
+                        int[] nearestIndices = new int[exportBuffers.Count];
+
+                        for (int i = 0; i < referenceCount; i++)
+                        {
+                            PointPair referencePoint = exportBuffers[referenceIndex][i];
+                            StringBuilder row = new StringBuilder();
+                            row.Append(Math.Round(referencePoint.X, 5));
+                            row.Append(separator);
+
+                            for (int usbIndex = 0; usbIndex < exportBuffers.Count; usbIndex++)
+                            {
+                                List<PointPair> sensorPoints = exportBuffers[usbIndex];
+                                int nearestIndex = nearestIndices[usbIndex];
+
+                                while (nearestIndex + 1 < sensorPoints.Count &&
+                                       Math.Abs(sensorPoints[nearestIndex + 1].X - referencePoint.X) <=
+                                       Math.Abs(sensorPoints[nearestIndex].X - referencePoint.X))
+                                {
+                                    nearestIndex++;
+                                }
+
+                                nearestIndices[usbIndex] = nearestIndex;
+                                row.Append(sensorPoints[nearestIndex].Y);
+                                row.Append(separator);
+                            }
+
+                            dataWriter.WriteLine(row.ToString());
+                        }
                     }
 
                     dataWriter.Close();
@@ -612,8 +632,23 @@ namespace SingleTact_Demo
         /// </summary>
         private void AcquisitionTimer_ReadOnce()
         {
-            Parallel.ForEach(USBdevices, USB =>
+            if (USBdevices.Count == 0)
+                return;
+
+            if (USBdevices.Count == 1)
             {
+                AcquisitionTimer_ReadUSB(USBdevices[0]);
+                return;
+            }
+
+            Parallel.ForEach(USBdevices, AcquisitionTimer_ReadUSB);
+        }
+
+        /// <summary>
+        /// Read and process one USB device.
+        /// </summary>
+        private void AcquisitionTimer_ReadUSB(USBdevice_GUI USB)
+        {
                 if (!acquisitionRunning_)
                     return;
 
@@ -667,12 +702,21 @@ namespace SingleTact_Demo
                     return;
                 }
 
-                // Same timestamp as the previous accepted frame for this USB = stale/duplicate packet.
-                // Do not add it to the graph or CSV.
+                // Reject stale packets and independently cap each USB sensor at 100 Hz.
+                // Keeping the polling loop fast avoids the coarse Windows timer resolution
+                // reducing a requested 100 Hz loop to roughly 60-70 Hz.
                 lock (workThreadLock)
                 {
-                    if (USB.lastTimeStamp > 0 && newFrame.TimeStamp <= USB.lastTimeStamp)
-                        return;
+                    if (USB.lastTimeStamp > 0)
+                    {
+                        double samplePeriod = newFrame.TimeStamp - USB.lastTimeStamp;
+
+                        if (samplePeriod <= 0 ||
+                            samplePeriod + 1e-9 < MIN_RECORDED_SAMPLE_PERIOD_SECONDS)
+                        {
+                            return;
+                        }
+                    }
                 }
 
                 USB.addFrame(newFrame);
@@ -699,7 +743,6 @@ namespace SingleTact_Demo
 
                     USB.setTimestamp(newFrame.TimeStamp);
                 }
-            });
         }
 
         /// <summary>

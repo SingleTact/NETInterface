@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Linq;
 using System.Management;
 using System.Text;
@@ -57,6 +58,16 @@ namespace SingleTactLibrary
         public List<string> findSingleTact()
         {
             List<string> SingleTactUSBList = new List<string>();
+
+            // If Windows exposes only one COM port, use it directly. There is no
+            // ambiguity to resolve, so avoid the slower WMI device enumeration.
+            string[] availableComPorts = SerialPort.GetPortNames();
+            if (availableComPorts.Length == 1)
+            {
+                SingleTactUSBList.Add(availableComPorts[0] + " - PPS Sensor");
+                return SingleTactUSBList;
+            }
+
             List<string> serialPortNames = new List<string>();
             (serialPortNames, _) = EnumUSBComPort();
             if (serialPortNames.Count == 1)
