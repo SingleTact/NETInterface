@@ -304,9 +304,10 @@ namespace SingleTact_Demo
         {
             int index = USBdevices.IndexOf(USB); // get current sensor number
             SingleTactData data_pt = USB.dataBuffer;
+            PointPair latestPoint;
             Color[] colours = { Color.Blue, Color.Orange, Color.DarkViolet, Color.Red, Color.DeepPink, Color.DarkSlateGray };
 
-            if (data_pt.data.Count > 0 && index < colours.Length)
+            if (index >= 0 && index < colours.Length && data_pt.TryGetLatestPoint(0, out latestPoint))
             {
                 // start graphing
                 GraphPane graphPane = graph_.GraphPane;
@@ -334,25 +335,22 @@ namespace SingleTact_Demo
                 else
                 {
                     // update curve data with new readings
-                    if (data_pt.data[0].Count > 1)
-                    {
-                        graphPane.CurveList[index].AddPoint(data_pt.data[0].Peek());//grab the latest value from the buffer.
-                        if (graphPane.CurveList[index].NPts > 100 * 60) //only keep 6000 points on the screen
-                            graphPane.CurveList[index].RemovePoint(0);
-                    }
+                    graphPane.CurveList[index].AddPoint(latestPoint);
+                    if (graphPane.CurveList[index].NPts > 100 * 60) //only keep 6000 points on the screen
+                        graphPane.CurveList[index].RemovePoint(0);
                 }
 
                 // This is to update the max and min value
                 if (isFirstFrame_)
                 {
-                    graphPane.XAxis.Scale.Min = data_pt.MostRecentTime;
+                    graphPane.XAxis.Scale.Min = latestPoint.X;
                     graphPane.XAxis.Scale.Max = graphPane.XAxis.Scale.Min + graphXRange_;
                     isFirstFrame_ = false;
                 }
 
-                if (data_pt.MostRecentTime >= graphPane.XAxis.Scale.Max)
+                if (latestPoint.X >= graphPane.XAxis.Scale.Max)
                 {
-                    graphPane.XAxis.Scale.Max = data_pt.MostRecentTime;
+                    graphPane.XAxis.Scale.Max = latestPoint.X;
                     graphPane.XAxis.Scale.Min = graphPane.XAxis.Scale.Max - graphXRange_;
                     //Update green valid region box
                     BoxObj b = (BoxObj)graphPane.GraphObjList[0];

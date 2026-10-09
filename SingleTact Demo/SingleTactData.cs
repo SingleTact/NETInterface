@@ -174,6 +174,30 @@ namespace SingleTact_Demo
             }
         }
 
+        /// <summary>
+        /// Copy the latest chart point while acquisition and clearing are excluded.
+        /// </summary>
+        public bool TryGetLatestPoint(int measurementIndex, out PointPair point)
+        {
+            lock (bufferLock_)
+            {
+                point = null;
+                if (measurementIndex < 0 || measurementIndex >= data.Count)
+                    return false;
+
+                RollingPointPairList series = data[measurementIndex];
+                if (series.Count == 0)
+                    return false;
+
+                PointPair latest = series.Peek();
+                if (latest == null)
+                    return false;
+
+                point = new PointPair(latest);
+                return true;
+            }
+        }
+
         public SingleTactData Clone()
         {
             SingleTactData clone = new SingleTactData();
